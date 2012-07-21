@@ -128,6 +128,15 @@ else:
 	_check_thread = check_users()
 	_check_thread.start()
 
+if '-h' in sys.argv:
+	__server__ = sys.argv[sys.argv.index('-h')+1]
+
+if '-p' in sys.argv:
+	__port__ = int(sys.argv[sys.argv.index('-p')+1])
+
+if '-c' in sys.argv:
+	__channels__ = sys.argv[sys.argv.index('-c')+1].split(',')
+
 class SwanBot(irc.IRCClient):
 	nickname = __botname__
 
