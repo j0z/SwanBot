@@ -191,7 +191,7 @@ class SwanBot(irc.IRCClient):
 
 	def privmsg(self, user, channel, msg):
 		name,host = user.split('!', 1)
-		logging.info("<%s> %s" % (name, msg))
+		#logging.info("<%s> %s" % (name, msg))
 		_args = msg.split(' ')
 		_registered = is_registered(name,host=host)
 		
