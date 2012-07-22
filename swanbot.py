@@ -20,13 +20,12 @@
 #store/fetch data.
 #
 #Also note that a log file is created in data/log.txt
-#You can disable this by commenting out lines 38-41
 
 from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol
 import threading
 import logging
-import parse
+import core
 import time
 import json
 import sys
@@ -62,30 +61,25 @@ class check_users(threading.Thread):
 	
 	def run(self):
 		while self.running:
-			_curr_time = time.strptime(time.ctime())
-			
-			for user in database['users']:
-				if user.has_key('alarms'):
-					for alarm in user['alarms']:
-						_time = time.strptime(alarm['when'],'%H:%M')
-						if _time.tm_hour <= _curr_time.tm_hour and _time.tm_min <= _curr_time.tm_min:
-							user['alarms'].remove(alarm)
-							
-							if self.callback:
-								self.callback.msg(user['alert_channel'],
-									'%s: %s' % (user['name'],alarm['what']))
+			if self.callback:
+				for user in database['users']:
+					for module in self.callback.modules:
+						module['module'].tick(user,self.callback)
 			
 			time.sleep(1)
 
-def is_registered(name,host):
+def is_registered(name,host=None):
 	for user in database['users']:
-		if user['name'] == name and user['host'] == host:
-			return user
+		if user['name'] == name:
+			if host and user['host'] == host:
+				return user
+			elif not host:
+				return user
 
 	return False
 
 def register_user(name,host):
-	if is_registered(name,host): return False
+	if is_registered(name,host=host): return False
 
 	logging.info('Registered new user: %s' % name)
 	database['users'].append({'name':name,'host':host,'follow':False,'alert_channel':None})
@@ -139,6 +133,27 @@ if '-c' in sys.argv:
 
 class SwanBot(irc.IRCClient):
 	nickname = __botname__
+	modules = []
+	
+	def get_users(self):
+		#global database
+		
+		return database['users']
+	
+	def has_module(self,name):
+		for module in self.modules:
+			if module['name'] == name:
+				return True
+		
+		return False
+	
+	def add_module(self,name):
+		try:
+			exec('import %s as temp' % name)
+			self.modules.append({'name':name,'module':temp})
+			logging.info('Loaded module \'%s\'' % name)
+		except ImportError:
+			logging.error('ImportError occurred when loading module \'%s\'' % name)
 
 	def connectionMade(self):
 		global _check_thread
@@ -146,6 +161,18 @@ class SwanBot(irc.IRCClient):
 		irc.IRCClient.connectionMade(self)
 		logging.info('Connected to server')
 		_check_thread.callback = self
+		
+		#Look for modules in modules.conf
+		logging.info('Looking for modules.conf...')
+		try:
+			with open('modules.conf','r') as _modules_conf:
+				for line in _modules_conf.readlines():
+					self.add_module(line.strip())
+			logging.info('Done loading modules')
+		except IOError:
+			logging.info('Could not find modules.conf.')
+		except:
+			logging.info('Error when parsing module in modules.conf: %s' % line)
 
 	def connectionLost(self, reason):
 		global _check_thread
@@ -166,7 +193,7 @@ class SwanBot(irc.IRCClient):
 		name,host = user.split('!', 1)
 		logging.info("<%s> %s" % (name, msg))
 		_args = msg.split(' ')
-		_registered = is_registered(name,host)
+		_registered = is_registered(name,host=host)
 		
 		if channel == self.nickname or _args[0].count(self.nickname):
 			if _args[0].count(self.nickname):
@@ -188,14 +215,45 @@ class SwanBot(irc.IRCClient):
 					_registered['alert_channel'] = name
 				
 				if 'reload' in _args:
-					self.msg(name,'Reloading module...')
-					reload(parse)
+					logging.info('Reloading core...')
+					reload(core)
+					self.msg(_registered['alert_channel'],'Reloaded module \'core\'')
+					
+					for module in self.modules:
+						logging.info('Reloading %s...' % module['name'])
+						
+						try:
+							reload(module['module'])
+							self.msg(_registered['alert_channel'],'Reloaded module \'%s\'' % module['name'])
+						except:
+							logging.error('Failed loading %s!' % module['name'])
+					
+					logging.info('Done reloading modules')
+					
 				else:
-					parse.parse(_args,self,channel,_registered)
+					core.parse(_args,self,_registered['alert_channel'],_registered)
+					
+					for module in self.modules:
+						module['module'].parse(_args,self,_registered['alert_channel'],_registered)
 
+	def userJoined(self, user, channel):
+		logging.info('%s joined %s' % (user,channel))
+		
+		for module in self.modules:
+			module['module'].on_user_join(user,channel,self)
+	
+	def userLeft(self, user, channel):
+		logging.info('%s left %s' % (user,channel))
+		
+		for module in self.modules:
+			module['module'].on_user_part(user,channel,self)
+	
+	def userQuit(self, user, quitMessage):
+		logging.info('%s quit (%s)' % (user,quitMessage))
+	
 	def action(self, user, channel, msg):
 		user = user.split('!', 1)[0]
-		logging.info("* %s %s" % (user, msg))
+		logging.info('* %s %s' % (user, msg))
 
 	def irc_NICK(self, prefix, params):
 		old_nick = prefix.split('!')[0]

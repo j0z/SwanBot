@@ -1,7 +1,5 @@
 import time
 
-__name__ = 'mod_alarm'
-
 def tick(user,callback):
 	_curr_time = time.strptime(time.ctime())
 	
@@ -31,3 +29,9 @@ def parse(commands,callback,channel,user):
 			else:
 				add_alarm(user,commands[2])
 				callback.msg(channel,'%s: Alarm set for %s' % (user['name'],commands[2]))
+
+def on_user_join(user,channel,callback):
+	pass
+
+def on_user_part(user,channel,callback):
+	pass

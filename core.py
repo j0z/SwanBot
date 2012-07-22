@@ -17,8 +17,7 @@ def parse(commands,callback,channel,user):
 			if callback.has_module(commands[1]):
 				callback.msg(channel,'%s: Module \'%s\' already loaded' % (user['name'],commands[1]))
 			else:
-				exec('import %s as temp' % (commands[1]))
-				callback.add_module(commands[1],temp)
+				callback.add_module(commands[1])
 				callback.msg(channel,'%s: Loaded module %s' % (user['name'],commands[1]))
 		except ImportError:
 			callback.msg(channel,'%s: Could not load module %s' % (user['name'],commands[1]))
