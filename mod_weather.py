@@ -5,15 +5,17 @@ def tick(user,callback):
 
 def get_weather(zip):	
 	_feed = feedparser.parse('http://rss.wunderground.com/auto/rss_full/%s' % zip)
-	return _feed.entries[0].title.rpartition('Current Conditions : ')[2]
+	
+	try:
+		return str(_feed.entries[0].title)
+	except:
+		return 'Invalid ZIP'
 
 def parse(commands,callback,channel,user):
 	if commands[0] == 'weather' and len(commands)==2:
-		callback.msg(channel,'%s: Weather for %s: %s' %
+		callback.msg(channel,'%s: %s' %
 			(user['name'],
-			commands[1]),
-			get_weather(commands[1]))
-		add_mail(user,commands[1],commands[2:])
+			get_weather(commands[1])))
 
 def on_user_join(user,channel,callback):
 	pass
