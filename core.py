@@ -5,10 +5,8 @@ def parse(commands,callback,channel,user):
 	if 'info' in commands:
 		callback.msg(user['alert_channel'],'%s, Follow: %s' % (user['name'],str(user['follow'])))
 		callback.msg(user['alert_channel'],'%s, Alert channel: %s' % (user['name'],user['alert_channel']))
-		callback.msg(user['alert_channel'],'I am running the following modules:')
-		
-		for module in callback.modules:
-			callback.msg(user['alert_channel'],'%s' % module['name'])
+		callback.msg(user['alert_channel'],'%s, I am running the following modules: %s'
+			% (user['name'],', '.join(m['name'] for m in callback.modules)))
 		
 	elif 'follow' in commands:
 		if user['follow']:

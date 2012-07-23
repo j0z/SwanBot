@@ -177,6 +177,9 @@ class SwanBot(irc.IRCClient):
 	def connectionLost(self, reason):
 		global _check_thread
 		
+		for channel in self.factory.channels:
+			self.leave(channel,reason='Shutting down')
+		
 		irc.IRCClient.connectionLost(self, reason)
 		logging.info('Killed connection to server')
 		_check_thread.running = False
@@ -258,7 +261,7 @@ class SwanBot(irc.IRCClient):
 	def irc_NICK(self, prefix, params):
 		old_nick = prefix.split('!')[0]
 		new_nick = params[0]
-		self.logger.log("%s is now known as %s" % (old_nick, new_nick))
+		#logging.info("%s is now known as %s" % (old_nick, new_nick))
 
 	def alterCollidedNick(self, nickname):
 		return nickname + '_'

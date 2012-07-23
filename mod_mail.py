@@ -31,7 +31,7 @@ def get_mail(user,callback):
 
 def parse(commands,callback,channel,user):
 	if commands[0] == 'mail':
-		if (len(commands)==2 and commands[1]=='get') or len(commands)==1:
+		if (len(commands)==2 and commands[1] in ['check','get']) or len(commands)==1:
 			get_mail(user['name'],callback)
 		elif len(commands)>=3:
 			add_mail(user,commands[1],commands[2:])
