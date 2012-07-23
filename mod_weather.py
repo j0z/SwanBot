@@ -1,6 +1,9 @@
 import feedparser
 
-def tick(user,callback):
+def tick(callback):
+	pass
+
+def user_tick(user,callback):
 	pass
 
 def get_weather(zip):	

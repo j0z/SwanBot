@@ -1,6 +1,9 @@
 import time
 
-def tick(user,callback):
+def tick(callback):
+	pass
+
+def user_tick(user,callback):
 	pass
 
 def add_mail(user,who,message):
@@ -38,5 +41,5 @@ def on_user_join(user,channel,callback):
 	get_mail(user,callback)
 
 def on_user_part(user,channel,callback):
-	passre
+	pass
 	

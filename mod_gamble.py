@@ -8,13 +8,14 @@ class bet:
 		self.betters = []
 		self.money = 0
 		self.owner = owner
+		self.channel = owner['last_channel']
 		self.winning_number = random.randrange(1,6)
 	
 	def place(self,user,bet,money):
 		_users = [n['user'] for n in self.betters]
 		
 		if user['money']-money<0:
-			self.callback.msg(user['alert_channel'],'%s: You do not have enough money!'
+			self.callback.msg(self.channel,'%s: You do not have enough money!'
 				% user['name'])
 			return 1
 			
@@ -24,7 +25,7 @@ class bet:
 		if not user in _users:
 			self.betters.append({'user':user,'bet':bet})
 		
-		self.callback.msg(user['alert_channel'],'%s: Bet of %s placed. Current total is %s.'
+		self.callback.msg(self.channel,'%s: Bet of %s placed. Current total is %s.'
 			% (user['name'],money,self.money))
 	
 	def finalize(self):
@@ -36,21 +37,22 @@ class bet:
 			if user['bet'] == self.winning_number:
 				_winners+=1
 		
-		self.callback.msg(self.owner['alert_channel'],'Bet over! The winning number was %s.' %
+		self.callback.msg(self.channel,'Bet over! The winning number was %s.' %
 			(self.winning_number))
 		
 		if not _winners:
-			self.callback.msg(self.owner['alert_channel'],'Nobody won!' %
-				(self.owner['name']))
+			self.callback.msg(self.channel,'Nobody won!')
 		else:		
 			for user in self.betters:
 				if user['bet'] == self.winning_number:
 					user['user']['money']+=self.money/_winners
 			
-			self.callback.msg(self.owner['alert_channel'],'Congrats, winners!')
+			self.callback.msg(self.channel,'Congrats, winners!')
 		
+def tick(callback):
+	pass
 
-def tick(user,callback):
+def user_tick(user,callback):
 	if not user.has_key('money'):
 		user['money'] = 50
 
@@ -98,7 +100,7 @@ def parse(commands,callback,channel,user):
 		__bets__.append(bet(user,callback))
 		
 		callback.msg(channel,'%s has started a bet! Type: %s place bet %s <bet> <money>' %
-			(callback.nickname,user['name'],user['name']))
+			(user['name'],callback.nickname,user['name']))
 	elif ' '.join(commands[0:2]) == 'place bet' and len(commands)==5:
 		_bet = get_bet(commands[2])
 		

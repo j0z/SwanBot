@@ -54,6 +54,11 @@ __botname__ = 'Holo'
 __server__ = '192.168.1.2'
 __port__ = 6667
 __channels__ = ['#talk','#holo']
+__user__ = {'name':'',
+	'host':'',
+	'follow':False,
+	'last_channel':None,
+	'alert_channel':None}
 
 class check_users(threading.Thread):
 	running = True
@@ -64,8 +69,11 @@ class check_users(threading.Thread):
 			if self.callback:
 				for user in database['users']:
 					for module in self.callback.modules:
-						module['module'].tick(user,self.callback)
-			
+						module['module'].user_tick(user,self.callback)
+				
+				for module in self.callback.modules:
+					module['module'].tick(self.callback)
+				
 			time.sleep(1)
 
 def is_registered(name,host=None):
@@ -82,7 +90,11 @@ def register_user(name,host):
 	if is_registered(name,host=host): return False
 
 	logging.info('Registered new user: %s' % name)
-	database['users'].append({'name':name,'host':host,'follow':False,'alert_channel':None})
+	user = __user__.copy()
+	user['name'] = name
+	user['host'] = host
+	
+	database['users'].append(user)
 	return True
 
 def save():
@@ -109,6 +121,24 @@ def load():
 		logging.error('Could not load database from disk! Please run with -build-db')
 		sys.exit()
 
+def upgrade_db():
+	_upgraded = False
+	
+	for user in database['users']:
+		for key in __user__:
+			if not user.has_key(key):
+				user[key] = __user__[key]
+				_upgraded = True
+	
+	if _upgraded:
+		logging.info('DB updated!')
+
+def setup():
+	global _check_thread
+	load()
+	_check_thread = check_users()
+	_check_thread.start()
+
 database = {}
 
 if '-build-db' in sys.argv:
@@ -117,10 +147,14 @@ if '-build-db' in sys.argv:
 	database['users'] = []
 	save()
 	sys.exit()
-else:
+elif '-upgrade-db' in sys.argv:
+	logging.info('Upgrading DB...')
 	load()
-	_check_thread = check_users()
-	_check_thread.start()
+	upgrade_db()
+	save()
+	setup()
+else:
+	setup()
 
 if '-h' in sys.argv:
 	__server__ = sys.argv[sys.argv.index('-h')+1]
@@ -216,6 +250,8 @@ class SwanBot(irc.IRCClient):
 						_registered['alert_channel'] = channel
 				else:
 					_registered['alert_channel'] = name
+				
+				_registered['last_channel'] = channel
 				
 				if 'reload' in _args:
 					logging.info('Reloading core...')

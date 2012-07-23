@@ -1,6 +1,9 @@
 import time
 
-def tick(user,callback):
+def tick(callback):
+	pass
+
+def user_tick(user,callback):
 	_curr_time = time.strptime(time.ctime())
 	
 	if user.has_key('alarms'):
