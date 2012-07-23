@@ -97,8 +97,8 @@ def parse(commands,callback,channel,user):
 		
 		__bets__.append(bet(user,callback))
 		
-		callback.msg(channel,'%s has started a bet! Type: place bet %s <bet> <money>' %
-			(user['name'],user['name']))
+		callback.msg(channel,'%s has started a bet! Type: %s place bet %s <bet> <money>' %
+			(callback.nickname,user['name'],user['name']))
 	elif ' '.join(commands[0:2]) == 'place bet' and len(commands)==5:
 		_bet = get_bet(commands[2])
 		

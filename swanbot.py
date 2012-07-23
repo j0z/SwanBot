@@ -240,23 +240,24 @@ class SwanBot(irc.IRCClient):
 						module['module'].parse(_args,self,_registered['alert_channel'],_registered)
 
 	def userJoined(self, user, channel):
-		logging.info('%s joined %s' % (user,channel))
+		#logging.info('%s joined %s' % (user,channel))
 		
 		for module in self.modules:
 			module['module'].on_user_join(user,channel,self)
 	
 	def userLeft(self, user, channel):
-		logging.info('%s left %s' % (user,channel))
+		#logging.info('%s left %s' % (user,channel))
 		
 		for module in self.modules:
 			module['module'].on_user_part(user,channel,self)
 	
 	def userQuit(self, user, quitMessage):
-		logging.info('%s quit (%s)' % (user,quitMessage))
+		pass
+		#logging.info('%s quit (%s)' % (user,quitMessage))
 	
 	def action(self, user, channel, msg):
 		user = user.split('!', 1)[0]
-		logging.info('* %s %s' % (user, msg))
+		#logging.info('* %s %s' % (user, msg))
 
 	def irc_NICK(self, prefix, params):
 		old_nick = prefix.split('!')[0]
