@@ -1,10 +1,7 @@
 import time
 
 def tick(user,callback):
-	_curr_time = time.strptime(time.ctime())
-	
-	if user.has_key('messages'):
-		pass
+	pass
 
 def add_mail(user,who,message):
 	if not user.has_key('messages'):
@@ -14,7 +11,7 @@ def add_mail(user,who,message):
 		'message':' '.join(message),
 		'when':time.strftime('%A, %B %d at %H:%M')})
 
-def get_mail(user,callback):
+def get_mail(user,callback,no_mail=False):
 	_had_mail = False
 	
 	for _user in callback.get_users():
@@ -26,13 +23,13 @@ def get_mail(user,callback):
 					_user['messages'].remove(message)
 					_had_mail = True
 	
-	if not _had_mail:
+	if not _had_mail and no_mail:
 		callback.msg(user,'You have no mail!')
 
 def parse(commands,callback,channel,user):
 	if commands[0] == 'mail':
 		if (len(commands)==2 and commands[1] in ['check','get']) or len(commands)==1:
-			get_mail(user['name'],callback)
+			get_mail(user['name'],callback,no_mail=True)
 		elif len(commands)>=3:
 			add_mail(user,commands[1],commands[2:])
 			callback.msg(channel,'%s: Message sent to %s' % (user['name'],commands[1]))
@@ -41,5 +38,5 @@ def on_user_join(user,channel,callback):
 	get_mail(user,callback)
 
 def on_user_part(user,channel,callback):
-	pass
+	passre
 	
