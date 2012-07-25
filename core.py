@@ -27,3 +27,4 @@ def parse(commands,callback,channel,user):
 			logging.error('No module named \'%s\'' % commands[1])
 	elif commands[0] == 'force-register' and len(commands)==2:
 		callback.register_user(commands[1],'')
+		callback.msg(channel,'%s: Tried to register %s' % (user['name'],commands[1]))
