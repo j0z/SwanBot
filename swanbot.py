@@ -184,6 +184,9 @@ class SwanBot(irc.IRCClient):
 	nickname = __botname__
 	modules = []
 	
+	def register_user(self,name,host):
+		register_user(name,host)
+	
 	def get_users(self):
 		#global database
 		
