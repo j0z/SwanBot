@@ -188,8 +188,6 @@ class SwanBot(irc.IRCClient):
 		register_user(name,host)
 	
 	def get_users(self):
-		#global database
-		
 		return database['users']
 	
 	def has_module(self,name):
