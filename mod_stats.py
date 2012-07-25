@@ -31,4 +31,3 @@ def on_user_part(user,channel,callback):
 		if _user['name']==user:
 			_user['stats']['parts']+=1
 			return 0
-	
