@@ -6,8 +6,8 @@
 #Anyway, this bot creates a "database" of registered users that it loads on
 #run and saves on exit.
 #
-#python ircbot.py -build-db
-#python ircbot.py
+#python swanbot.py -build-db
+#python swanbot.py
 #
 #You can then private message the bot like so:
 #<flags> register
@@ -63,16 +63,31 @@ __user__ = {'name':'',
 class check_users(threading.Thread):
 	running = True
 	callback = None
+	blacklist = []
 	
 	def run(self):
 		while self.running:
 			if self.callback:
 				for user in database['users']:
 					for module in self.callback.modules:
-						module['module'].user_tick(user,self.callback)
+						if module['name'] in self.blacklist:
+							continue
+						
+						try:
+							module['module'].user_tick(user,self.callback)
+						except:
+							logging.error('Error in %s.user_tick()!' % module['name'])
+							self.blacklist.append(module['name'])
 				
 				for module in self.callback.modules:
-					module['module'].tick(self.callback)
+					if module['name'] in self.blacklist:
+						continue
+					
+					try:
+						module['module'].tick(self.callback)
+					except:
+						logging.error('Error in %s.tick()!' % module['name'])
+						self.blacklist.append(module['name'])
 				
 			time.sleep(1)
 
