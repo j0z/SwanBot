@@ -368,7 +368,7 @@ class SwanBot(irc.IRCClient):
 			elif msg.count('This nickname is registered'):
 				logging.info('NICKSERV: Trying to identify with NICKSERV.')
 				self.nickserv_identify()
-			elif msg.count('now recognized'):
+			elif msg.count('now recognized') or msg.count('now identified'):
 				logging.info('NICKSERV: I am identified with NICKSERV.')
 
 	def userJoined(self, user, channel):
