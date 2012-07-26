@@ -19,7 +19,7 @@ __keyphrases__ = [{'command':'weather',
 	'needs':['tomorrow','\d{5}','weather'],
 	'keywords':['check','what\'s','like','in']},
 	{'command':'advisories',
-	'needs':['advisories','\d{5}'],
+	'needs':['advisories','\d{5}','weather'],
 	'keywords':['check','what\'s','like','in']}]
 
 def tick(callback):
