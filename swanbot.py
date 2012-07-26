@@ -197,7 +197,7 @@ class SwanBot(irc.IRCClient):
 		_match = {'command':None,'matches':0,'keywords':[]}
 		
 		for module in self.modules:
-			if not module['name'] == 'mod_weather':
+			if not module['name'] in ['mod_weather','mod_chanserv']:
 				continue
 			
 			for phrase in module['module'].__keyphrases__:
@@ -207,13 +207,32 @@ class SwanBot(irc.IRCClient):
 				if phrase['command'] in text:
 					_break = False
 					for need in phrase['needs']:
-						_re = re.findall(need,' '.join(text))
+						_found_name = False
 						
-						if not len(_re):
-							_break = True
-							break
-						else:
-							_keywords.append(_re[0])
+						if need.count('%')==2:
+							if need == '%user%':
+								for user in self.get_users():
+									if user['name'] == self.nickname:
+										continue
+									
+									if user['name'] in text:
+										_keywords.append(user['name'])
+										_found_name = True
+										_matches += 1
+										break
+								
+								if _found_name:
+									continue
+						else:							
+							_re = re.findall(need,' '.join(text))
+							
+							if not len(_re):
+								_break = True
+								print 'Had to break'
+								break
+							else:
+								_keywords.append(_re[0])
+								_matches += 1
 					
 					if _break:
 						continue

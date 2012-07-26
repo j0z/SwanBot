@@ -1,3 +1,7 @@
+__keyphrases__ = [{'command':'aop',
+	'needs':['aop','%user%'],
+	'keywords':['add','to','the','list']}]
+
 __chanserv__ = {'auto_mode':0,'auto_kick':[]}
 
 def tick(callback):
@@ -8,6 +12,9 @@ def user_tick(user,callback):
 		user['chanserv'] = __chanserv__.copy()
 
 def parse(commands,callback,channel,user):
+	if not callback.owner == user['name']:
+		return 0
+	
 	if not user.has_key('chanserv'):
 		user['chanserv'] = __chanserv__.copy()
 	

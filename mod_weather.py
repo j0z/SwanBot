@@ -1,6 +1,8 @@
 import feedparser
 
-__keyphrases__ = [{'command':'weather','needs':['weather','\d{5}'],'keywords':['check','what\'s','like','in']}]
+__keyphrases__ = [{'command':'weather',
+	'needs':['weather','\d{5}'],
+	'keywords':['check','what\'s','like','in']}]
 
 def tick(callback):
 	pass
