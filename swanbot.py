@@ -204,7 +204,7 @@ class SwanBot(irc.IRCClient):
 				_keywords = []
 				_matches = 0
 				
-				if phrase['command'] in text:
+				if phrase['command'] in text or phrase['command'].upper() in text:
 					_break = False
 					for need in phrase['needs']:
 						_found_name = False
@@ -223,8 +223,8 @@ class SwanBot(irc.IRCClient):
 								
 								if _found_name:
 									continue
-						else:							
-							_re = re.findall(need,' '.join(text))
+						else:
+							_re = re.findall(need,' '.join(text).lower())
 							
 							if not len(_re):
 								_break = True

@@ -25,7 +25,6 @@ def parse(commands,callback,channel,user):
 				callback.mode(channel,True,'o',user=user['name'])
 				callback.msg(channel,'%s, aop set for %s' %
 					(user['name'],commands[1]))
-				print 'AOP set'
 				return 0
 	elif commands[0] == 'avoice' and len(commands)>=2:
 		for _user in callback.get_users():
