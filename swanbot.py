@@ -193,6 +193,7 @@ class SwanBot(irc.IRCClient):
 	versionEnv = 'Wayne Brady'
 
 	def parse(self,text):
+		text = text.replace('?','')
 		text = text.split()
 		_match = {'command':None,'matches':0,'keywords':[]}
 		

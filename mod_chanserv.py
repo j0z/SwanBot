@@ -1,6 +1,12 @@
 __keyphrases__ = [{'command':'aop',
 	'needs':['aop','%user%'],
-	'keywords':['add','to','the','list']}]
+	'keywords':['add','to','the','list']},
+	{'command':'avoice',
+	'needs':['avoice','%user%'],
+	'keywords':['add','to','the','list']},
+	{'command':'dop',
+	'needs':['dop','%user%'],
+	'keywords':['remove','add','to','the','list']}]
 
 __chanserv__ = {'auto_mode':0,'auto_kick':[]}
 
@@ -22,26 +28,26 @@ def parse(commands,callback,channel,user):
 		for _user in callback.get_users():
 			if _user['name'] == commands[1]:
 				_user['chanserv']['auto_mode'] = 1
-				callback.mode(channel,True,'o',user=user['name'])
-				callback.msg(channel,'%s, aop set for %s' %
-					(user['name'],commands[1]))
+				callback.mode(channel,True,'o',user=_user['name'])
+				callback.msg(channel,'aop set for %s' %
+					(commands[1]),to=user['name'])
 				return 0
 	elif commands[0] == 'avoice' and len(commands)>=2:
 		for _user in callback.get_users():
 			if _user['name'] == commands[1]:
 				_user['chanserv']['auto_mode'] = 2
-				callback.mode(channel,True,'v',user=user['name'])
-				callback.msg(channel,'%s, avoice set for %s' %
-					(user['name'],commands[1]))
+				callback.mode(channel,True,'v',user=_user['name'])
+				callback.msg(channel,'avoice set for %s' %
+					(commands[1]),to=user['name'])
 				return 0
 	elif commands[0] in ['dop','dvoice'] and len(commands)>=2:
 		for _user in callback.get_users():
 			if _user['name'] == commands[1]:
 				_user['chanserv']['auto_mode'] = 0
-				callback.mode(channel,False,'o',user=user['name'])
-				callback.mode(channel,False,'v',user=user['name'])
-				callback.msg(channel,'%s, auto op/voice removed for %s' %
-					(user['name'],commands[1]))
+				callback.mode(channel,False,'o',user=_user['name'])
+				callback.mode(channel,False,'v',user=_user['name'])
+				callback.msg(channel,'auto op/voice removed for %s' %
+					(commands[1]),to=user['name'])
 				return 0
 	elif commands[0] == 'ak' and len(commands)>=2:
 		callback.register_user(commands[1],'')
