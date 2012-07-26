@@ -349,12 +349,12 @@ class SwanBot(irc.IRCClient):
 				module['module'].parse(_args,self,_registered['alert_channel'],_registered)
 		
 	def noticed(self, user, channel, msg):
+		print msg, user
+		
 		try:
 			name,host = user.split('!', 1)
 		except:
 			return 1
-		
-		print msg
 		
 		#Specific stuff to do with NICKSERV
 		if name.lower() == 'nickserv':
