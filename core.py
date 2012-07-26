@@ -9,12 +9,8 @@ def parse(commands,callback,channel,user):
 			% (user['name'],', '.join(m['name'] for m in callback.modules)))
 		
 	elif 'follow' in commands:
-		if user['follow']:
-			callback.msg(channel,'%s, I will no longer follow you.' % (user['name']))
-			user['follow'] = False
-		else:
-			callback.msg(channel,'%s, I will follow you.' % (user['name']))
-			user['follow'] = True
+		pass
+	
 	elif commands[0] == 'load' and len(commands)==2:
 		try:
 			if callback.has_module(commands[1]):

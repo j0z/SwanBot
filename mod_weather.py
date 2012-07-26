@@ -15,10 +15,9 @@ def get_weather(zip):
 		return 'Invalid ZIP'
 
 def parse(commands,callback,channel,user):
-	if commands[0] == 'weather' and len(commands)==2:
-		callback.msg(channel,'%s: %s' %
-			(user['name'],
-			get_weather(commands[1])))
+	if commands[0] == '.w' and len(commands)==2:
+		callback.msg(channel,'%s' %
+			get_weather(commands[1]),to=user['name'])
 
 def on_user_join(user,channel,callback):
 	pass

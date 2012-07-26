@@ -53,12 +53,15 @@ logger.addHandler(ch)
 __botname__ = 'Holo'
 __server__ = '192.168.1.2'
 __port__ = 6667
+__password__ = 'yerpderp'
+__email__ = 'clearlyfake@itsfakeimnotkidding.org'
 __channels__ = ['#talk','#holo']
 __user__ = {'name':'',
 	'host':'',
-	'follow':False,
 	'last_channel':None,
-	'alert_channel':None}
+	'alert_channel':None,
+	'owner':False,
+	'speech_highlight_in_public':False}
 
 class check_users(threading.Thread):
 	running = True
@@ -183,6 +186,19 @@ if '-c' in sys.argv:
 class SwanBot(irc.IRCClient):
 	nickname = __botname__
 	modules = []
+	owner = None
+	versionName = 'SwanBot'
+	versionNum = '0.1'
+	versionEnv = 'Wayne Brady'
+	
+	def msg(self,channel,message,to=None):
+		_user = is_registered(to)
+		
+		if _user:			
+			if _user['speech_highlight_in_public']:
+				message = '%s: %s' % (to,message)
+		
+		irc.IRCClient.msg(self,channel,str(message))
 	
 	def register_user(self,name,host):
 		register_user(name,host)
@@ -205,8 +221,14 @@ class SwanBot(irc.IRCClient):
 		except ImportError:
 			logging.error('ImportError occurred when loading module \'%s\'' % name)
 
+	def nickserv_identify(self):
+		self.msg('nickserv','identify %s' % __password__)
+	
 	def connectionMade(self):
 		global _check_thread
+		
+		if _check_thread.callback:
+			return 0
 		
 		irc.IRCClient.connectionMade(self)
 		logging.info('Connected to server')
@@ -223,12 +245,20 @@ class SwanBot(irc.IRCClient):
 			logging.info('Could not find modules.conf.')
 		except:
 			logging.info('Error when parsing module in modules.conf: %s' % line)
+		
+		logging.info('Configuring...')
+		
+		for user in self.get_users():
+			if user['owner']:
+				self.owner = user['name']
+				logging.info('Configure: Owner set to \'%s\'' % self.owner)
+				break
+		
+		if not self.owner:
+			logging.debug('Warning: No owner set! Message \'claim\' to %s.' % self.nickname)		
 
 	def connectionLost(self, reason):
 		global _check_thread
-		
-		for channel in self.factory.channels:
-			self.leave(channel,reason='Shutting down')
 		
 		irc.IRCClient.connectionLost(self, reason)
 		logging.info('Killed connection to server')
@@ -244,54 +274,100 @@ class SwanBot(irc.IRCClient):
 
 	def privmsg(self, user, channel, msg):
 		name,host = user.split('!', 1)
+		_highlighted = False
+		
+		if name == self.nickname:
+			return 0
+		
 		register_user(name,host=host)
 		
 		#logging.info("<%s> %s" % (name, msg))
 		_args = msg.split(' ')
 		_registered = is_registered(name,host=host)
 		
-		if channel == self.nickname or _args[0].count(self.nickname):
-			if _args[0].count(self.nickname):
-				_args.pop(0)
-			
-			if 'register' in _args:
-				if register_user(name,host):
-					self.msg(name,'You\'ve been registered, %s!' % name)
-				else:
-					self.msg(name,'You\'ve already been registered, %s!' % name)
+		if _args[0].count(self.nickname):
+			_args.pop(0)
+			_highlighted = True
 
-			elif _registered:
-				if _registered['follow']:
-					if channel==self.nickname:
-						_registered['alert_channel'] = name
-					else:
-						_registered['alert_channel'] = channel
-				else:
-					_registered['alert_channel'] = name
+		if not _registered:
+			logging.error('ERROR: User \'%s\' not registered!', name)
+			return 1
+		
+		if not channel == self.nickname:
+			_registered['last_channel'] = channel
+		
+		if channel==self.nickname:
+			_registered['alert_channel'] = name
+		else:
+			_registered['alert_channel'] = channel
+		
+		if 'claim' in _args and not self.owner and (channel==self.nickname or _highlighted):
+			_registered['owner'] = name
+			self.owner = name
+			
+			self.msg(name,"I am now under your control. For a tutorial type, !tutorial")
+		
+		elif 'register' in _args and _registered['owner'] and (channel==self.nickname or _highlighted):
+			logging.info('NICKSERV: Attempting to register (issued by %s)' % name)
+			self.msg('nickserv','register %s %s' % (__password__,__email__))
+		
+		elif 'reload' in _args and _registered['owner'] and (channel==self.nickname or _highlighted):
+			logging.info('Reloading core...')
+			reload(core)
+			self.msg(_registered['alert_channel'],'Reloaded module \'core\'')
+			
+			for module in self.modules:
+				logging.info('Reloading %s...' % module['name'])
 				
-				_registered['last_channel'] = channel
-				
-				if 'reload' in _args:
-					logging.info('Reloading core...')
-					reload(core)
-					self.msg(_registered['alert_channel'],'Reloaded module \'core\'')
-					
-					for module in self.modules:
-						logging.info('Reloading %s...' % module['name'])
-						
-						try:
-							reload(module['module'])
-							self.msg(_registered['alert_channel'],'Reloaded module \'%s\'' % module['name'])
-						except:
-							logging.error('Failed loading %s!' % module['name'])
-					
-					logging.info('Done reloading modules')
-					
-				else:
-					core.parse(_args,self,_registered['alert_channel'],_registered)
-					
-					for module in self.modules:
-						module['module'].parse(_args,self,_registered['alert_channel'],_registered)
+				try:
+					reload(module['module'])
+					self.msg(_registered['alert_channel'],'Reloaded module \'%s\'' % module['name'],
+						to=name)
+				except:
+					logging.error('Failed loading %s!' % module['name'])
+			
+			logging.info('Done reloading modules')
+			
+		elif ' '.join(_args)=='highlight me in public':
+			_registered['speech_highlight_in_public'] = True
+			self.msg(_registered['alert_channel'],'I will highlight you when speaking in public.',to=name)
+		
+		elif ' '.join(_args)=='don\'t highlight me in public':
+			_registered['speech_highlight_in_public'] = False
+			self.msg(_registered['alert_channel'],'I will not highlight you when speaking in public.',
+				to=name)	
+		
+		elif ' '.join(_args)=='kill connection' and (channel==self.nickname or _highlighted):
+			logging.info('Shutdown called by \'%s\'' % name)
+
+			reactor.stop()
+		
+		else:
+			core.parse(_args,self,_registered['alert_channel'],_registered)
+			
+			for module in self.modules:
+				module['module'].parse(_args,self,_registered['alert_channel'],_registered)
+		
+	def noticed(self, user, channel, msg):
+		try:
+			name,host = user.split('!', 1)
+		except:
+			return 1
+
+		#Specific stuff to do with NICKSERV
+		if name.lower() == 'nickserv':
+			if msg.count('already identified'):
+				logging.info('NICKSERV: I was already identified.')
+			elif msg.count('isn\'t registered'):
+				logging.info('NICKSERV: I am not registered. Type \'register\'.')
+			elif msg.count('registered under'):
+				logging.info('NICKSERV: I am now registered with NICKSERV.')
+				self.msg(self.owner,'I am now registered with NICKSERV.')
+			elif msg.count('This nickname is registered'):
+				logging.info('NICKSERV: Trying to identify with NICKSERV.')
+				self.nickserv_identify()
+			elif msg.count('now recognized'):
+				logging.info('NICKSERV: I am identified with NICKSERV.')
 
 	def userJoined(self, user, channel):
 		#logging.info('%s joined %s' % (user,channel))
