@@ -17,6 +17,9 @@ __keyphrases__ = [{'command':'weather',
 	'keywords':['check','what\'s','like','in']},
 	{'command':'tomorrow',
 	'needs':['tomorrow','\d{5}','weather'],
+	'keywords':['check','what\'s','like','in']},
+	{'command':'advisories',
+	'needs':['advisories','\d{5}'],
 	'keywords':['check','what\'s','like','in']}]
 
 def tick(callback):
@@ -73,6 +76,25 @@ def get_forecast_tomorrow(zip):
 	
 	return 'Tomorrow\'s forecast for %s, %s: %s - %s' % (_city,_state,_text,_feed.entries[0].link)
 
+def get_advisories(zip):
+	_feed = get_feed(zip)
+	_warnings = ''
+	
+	for entry in _feed.entries[4:]:
+		_title = entry.title.partition(' - ')
+		_what = _title[0]
+		_when = _title[2]
+		
+		if not len(_warnings):
+			_warnings += '%s (%s)' % (_what,_when)
+		else:
+			_warnings += ' - %s (%s)' % (_what,_when)
+	
+	_city = _feed.entries[1].link.rpartition('/')[2].rpartition('.html')[0]
+	_state = _feed.entries[1].link.rpartition('/')[0].rpartition('/')[2]
+	
+	return 'Weather advisories for %s, %s: %s' % (_city,_state,_warnings)
+
 def parse(commands,callback,channel,user):
 	if commands[0] in ['.w','weather'] and len(commands)==2:
 		callback.msg(channel,'%s' %
@@ -86,9 +108,13 @@ def parse(commands,callback,channel,user):
 		callback.msg(channel,'%s' %
 			get_forecast_tonight(commands[1]),to=user['name'])
 	
-	elif commands[0] in ['.wt','tomorrow'] and len(commands)>=2:
+	elif commands[0] in ['.wf','tomorrow'] and len(commands)>=2:
 		callback.msg(channel,'%s' %
 			get_forecast_tomorrow(commands[1]),to=user['name'])
+	
+	elif commands[0] in ['.wa','advisories'] and len(commands)>=2:
+		callback.msg(channel,'%s' %
+			get_advisories(commands[1]),to=user['name'])
 
 def on_user_join(user,channel,callback):
 	pass
