@@ -1,5 +1,7 @@
 import feedparser
 
+__keyphrases__ = [{'command':'weather','needs':['weather','\d{5}'],'keywords':['check','what\'s','like','in']}]
+
 def tick(callback):
 	pass
 
@@ -15,7 +17,7 @@ def get_weather(zip):
 		return 'Invalid ZIP'
 
 def parse(commands,callback,channel,user):
-	if commands[0] == '.w' and len(commands)==2:
+	if commands[0] in ['.w','weather'] and len(commands)==2:
 		callback.msg(channel,'%s' %
 			get_weather(commands[1]),to=user['name'])
 

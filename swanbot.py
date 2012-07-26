@@ -30,6 +30,7 @@ import time
 import json
 import sys
 import os
+import re
 
 #Set up proper logging
 logger = logging.getLogger()
@@ -190,6 +191,47 @@ class SwanBot(irc.IRCClient):
 	versionName = 'SwanBot'
 	versionNum = '0.1'
 	versionEnv = 'Wayne Brady'
+
+	def parse(self,text):
+		text = text.split()
+		_match = {'command':None,'matches':0,'keywords':[]}
+		
+		for module in self.modules:
+			if not module['name'] == 'mod_weather':
+				continue
+			
+			for phrase in module['module'].__keyphrases__:
+				_keywords = []
+				_matches = 0
+				
+				if phrase['command'] in text:
+					_break = False
+					for need in phrase['needs']:
+						_re = re.findall(need,' '.join(text))
+						
+						if not len(_re):
+							_break = True
+							break
+						else:
+							_keywords.append(_re[0])
+					
+					if _break:
+						continue
+					
+					for word in text:
+						if word in phrase['keywords']:
+							_matches += 1
+				
+				if _matches > _match['matches']:
+					_match['command'] = phrase['command']
+					_match['matches'] = _matches
+					_match['keywords'] = _keywords
+					_match['module'] = module['module']
+		
+		if _match['command']:
+			return _match
+		else:
+			return None
 	
 	def msg(self,channel,message,to=None):
 		_user = is_registered(to)
@@ -220,7 +262,7 @@ class SwanBot(irc.IRCClient):
 			logging.info('Loaded module \'%s\'' % name)
 		except ImportError:
 			logging.error('ImportError occurred when loading module \'%s\'' % name)
-
+	
 	def nickserv_identify(self):
 		self.msg('nickserv','identify %s' % __password__)
 	
@@ -346,8 +388,13 @@ class SwanBot(irc.IRCClient):
 		else:
 			core.parse(_args,self,_registered['alert_channel'],_registered)
 			
-			for module in self.modules:
-				module['module'].parse(_args,self,_registered['alert_channel'],_registered)
+			_parse = self.parse(msg)
+			
+			if _parse:
+				_parse['module'].parse(_parse['keywords'],self,_registered['alert_channel'],_registered)
+			else:			
+				for module in self.modules:
+					module['module'].parse(_args,self,_registered['alert_channel'],_registered)
 		
 	def noticed(self, user, channel, msg):		
 		try:
