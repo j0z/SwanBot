@@ -377,6 +377,7 @@ class SwanBot(irc.IRCClient):
 
 	def irc_RPL_WHOREPLY(self, *nargs):
 		"Receive WHO reply from server"
+		print nargs[1]
 		register_user(nargs[1][2],'')
 	
 	def userJoined(self, user, channel):
