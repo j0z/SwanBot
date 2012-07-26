@@ -8,7 +8,8 @@ def get_title(url):
 	soup = BeautifulSoup.BeautifulSoup(urllib.urlopen(url))
 	
 	try:
-		return soup.title.string.strip().replace('&nbsp;',' ')
+		return soup.title.string.strip().rstrip().replace('&nbsp;',' ').replace('\n',' ')\
+			.replace('       ',' ')
 	except:
 		return 'Page not found!'
 

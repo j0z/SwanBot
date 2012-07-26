@@ -10,10 +10,10 @@ def user_tick(user,callback):
 	user['stats']['seconds_online']+=1
 
 def parse(commands,callback,channel,user):
-	user['stats']['lines']+=1
-	
 	if not user.has_key('stats'):
 		user['stats'] = __stats__.copy()
+	
+	user['stats']['lines']+=1
 	
 	if commands[0] == 'stats':
 		for key in user['stats']:

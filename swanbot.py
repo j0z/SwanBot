@@ -190,7 +190,7 @@ class SwanBot(irc.IRCClient):
 	owner = None
 	versionName = 'SwanBot'
 	versionNum = '0.1'
-	versionEnv = 'Wayne Brady'
+	versionEnv = 'Wayne Brady\'s Cat'
 
 	def parse(self,text):
 		text = text.replace('?','')
@@ -206,7 +206,7 @@ class SwanBot(irc.IRCClient):
 				_matches = 0
 				
 				#delete this?
-				if phrase['command'] in text or phrase['command'].upper() in text:
+				if 1==1:#phrase['command'] in text or phrase['command'].upper() in text:
 					_break = False
 					for need in phrase['needs']:
 						_found_name = False
@@ -230,7 +230,6 @@ class SwanBot(irc.IRCClient):
 							
 							if not len(_re):
 								_break = True
-								print 'Had to break'
 								break
 							else:
 								_keywords.append(_re[0])

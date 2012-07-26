@@ -24,6 +24,10 @@ def parse(commands,callback,channel,user):
 	if not user.has_key('chanserv'):
 		user['chanserv'] = __chanserv__.copy()
 	
+	if not channel in callback.factory.channels:
+		callback.msg(channel,'This isn\'t a channel.',to=user['name'])
+		return 0
+	
 	if commands[0] == 'aop' and len(commands)>=2:
 		for _user in callback.get_users():
 			if _user['name'] == commands[1]:
