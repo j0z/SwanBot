@@ -353,7 +353,9 @@ class SwanBot(irc.IRCClient):
 			name,host = user.split('!', 1)
 		except:
 			return 1
-
+		
+		print msg
+		
 		#Specific stuff to do with NICKSERV
 		if name.lower() == 'nickserv':
 			if msg.count('already identified'):
