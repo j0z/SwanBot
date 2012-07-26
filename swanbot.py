@@ -271,6 +271,7 @@ class SwanBot(irc.IRCClient):
 
 	def joined(self, channel):
 		logging.info("Joined %s" % channel)
+		self.who(channel)
 
 	def privmsg(self, user, channel, msg):
 		name,host = user.split('!', 1)
@@ -348,9 +349,7 @@ class SwanBot(irc.IRCClient):
 			for module in self.modules:
 				module['module'].parse(_args,self,_registered['alert_channel'],_registered)
 		
-	def noticed(self, user, channel, msg):
-		print msg, user
-		
+	def noticed(self, user, channel, msg):		
 		try:
 			name,host = user.split('!', 1)
 		except:
@@ -370,7 +369,16 @@ class SwanBot(irc.IRCClient):
 				self.nickserv_identify()
 			elif msg.count('now recognized') or msg.count('now identified'):
 				logging.info('NICKSERV: I am identified with NICKSERV.')
+			else:
+				logging.info('NICKSERV: %s' % msg)
 
+	def who(self, channel):
+		self.sendLine('WHO %s' % channel)
+
+	def irc_RPL_WHOREPLY(self, *nargs):
+		"Receive WHO reply from server"
+		register_user(nargs[1][2],'')
+	
 	def userJoined(self, user, channel):
 		#logging.info('%s joined %s' % (user,channel))
 		
