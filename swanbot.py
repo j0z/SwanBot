@@ -205,6 +205,7 @@ class SwanBot(irc.IRCClient):
 				_keywords = []
 				_matches = 0
 				
+				#delete this?
 				if phrase['command'] in text or phrase['command'].upper() in text:
 					_break = False
 					for need in phrase['needs']:
