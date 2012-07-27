@@ -1,26 +1,5 @@
 import feedparser
 
-#__keyphrases__ = [{'command':'weather',
-#	'needs':['weather','\d{5}'],
-#	'keywords':['check','what\'s','like','in']},
-#	{'command':'forecast',
-#	'needs':['forecast','\d{5}'],
-#	'keywords':['check','what\'s','like','in']},
-#	{'command':'tonight',
-#	'needs':['tonight','\d{5}','forecast'],
-#	'keywords':['check','what\'s','like','in']},
-#	{'command':'tonight',
-#	'needs':['tonight','\d{5}','weather'],
-#	'keywords':['check','what\'s','like','in']},
-#	{'command':'tomorrow',
-#	'needs':['tomorrow','\d{5}','forecast'],
-#	'keywords':['check','what\'s','like','in']},
-#	{'command':'tomorrow',
-#	'needs':['tomorrow','\d{5}','weather'],
-#	'keywords':['check','what\'s','like','in']},
-#	{'command':'advisories',
-#	'needs':['advisories','\d{5}','weather'],
-#	'keywords':['check','what\'s','like','in']}]
 __keyphrases__ = [{'command':'weather',
 	'needs':
 		[{'match':'weather','required':True},
@@ -30,7 +9,23 @@ __keyphrases__ = [{'command':'weather',
 	'needs':
 		[{'match':'forecast','required':True},
 		{'match':'\d{5}','required':False}],
-	'keywords':['check','what\'s','like','in']}]
+	'keywords':['check','what\'s','like','in']},
+	{'command':'tonight',
+	'needs':
+		[{'match':'tonight','required':True},
+		{'match':'\d{5}','required':False}],
+	'keywords':['check','what\'s','like','in']},
+	{'command':'tomorrow',
+	'needs':
+		[{'match':'tomorrow','required':True},
+		{'match':'\d{5}','required':False}],
+	'keywords':['weather','check','what\'s','like','in']},
+	{'command':'advisories',
+	'needs':
+		[{'match':'advisories','required':True},
+		{'match':'\d{5}','required':False}],
+	'keywords':['weather','check','what\'s','like','in']}
+	]
 
 def tick(callback):
 	pass
