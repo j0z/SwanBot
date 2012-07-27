@@ -14,7 +14,7 @@ __keyphrases__ = [{'command':'weather',
 	'needs':
 		[{'match':'tonight','required':True},
 		{'match':'\d{5}','required':False}],
-	'keywords':['check','what\'s','like','in']},
+	'keywords':['weather','check','what\'s','like','in']},
 	{'command':'tomorrow',
 	'needs':
 		[{'match':'tomorrow','required':True},
