@@ -7,9 +7,6 @@ def parse(commands,callback,channel,user):
 		callback.msg(user['alert_channel'],'%s, Alert channel: %s' % (user['name'],user['alert_channel']))
 		callback.msg(user['alert_channel'],'%s, I am running the following modules: %s'
 			% (user['name'],', '.join(m['name'] for m in callback.modules)))
-		
-	elif 'follow' in commands:
-		pass
 	
 	elif commands[0] == 'load' and len(commands)==2:
 		try:

@@ -189,7 +189,7 @@ class SwanBot(irc.IRCClient):
 	modules = []
 	owner = None
 	versionName = 'SwanBot'
-	versionNum = '0.1'
+	versionNum = '0.2'
 	versionEnv = 'Wayne Brady\'s Cat'
 
 	def parse(self,text):
@@ -198,50 +198,48 @@ class SwanBot(irc.IRCClient):
 		_match = {'command':None,'matches':0,'keywords':[]}
 		
 		for module in self.modules:
-			if not module['name'] in ['mod_weather','mod_chanserv']:
+			if not module['name'] in ['mod_weather','mod_stats']:
 				continue
 			
 			for phrase in module['module'].__keyphrases__:
 				_keywords = []
 				_matches = 0
+				_break = False
 				
-				#delete this?
-				if 1==1:#phrase['command'] in text or phrase['command'].upper() in text:
-					_break = False
-					for need in phrase['needs']:
-						_found_name = False
-						
-						if need.count('%')==2:
-							if need == '%user%':
-								for user in self.get_users():
-									if user['name'] == self.nickname:
-										continue
-									
-									if user['name'] in text:
-										_keywords.append(user['name'])
-										_found_name = True
-										_matches += 1
-										break
-								
-								if _found_name:
+				for need in phrase['needs']:
+					_found_name = False
+					
+					if need['match'].count('%')==2:
+						if need['match'] == '%user%':
+							for user in self.get_users():
+								if user['name'] == self.nickname:
 									continue
-						else:
-							_re = re.findall(need,' '.join(text).lower())
+								
+								if user['name'] in text:
+									_keywords.append(user['name'])
+									_found_name = True
+									_matches += 1
+									break
 							
-							if not len(_re):
-								_break = True
-								break
-							else:
-								_keywords.append(_re[0])
-								_matches += 1
-					
-					if _break:
-						continue
-					
-					for word in text:
-						if word in phrase['keywords']:
+							if _found_name:
+								continue
+					else:
+						_re = re.findall(need['match'],' '.join(text).lower())
+						
+						if not len(_re) and need['required']:
+							_break = True
+							break
+						elif len(_re):
+							_keywords.append(_re[0])
 							_matches += 1
 				
+				if _break:
+					continue
+				
+				for word in text:
+					if word in phrase['keywords']:
+						_matches += 1
+			
 				if _matches > _match['matches']:
 					_match['command'] = phrase['command']
 					_match['matches'] = _matches
@@ -411,6 +409,7 @@ class SwanBot(irc.IRCClient):
 			_parse = self.parse(msg)
 			
 			if _parse:
+				_parse['keywords'][0] = _parse['command']
 				_parse['module'].parse(_parse['keywords'],self,_registered['alert_channel'],_registered)
 			else:			
 				for module in self.modules:
