@@ -95,7 +95,10 @@ def get_advisories(zip):
 	_city = _feed.entries[1].link.rpartition('/')[2].rpartition('.html')[0]
 	_state = _feed.entries[1].link.rpartition('/')[0].rpartition('/')[2]
 	
-	return 'Weather advisories for %s, %s: %s' % (_city,_state,_warnings)
+	if len(_feed.entries)>=5:
+		return 'Weather advisories for %s, %s: %s' % (_city,_state,_warnings)
+	else:
+		return 'There are no advisories for %s, %s.' % (_city,_state)
 
 def parse(commands,callback,channel,user):
 	if not user.has_key('weather'):
