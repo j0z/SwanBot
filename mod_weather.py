@@ -109,6 +109,8 @@ def parse(commands,callback,channel,user):
 			_zip = commands[1]
 		elif user['weather'].has_key('zipcode'):
 			_zip = user['weather']['zipcode']
+		else:
+			callback.msg(channel,'I don\'t know what your zipcode is!',to=user['name'])
 		
 		callback.msg(channel,'%s' %
 			get_weather(_zip),to=user['name'])
@@ -118,6 +120,8 @@ def parse(commands,callback,channel,user):
 			_zip = commands[1]
 		elif user['weather'].has_key('zipcode'):
 			_zip = user['weather']['zipcode']
+		else:
+			callback.msg(channel,'I don\'t know what your zipcode is!',to=user['name'])
 		
 		callback.msg(channel,'%s' %
 			get_forecast(_zip),to=user['name'])
@@ -127,6 +131,8 @@ def parse(commands,callback,channel,user):
 			_zip = commands[1]
 		elif user['weather'].has_key('zipcode'):
 			_zip = user['weather']['zipcode']
+		else:
+			callback.msg(channel,'I don\'t know what your zipcode is!',to=user['name'])
 		
 		callback.msg(channel,'%s' %
 			get_forecast_tonight(_zip),to=user['name'])
@@ -136,6 +142,8 @@ def parse(commands,callback,channel,user):
 			_zip = commands[1]
 		elif user['weather'].has_key('zipcode'):
 			_zip = user['weather']['zipcode']
+		else:
+			callback.msg(channel,'I don\'t know what your zipcode is!',to=user['name'])
 		
 		callback.msg(channel,'%s' %
 			get_forecast_tomorrow(_zip),to=user['name'])
@@ -145,6 +153,8 @@ def parse(commands,callback,channel,user):
 			_zip = commands[1]
 		elif user['weather'].has_key('zipcode'):
 			_zip = user['weather']['zipcode']
+		else:
+			callback.msg(channel,'I don\'t know what your zipcode is!',to=user['name'])
 		
 		callback.msg(channel,'%s' %
 			get_advisories(_zip),to=user['name'])
