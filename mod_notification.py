@@ -25,7 +25,7 @@ def parse(commands,callback,channel,user):
 		user['growl_host'] = None
 	
 	if commands[0] == 'growl' and len(commands)==3:
-		if commands[1] == 'on':
+		if commands[1] == 'add':
 			if not commands[2] in user['notify_on']:
 				user['notify_on'].append(commands[2])
 				callback.msg(channel,'I will notify you if this event occurs: %s ' %
@@ -33,7 +33,7 @@ def parse(commands,callback,channel,user):
 			else:
 				callback.msg(channel,'You are already being notified for this event: %s ' %
 					commands[2],to=user['name'])
-		elif commands[1] == 'off':
+		elif commands[1] == 'remove':
 			if not commands[2] in user['notify_on']:
 				callback.msg(channel,'You are not currently being notified for this event: %s ' %
 					commands[2],to=user['name'])
