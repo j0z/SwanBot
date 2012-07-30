@@ -1,8 +1,8 @@
 __keyphrases__ = [{'command':'growl',
 	'needs':
 		[{'match':'growl','required':True},
-		{'match':'on','required':False},
-		{'match':'off','required':False},
+		{'match':'add','required':False},
+		{'match':'remove','required':False},
 		{'match':'join','required':False},
 		{'match':'message','required':False},
 		{'match':'highlight','required':False},
