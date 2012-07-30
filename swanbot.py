@@ -32,6 +32,13 @@ import sys
 import os
 import re
 
+try:
+	import gntp.notifier
+	__NOTIFICATIONS__ = True
+except:
+	print 'GNTP module not found. Notifications disabled.'
+	__NOTIFICATIONS__ = False
+
 #Set up proper logging
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -41,13 +48,13 @@ console_formatter = logging.Formatter('[%(asctime)s] %(message)s')
 try: os.mkdir('data')
 except: pass
 
-fh = logging.FileHandler(os.path.join('data','log.txt'))
-fh.setLevel(logging.DEBUG)
-fh.setFormatter(file_formatter)
-logger.addHandler(fh)
+#fh = logging.FileHandler(os.path.join('data','log.txt'))
+#fh.setLevel(logging.DEBUG)
+#fh.setFormatter(file_formatter)
+#logger.addHandler(fh)
 
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+ch.setLevel(logging.INFO)
 ch.setFormatter(console_formatter)
 logger.addHandler(ch)
 
@@ -251,6 +258,13 @@ class SwanBot(irc.IRCClient):
 		else:
 			return None
 	
+	def notify(self,title,text,image=None,hostname='localhost'):
+		if not __NOTIFICATIONS__:
+			return 1
+		
+		gntp.notifier.mini(text,title=title,applicationName='SwanBot',\
+			applicationIcon=image,hostname=hostname)
+	
 	def msg(self,channel,message,to=None):
 		_user = is_registered(to)
 		
@@ -332,6 +346,10 @@ class SwanBot(irc.IRCClient):
 	def joined(self, channel):
 		logging.info("Joined %s" % channel)
 		self.who(channel)
+	
+	def kickedFrom(self, channel, kicker, message):
+		logging.info('WARNING: Kicked from %s by %s: %s' % (channel,kicker,message))
+		self.join(channel)
 
 	def privmsg(self, user, channel, msg):
 		name,host = user.split('!', 1)
@@ -437,10 +455,10 @@ class SwanBot(irc.IRCClient):
 				logging.info('NICKSERV: I am identified with NICKSERV.')
 			else:
 				logging.info('NICKSERV: %s' % msg)
-
+	
 	def who(self, channel):
 		self.sendLine('WHO %s' % channel)
-
+	
 	def irc_RPL_WHOREPLY(self, *nargs):
 		"Receive WHO reply from server"
 		register_user(nargs[1][5],'')
