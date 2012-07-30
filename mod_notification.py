@@ -6,7 +6,10 @@ __keyphrases__ = [{'command':'growl',
 		{'match':'join','required':False},
 		{'match':'message','required':False},
 		{'match':'highlight','required':False},
-		{'match':'mention','required':False}],
+		{'match':'mention','required':False},
+		{'match':'ip','required':False},
+		{'match':'host','required':False},
+		{'match':'\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b','required':False}],
 	'keywords':['turn','notifications']}]
 
 def tick(callback):
