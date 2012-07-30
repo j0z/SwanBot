@@ -9,7 +9,8 @@ __keyphrases__ = [{'command':'growl',
 		{'match':'mention','required':False},
 		{'match':'ip','required':False},
 		{'match':'host','required':False},
-		{'match':'\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b','required':False}],
+		{'match':'\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b','required':False},
+		{'match':'list','required':False}],
 	'keywords':['turn','notifications']}]
 
 def tick(callback):
@@ -44,6 +45,14 @@ def parse(commands,callback,channel,user):
 			user['growl_host'] = commands[2]
 			callback.msg(channel,'Growl IP set: %s ' %
 					commands[2],to=user['name'])
+	elif commands[0] == 'growl' and len(commands)==2:
+		if commands[1] == 'list':
+			if user['notify_on']:
+				callback.msg(channel,'You are being notified for the following events: %s' %
+					', '.join(user['notify_on']),to=user['name'])
+			else:
+				callback.msg(channel,'You are not currently being notified for any events',
+					to=user['name'])
 	
 	for _user in callback.get_users():
 		if not _user.has_key('notify_on'):
