@@ -48,7 +48,7 @@ def parse(commands,callback,channel,user):
 			_user['growl_host'] = None
 			continue
 		
-		if not _user['growl_host']:
+		if not _user['growl_host'] and _user['notify_on']:
 			callback.msg(_user['name'],'Please configure your growl IP! Message: growl ip <ip>',
 				to=_user['name'])
 			continue
