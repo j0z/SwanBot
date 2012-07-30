@@ -205,7 +205,7 @@ class SwanBot(irc.IRCClient):
 		_match = {'command':None,'matches':0,'keywords':[]}
 		
 		for module in self.modules:
-			if not module['name'] in ['mod_weather','mod_stats']:
+			if not module['name'] in ['mod_notification','mod_weather','mod_stats']:
 				continue
 			
 			for phrase in module['module'].__keyphrases__:
