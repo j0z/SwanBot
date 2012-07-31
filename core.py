@@ -5,7 +5,7 @@ def parse(commands,callback,channel,user):
 	if not user['name'] == callback.owner:
 		return 1
 	
-	if 'info' in commands:
+	if commands[0] == 'info':
 		callback.msg(user['alert_channel'],'%s, Alert channel: %s' % (user['name'],user['alert_channel']))
 		callback.msg(user['alert_channel'],'%s, I am running the following modules: %s'
 			% (user['name'],', '.join(m['name'] for m in callback.modules)))
