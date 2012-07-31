@@ -405,20 +405,19 @@ class SwanBot(irc.IRCClient):
 		
 		elif 'reload' in _args and (_registered['owner'] or _registered['fallback_owner']) and\
 			(channel==self.nickname or _highlighted):
-			logging.info('Reloading core...')
+			logging.info('Reloading modules...')
+			
 			reload(core)
-			self.msg(_registered['alert_channel'],'Reloaded module \'core\'')
 			
 			for module in self.modules:
-				logging.info('Reloading %s...' % module['name'])
-				
 				try:
 					reload(module['module'])
-					self.msg(_registered['alert_channel'],'Reloaded module \'%s\'' % module['name'],
-						to=name)
 				except:
+					self.msg(_registered['alert_channel'],'Failed to reload \'%s\'' % module['name'],
+						to=name)
 					logging.error('Failed loading %s!' % module['name'])
 			
+			self.msg(_registered['alert_channel'],'Reload completed.',to=name)
 			logging.info('Done reloading modules')
 			
 		elif ' '.join(_args)=='highlight me in public':
