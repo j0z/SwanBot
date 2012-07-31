@@ -5,9 +5,10 @@ __keyphrases__ = [{'command':'weather',
 		[{'match':'weather','required':True},
 		{'match':'\d{5}','required':False}],
 	'keywords':['check','what\'s','like','in']},
-	{'command':'forecast',
+	{'command':'.wf',
 	'needs':
 		[{'match':'forecast','required':True},
+		{'match':'weather','required':False,'ignore':True},
 		{'match':'\d{5}','required':False}],
 	'keywords':['check','what\'s','like','in']},
 	{'command':'tonight',
@@ -115,7 +116,7 @@ def parse(commands,callback,channel,user):
 		callback.msg(channel,'%s' %
 			get_weather(_zip),to=user['name'])
 	
-	elif commands[0] in ['.wf','forecast']:
+	elif commands[0] in ['.wf']:
 		if len(commands)==2:
 			_zip = commands[1]
 		elif user['weather'].has_key('zipcode'):

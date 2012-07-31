@@ -17,6 +17,21 @@ def user_tick(user,callback):
 	if not user.has_key('chanserv'):
 		user['chanserv'] = __chanserv__.copy()
 
+def on_user_in_channel(channel,user,callback):
+	for _user in callback.get_users():
+		if _user['name']==user and _user['chanserv']['auto_mode']:
+			if _user['chanserv']['auto_mode']==0:
+				callback.mode(channel,False,'o',user=user)
+				callback.mode(channel,False,'v',user=user)
+			elif _user['chanserv']['auto_mode']==1:
+				callback.mode(channel,True,'o',user=user)
+			elif _user['chanserv']['auto_mode']==2:
+				callback.mode(channel,True,'v',user=user)
+			elif _user['chanserv']['auto_mode']==3 and channel in _user['chanserv']['auto_kick']:
+				callback.kick(channel,user,reason='Autokick')
+			
+			return 0
+
 def parse(commands,callback,channel,user):
 	if not callback.owner == user['name']:
 		return 0
@@ -76,6 +91,23 @@ def on_user_join(user,channel,callback):
 				callback.mode(channel,True,'v',user=user)
 			elif _user['chanserv']['auto_mode']==3 and channel in _user['chanserv']['auto_kick']:
 				callback.kick(channel,user,reason='Autokick')
+			
+			return 0
+
+def on_nick_change(old_nick,new_nick,callback):
+	for _user in callback.get_users():
+		#print _user['name'],new_nick,_user['chanserv']['auto_mode']
+		if _user['name']==new_nick and _user['chanserv']['auto_mode']:
+			for channel in callback.factory.channels:
+				if _user['chanserv']['auto_mode']==0:
+					callback.mode(channel,False,'o',user=new_nick)
+					callback.mode(channel,False,'v',user=new_nick)
+				elif _user['chanserv']['auto_mode']==1:
+					callback.mode(channel,True,'o',user=new_nick)
+				elif _user['chanserv']['auto_mode']==2:
+					callback.mode(channel,True,'v',user=new_nick)
+				elif _user['chanserv']['auto_mode']==3 and channel in _user['chanserv']['auto_kick']:
+					callback.kick(channel,new_nick,reason='Autokick')
 			
 			return 0
 

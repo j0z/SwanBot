@@ -237,8 +237,11 @@ class SwanBot(irc.IRCClient):
 							_break = True
 							break
 						elif len(_re):
-							_keywords.append(_re[0])
-							_matches += 1
+							if not need.has_key('ignore') or not need['ignore']:
+								_keywords.append(_re[0])
+								_matches += 1
+							else:
+								_matches += 1
 				
 				if _break:
 					continue
@@ -417,9 +420,9 @@ class SwanBot(irc.IRCClient):
 				to=name)	
 		
 		elif ' '.join(_args)=='kill connection' and (channel==self.nickname or _highlighted):
-			logging.info('Shutdown called by \'%s\'' % name)
-
-			reactor.stop()
+			if name == self.owner:
+				logging.info('Shutdown called by \'%s\'' % name)
+				reactor.stop()
 		
 		else:
 			core.parse(_args,self,_registered['alert_channel'],_registered)
@@ -462,6 +465,12 @@ class SwanBot(irc.IRCClient):
 	def irc_RPL_WHOREPLY(self, *nargs):
 		"Receive WHO reply from server"
 		register_user(nargs[1][5],'')
+		
+		for module in self.modules:
+			try:
+				module['module'].on_user_in_channel(nargs[1][1],nargs[1][5],self)
+			except:
+				logging.error('ERROR in %s..on_user_in_channel()' % module['name'])
 	
 	def userJoined(self, user, channel):
 		#logging.info('%s joined %s' % (user,channel))
@@ -486,6 +495,12 @@ class SwanBot(irc.IRCClient):
 	def irc_NICK(self, prefix, params):
 		old_nick = prefix.split('!')[0]
 		new_nick = params[0]
+		
+		for module in self.modules:
+			try:
+				module['module'].on_nick_change(old_nick,new_nick,self)
+			except:
+				logging.error('ERROR in %s.on_nick_change()' % module['name'])
 		#logging.info("%s is now known as %s" % (old_nick, new_nick))
 
 	def alterCollidedNick(self, nickname):

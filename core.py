@@ -21,7 +21,7 @@ def parse(commands,callback,channel,user):
 	elif commands[0] == 'force-register' and len(commands)==2:
 		callback.register_user(commands[1],'')
 		callback.msg(channel,'%s: Tried to register %s' % (user['name'],commands[1]))
-	elif commands[0] == 'join' and len(commands)==2 and user['name'] == callback.owner:
+	elif commands[0] == 'join' and len(commands)>=2 and user['name'] == callback.owner:
 		if len(commands)>2:
 			callback.join(commands[1],key=' '.join(commands[2:]))
 		else:
