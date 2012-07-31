@@ -69,6 +69,7 @@ __user__ = {'name':'',
 	'last_channel':None,
 	'alert_channel':None,
 	'owner':False,
+	'fallback_owner':False,
 	'speech_highlight_in_public':False}
 
 class check_users(threading.Thread):
@@ -195,6 +196,7 @@ class SwanBot(irc.IRCClient):
 	nickname = __botname__
 	modules = []
 	owner = None
+	fallback_owner = None
 	versionName = 'SwanBot'
 	versionNum = '0.2'
 	versionEnv = 'Wayne Brady\'s Cat'
@@ -209,8 +211,6 @@ class SwanBot(irc.IRCClient):
 				module['module'].__keyphrases__
 			except:
 				continue
-			
-			print module['name']
 			
 			for phrase in module['module'].__keyphrases__:
 				_keywords = []
@@ -333,6 +333,11 @@ class SwanBot(irc.IRCClient):
 			if user['owner']:
 				self.owner = user['name']
 				logging.info('Configure: Owner set to \'%s\'' % self.owner)
+			elif user['fallback_owner']:
+				self.fallback_owner = user['name']
+				logging.info('Configure: Fallback owner set to \'%s\'' % self.fallback_owner)
+			
+			if self.owner and self.fallback_owner:
 				break
 		
 		if not self.owner:
@@ -393,11 +398,13 @@ class SwanBot(irc.IRCClient):
 			
 			self.msg(name,"I am now under your control. For a tutorial type, !tutorial")
 		
-		elif 'register' in _args and _registered['owner'] and (channel==self.nickname or _highlighted):
+		elif 'register' in _args and (_registered['owner'] or _registered['fallback_owner']) and\
+			(channel==self.nickname or _highlighted):
 			logging.info('NICKSERV: Attempting to register (issued by %s)' % name)
 			self.msg('nickserv','register %s %s' % (__password__,__email__))
 		
-		elif 'reload' in _args and _registered['owner'] and (channel==self.nickname or _highlighted):
+		elif 'reload' in _args and (_registered['owner'] or _registered['fallback_owner']) and\
+			(channel==self.nickname or _highlighted):
 			logging.info('Reloading core...')
 			reload(core)
 			self.msg(_registered['alert_channel'],'Reloaded module \'core\'')

@@ -1,6 +1,6 @@
 __keyphrases__ = [{'command':'nope',
 	'needs':
-		[{'match':'INTERNET TIME','required':True}],
+		[{'match':'placeholder','required':True}],
 	'keywords':['turn','notifications']}]
 
 def tick(callback):
@@ -9,10 +9,7 @@ def tick(callback):
 def user_tick(user,callback):
 	pass
 
-def parse(commands,callback,channel,user):
-	if not user.has_key('notify_on'):
-		pass
-	
+def parse(commands,callback,channel,user):	
 	if channel in callback.factory.channels:
 		return 1
 
