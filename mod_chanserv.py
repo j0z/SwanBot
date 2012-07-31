@@ -1,11 +1,17 @@
 __keyphrases__ = [{'command':'aop',
-	'needs':['aop','%user%'],
+	'needs':
+		[{'match':'aop','required':True},
+		{'match':'%user%','required':True}],
 	'keywords':['add','to','the','list']},
 	{'command':'avoice',
-	'needs':['avoice','%user%'],
+	'needs':
+		[{'match':'avoice','required':True},
+		{'match':'%user%','required':True}],
 	'keywords':['add','to','the','list']},
 	{'command':'dop',
-	'needs':['dop','%user%'],
+	'needs':
+		[{'match':'dop','required':True},
+		{'match':'%user%','required':True}],
 	'keywords':['remove','add','to','the','list']}]
 
 __chanserv__ = {'auto_mode':0,'auto_kick':[]}
@@ -38,10 +44,6 @@ def parse(commands,callback,channel,user):
 	
 	if not user.has_key('chanserv'):
 		user['chanserv'] = __chanserv__.copy()
-	
-	#if not channel in callback.factory.channels:
-	#	callback.msg(channel,'This isn\'t a channel.',to=user['name'])
-	#	return 0
 	
 	if commands[0] == 'aop' and len(commands)>=2:
 		for _user in callback.get_users():
@@ -96,7 +98,6 @@ def on_user_join(user,channel,callback):
 
 def on_nick_change(old_nick,new_nick,callback):
 	for _user in callback.get_users():
-		#print _user['name'],new_nick,_user['chanserv']['auto_mode']
 		if _user['name']==new_nick and _user['chanserv']['auto_mode']:
 			for channel in callback.factory.channels:
 				if _user['chanserv']['auto_mode']==0:

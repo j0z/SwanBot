@@ -205,8 +205,12 @@ class SwanBot(irc.IRCClient):
 		_match = {'command':None,'matches':0,'keywords':[]}
 		
 		for module in self.modules:
-			if not module['name'] in ['mod_notification','mod_weather','mod_stats']:
+			try:
+				module['module'].__keyphrases__
+			except:
 				continue
+			
+			print module['name']
 			
 			for phrase in module['module'].__keyphrases__:
 				_keywords = []
@@ -469,8 +473,10 @@ class SwanBot(irc.IRCClient):
 		for module in self.modules:
 			try:
 				module['module'].on_user_in_channel(nargs[1][1],nargs[1][5],self)
+			except AttributeError:
+				pass
 			except:
-				logging.error('ERROR in %s..on_user_in_channel()' % module['name'])
+				logging.error('ERROR in %s.on_user_in_channel()' % module['name'])
 	
 	def userJoined(self, user, channel):
 		#logging.info('%s joined %s' % (user,channel))
