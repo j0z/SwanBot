@@ -396,7 +396,7 @@ class SwanBot(irc.IRCClient):
 			_registered['owner'] = name
 			self.owner = name
 			
-			self.msg(name,"I am now under your control. For a tutorial type, !tutorial")
+			self.msg(name,'I am now under your control.')
 		
 		elif 'register' in _args and (_registered['owner'] or _registered['fallback_owner']) and\
 			(channel==self.nickname or _highlighted):
@@ -434,7 +434,7 @@ class SwanBot(irc.IRCClient):
 				logging.info('Shutdown called by \'%s\'' % name)
 				reactor.stop()
 		
-		else:
+		elif channel==self.nickname or _highlighted:
 			core.parse(_args,self,_registered['alert_channel'],_registered)
 			
 			_parse = self.parse(msg)
