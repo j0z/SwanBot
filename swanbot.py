@@ -434,7 +434,7 @@ class SwanBot(irc.IRCClient):
 				logging.info('Shutdown called by \'%s\'' % name)
 				reactor.stop()
 		
-		elif channel==self.nickname or _highlighted:
+		else:
 			core.parse(_args,self,_registered['alert_channel'],_registered)
 			
 			_parse = self.parse(msg)
@@ -444,7 +444,16 @@ class SwanBot(irc.IRCClient):
 				_parse['module'].parse(_parse['keywords'],self,_registered['alert_channel'],_registered)
 			else:			
 				for module in self.modules:
-					module['module'].parse(_args,self,_registered['alert_channel'],_registered)
+					_bypass = False
+					
+					try:
+						if module['module'].__parse_always__:
+							_bypass = True
+					except:
+						pass
+					
+					if (channel==self.nickname or _highlighted or _bypass):
+						module['module'].parse(_args,self,_registered['alert_channel'],_registered)
 		
 	def noticed(self, user, channel, msg):		
 		try:
@@ -473,8 +482,6 @@ class SwanBot(irc.IRCClient):
 		self.sendLine('WHO %s' % channel)
 	
 	def irc_RPL_WHOREPLY(self, *nargs):
-		"Receive WHO reply from server"
-		print nargs[1]
 		register_user(nargs[1][5],'')
 		
 		for module in self.modules:

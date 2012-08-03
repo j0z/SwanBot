@@ -1,3 +1,4 @@
+__parse_always__ = True
 __keyphrases__ = [{'command':'growl',
 	'needs':
 		[{'match':'growl','required':True},
@@ -69,9 +70,11 @@ def parse(commands,callback,channel,user):
 			callback.notify('%s - %s' % (channel,user['name']),' '.join(commands),
 				hostname=_user['growl_host'])
 		elif 'highlight' in _user['notify_on'] or 'mention' in _user['notify_on']:
-			if _user['name'] in commands:
-				callback.notify('%s - %s' % (channel,user['name']),' '.join(commands),
-					hostname=_user['growl_host'])
+			for command in commands:
+				if command.count(_user['name']):
+					callback.notify('%s - %s' % (channel,user['name']),' '.join(commands),
+						hostname=_user['growl_host'])
+					break
 
 def on_user_join(user,channel,callback):
 	pass
