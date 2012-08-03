@@ -9,7 +9,7 @@ def get_title(url):
 	
 	try:
 		return soup.title.string.strip().rstrip().replace('&nbsp;',' ').replace('\n',' ')\
-			.replace('       ',' ')
+			.replace('       ',' ').replace('&quot;','"')
 	except:
 		return 'Page not found!'
 
