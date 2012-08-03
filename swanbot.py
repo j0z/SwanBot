@@ -70,7 +70,8 @@ __user__ = {'name':'',
 	'alert_channel':None,
 	'owner':False,
 	'fallback_owner':False,
-	'speech_highlight_in_public':False}
+	'speech_highlight_in_public':False,
+	'message_on_highlight':True}
 
 class check_users(threading.Thread):
 	running = True
@@ -278,6 +279,13 @@ class SwanBot(irc.IRCClient):
 		if _user:			
 			if _user['speech_highlight_in_public']:
 				message = '%s: %s' % (to,message)
+			
+			if _user['message_on_highlight']:
+				irc.IRCClient.msg(self,channel,str(message))
+				return 1
+			else:
+				irc.IRCClient.notice(self,to,str(message))
+				return 1
 		
 		irc.IRCClient.msg(self,channel,str(message))
 	
@@ -433,6 +441,17 @@ class SwanBot(irc.IRCClient):
 			if name == self.owner:
 				logging.info('Shutdown called by \'%s\'' % name)
 				reactor.stop()
+		
+		elif _args[0] == 'set':
+			if len(_args)==3 and _args[1] == 'message_on_highlight':
+				if _args[2] == 'on':
+					_registered['message_on_highlight'] = True
+					self.msg(_registered['name'],'I will message you directly for certain commands.',
+						to=name)
+				elif _args[2] == 'off':
+					_registered['message_on_highlight'] = False
+					self.msg(_registered['name'],'I will notify you for certain commands.',
+						to=name)
 		
 		else:
 			core.parse(_args,self,_registered['alert_channel'],_registered)

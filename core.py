@@ -59,4 +59,3 @@ def parse(commands,callback,channel,user):
 				callback.msg(user['name'],'Set fallback_owner to %s' % commands[2],to=user['name'])
 				callback.msg(commands[2],'You are now the fallback owner of this bot.',to=user['name'])
 				break
-			
