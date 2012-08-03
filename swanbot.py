@@ -456,12 +456,15 @@ class SwanBot(irc.IRCClient):
 		else:
 			core.parse(_args,self,_registered['alert_channel'],_registered)
 			
-			_parse = self.parse(msg)
+			if channel==self.nickname or _highlighted:
+				_parse = self.parse(msg)
+			else:
+				_parse = None
 			
 			if _parse:
 				_parse['keywords'][0] = _parse['command']
 				_parse['module'].parse(_parse['keywords'],self,_registered['alert_channel'],_registered)
-			else:			
+			else:
 				for module in self.modules:
 					_bypass = False
 					
