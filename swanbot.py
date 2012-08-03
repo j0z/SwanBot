@@ -280,7 +280,7 @@ class SwanBot(irc.IRCClient):
 			if _user['speech_highlight_in_public']:
 				message = '%s: %s' % (to,message)
 			
-			if _user['message_on_highlight']:
+			if _user['message_on_highlight'] or not channel==to:
 				irc.IRCClient.msg(self,channel,str(message))
 				return 1
 			else:
@@ -471,7 +471,7 @@ class SwanBot(irc.IRCClient):
 					except:
 						pass
 					
-					if (channel==self.nickname or _highlighted or _bypass):
+					if (channel==self.nickname or _highlighted or _args[0][0]=='.' or _bypass):
 						module['module'].parse(_args,self,_registered['alert_channel'],_registered)
 		
 	def noticed(self, user, channel, msg):		
