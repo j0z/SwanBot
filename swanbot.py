@@ -223,25 +223,27 @@ class SwanBot(irc.IRCClient):
 			return 1
 		
 		_reload = False
+		_restart = False
 		logging.info('Update: Checking for updates')
 		
 		for line in git.pull('origin','master'):
 			if line.count('swanbot.py'):
-				logging.info('Update: Updates have been made to the core. Please restart.')
-				self.msg(user['name'],'Changes to the core have been made. Restart.',to=user['name'])
+				_restart = True
+				logging.info('Update: Updates have been made to the core.')
+				self.msg(user['name'],'The core has updated. Restart issued.',to=user['name'])
 			elif line.count('mod_'):
 				logging.info('Update: \'%s\' changed.' % line.rpartition('.py')[0].strip())
 				self.msg(user['name'],'Update: \'%s\' changed.' % line.rpartition('.py')[0].strip(),
 					to=user['name'])
 				_reload = True
 		
-		if _reload:
+		if _restart:
+			logging.info('Update: Restarting to apply updates.')
+			shutdown_and_restart()
+		elif _reload:
 			logging.info('Update: Update finished. Reloading.')
 			self.msg(user['name'],'Update completed. Reloading.',to=user['name'])
 			self.reload(user)
-		else:
-			logging.info('Update: No updates.')
-			self.msg(user['name'],'No updates.',to=user['name'])
 
 	def reload(self,user):
 		logging.info('Reloading modules...')
@@ -257,7 +259,7 @@ class SwanBot(irc.IRCClient):
 				logging.error('Failed loading %s!' % module['name'])
 		
 		self.msg(user['alert_channel'],'Reload completed.',to=user['name'])
-		logging.info('Done reloading modules')
+		logging.info('Done reloading modules')		
 	
 	def parse(self,text):
 		text = text.replace('?','')
@@ -612,6 +614,10 @@ def start():
 	_factory = SwanBotFactory(__channels__)
 	reactor.connectTCP(__server__, __port__, _factory)
 	reactor.run()
+
+def shutdown_and_restart():
+	reactor.stop()
+	sys.exit(1)
 
 if __name__ == '__main__':
 	start()
