@@ -227,7 +227,7 @@ class SwanBot(irc.IRCClient):
 		if _reload:
 			logging.info('Update: Update finished. Reloading.')
 			self.msg(user['name'],'Update completed. Reloading.',to=user['name'])
-			self.reload()
+			self.reload(user)
 		else:
 			logging.info('Update: No updates.')
 			self.msg(user['name'],'No updates.',to=user['name'])
