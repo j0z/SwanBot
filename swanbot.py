@@ -65,6 +65,9 @@ ch.setLevel(logging.INFO)
 ch.setFormatter(console_formatter)
 logger.addHandler(ch)
 
+#Need this for restarting
+__RESTART__ = False
+
 __botname__ = 'Holo'
 __server__ = '192.168.1.2'
 __port__ = 6667
@@ -239,6 +242,7 @@ class SwanBot(irc.IRCClient):
 		
 		if _restart:
 			logging.info('Update: Restarting to apply updates.')
+			__RESTART__ = True
 			shutdown_and_restart()
 		elif _reload:
 			logging.info('Update: Update finished. Reloading.')
@@ -417,6 +421,14 @@ class SwanBot(irc.IRCClient):
 		logging.info('Killed connection to server')
 		_check_thread.running = False
 		save()
+		
+		if __RESTART__:
+			try:
+				sys.exit(1)
+			except SystemExit, e:
+				sys.exit(e)
+			except:
+				pass
 
 	def signedOn(self):
 		for channel in self.factory.channels:
@@ -617,11 +629,7 @@ def start():
 
 def shutdown_and_restart():
 	reactor.stop()
-	
-	try:
-		sys.exit(1)
-	except SystemExit, e:
-		sys.exit(e)
+	__RESTART__ = True
 
 if __name__ == '__main__':
 	start()
