@@ -215,7 +215,7 @@ class SwanBot(irc.IRCClient):
 	owner = None
 	fallback_owner = None
 	versionName = 'SwanBot'
-	versionNum = '0.2'
+	versionNum = '0.3'
 	versionEnv = 'Wayne Brady\'s Cat'
 
 	def update(self,user):
