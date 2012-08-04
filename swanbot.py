@@ -85,7 +85,7 @@ class check_thread(threading.Thread):
 	callback = None
 	blacklist = []
 	update_timer_max = 1800
-	update_timer = 1800
+	update_timer = 5
 	
 	def run(self):
 		while self.running:
@@ -113,7 +113,7 @@ class check_thread(threading.Thread):
 			
 			if not self.update_timer:
 				#Check if owner is online
-				self.callback.update(is_registered(self.owner))
+				self.callback.update(is_registered(self.callback.owner))
 				self.update_timer = self.update_timer_max
 			else:
 				self.update_timer-=1
