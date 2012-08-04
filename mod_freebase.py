@@ -6,7 +6,7 @@ __url__ = 'https://www.googleapis.com/freebase/v1/text/en/%search%'
 
 def get_info(query):
 	_result = json.loads(urllib.urlopen(__url__.replace('%search%',query.lower())
-		.replace(' ','_').replace('\n','')).read())
+		.replace(' ','_')).read().replace('\n',''))
 	
 	try:
 		return _result['result'].encode("utf-8")
