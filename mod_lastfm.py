@@ -21,6 +21,8 @@ def parse(commands,callback,channel,user):
 	if not user.has_key('last_fm'):
 		user['last_fm'] = None
 	
+	print 'I was testing'
+	
 	if commands[0] == '.lastfm' and len(commands)==2:
 		user['last_fm'] = commands[1]
 		callback.msg(channel,get_playing(commands[1]),to=user['name'])
