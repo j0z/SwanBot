@@ -209,7 +209,7 @@ class SwanBot(irc.IRCClient):
 	versionNum = '0.2'
 	versionEnv = 'Wayne Brady\'s Cat'
 
-	def update(self):
+	def update(self,user):
 		if not __GIT__:
 			return 1
 		
@@ -225,9 +225,11 @@ class SwanBot(irc.IRCClient):
 		
 		if _reload:
 			logging.info('Update: Update finished. Reloading.')
+			self.msg(user['name'],'Update completed. Reloading.',to=user['name'])
 			self.reload()
 		else:
 			logging.info('Update: No updates.')
+			self.msg(user['name'],'No updates.',to=user['name'])
 
 	def reload(self,user):
 		logging.info('Reloading modules...')
