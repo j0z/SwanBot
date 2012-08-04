@@ -80,10 +80,12 @@ __user__ = {'name':'',
 	'speech_highlight_in_public':False,
 	'message_on_highlight':True}
 
-class check_users(threading.Thread):
+class check_thread(threading.Thread):
 	running = True
 	callback = None
 	blacklist = []
+	update_timer_max = 1800
+	update_timer = 1800
 	
 	def run(self):
 		while self.running:
@@ -108,6 +110,13 @@ class check_users(threading.Thread):
 					except:
 						logging.error('Error in %s.tick()!' % module['name'])
 						self.blacklist.append(module['name'])
+			
+			if not self.update_timer:
+				#Check if owner is online
+				self.callback.update(is_registered(self.owner))
+				self.update_timer = self.update_timer_max
+			else:
+				self.update_timer-=1
 				
 			time.sleep(1)
 
@@ -171,7 +180,7 @@ def upgrade_db():
 def setup():
 	global _check_thread
 	load()
-	_check_thread = check_users()
+	_check_thread = check_thread()
 	_check_thread.start()
 
 database = {}
@@ -222,6 +231,8 @@ class SwanBot(irc.IRCClient):
 				self.msg(user['name'],'Changes to the core have been made. Restart.',to=user['name'])
 			elif line.count('mod_'):
 				logging.info('Update: \'%s\' changed.' % line.rpartition('.py')[0].strip())
+				self.msg(user['name'],'Update: \'%s\' changed.' % line.rpartition('.py')[0].strip(),
+					to=user['name'])
 				_reload = True
 		
 		if _reload:
