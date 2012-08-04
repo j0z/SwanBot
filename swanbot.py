@@ -616,7 +616,6 @@ def start():
 	reactor.run()
 
 def shutdown_and_restart():
-	logging.info('Shutting down with exit status 1.')
 	reactor.stop()
 	sys.exit(1)
 
