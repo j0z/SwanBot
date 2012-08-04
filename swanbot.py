@@ -427,8 +427,6 @@ class SwanBot(irc.IRCClient):
 				sys.exit(1)
 			except SystemExit, e:
 				sys.exit(e)
-			except:
-				pass
 
 	def signedOn(self):
 		for channel in self.factory.channels:
