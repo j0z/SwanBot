@@ -39,6 +39,13 @@ except:
 	print 'GNTP module not found. Notifications disabled.'
 	__NOTIFICATIONS__ = False
 
+try:
+	import simplegit as git
+	__GIT__ = True
+except:
+	print 'simplegit module not found. Git disabled.'
+	__GIT__ = False
+
 #Set up proper logging
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -202,6 +209,42 @@ class SwanBot(irc.IRCClient):
 	versionNum = '0.2'
 	versionEnv = 'Wayne Brady\'s Cat'
 
+	def update(self):
+		if not __GIT__:
+			return 1
+		
+		_reload = False
+		logging.info('Update: Checking for updates')
+		
+		for line in git.pull('origin','master'):
+			if line.count('swanbot.py'):
+				logging.info('Update: Updates have been made to the core. Please restart.')
+			elif line.count('mod_'):
+				logging.info('Update: \'%s\' changed.' % line.rpartition('.py')[0].strip())
+				_reload = True
+		
+		if _reload:
+			logging.info('Update: Update finished. Reloading.')
+			self.reload()
+		else:
+			logging.info('Update: No updates.')
+
+	def reload(self,user):
+		logging.info('Reloading modules...')
+			
+		reload(core)
+		
+		for module in self.modules:
+			try:
+				reload(module['module'])
+			except:
+				self.msg(user['alert_channel'],'Failed to reload \'%s\'' % module['name'],
+					to=user['name'])
+				logging.error('Failed loading %s!' % module['name'])
+		
+		self.msg(user['alert_channel'],'Reload completed.',to=user['name'])
+		logging.info('Done reloading modules')
+	
 	def parse(self,text):
 		text = text.replace('?','')
 		text = text.split()
@@ -413,20 +456,7 @@ class SwanBot(irc.IRCClient):
 		
 		elif 'reload' in _args and (_registered['owner'] or _registered['fallback_owner']) and\
 			(channel==self.nickname or _highlighted):
-			logging.info('Reloading modules...')
-			
-			reload(core)
-			
-			for module in self.modules:
-				try:
-					reload(module['module'])
-				except:
-					self.msg(_registered['alert_channel'],'Failed to reload \'%s\'' % module['name'],
-						to=name)
-					logging.error('Failed loading %s!' % module['name'])
-			
-			self.msg(_registered['alert_channel'],'Reload completed.',to=name)
-			logging.info('Done reloading modules')
+			self.reload(_registered)
 			
 		elif ' '.join(_args)=='highlight me in public':
 			_registered['speech_highlight_in_public'] = True

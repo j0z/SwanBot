@@ -20,6 +20,8 @@ def parse(commands,callback,channel,user):
 		except ImportError:
 			callback.msg(channel,'%s: Could not load module %s' % (user['name'],commands[1]))
 			logging.error('No module named \'%s\'' % commands[1])
+	elif commands[0] == 'update' and len(commands)==1:
+		callback.update()
 	elif commands[0] == 'force-register' and len(commands)==2:
 		callback.register_user(commands[1],'')
 		callback.msg(channel,'%s: Tried to register %s' % (user['name'],commands[1]))
