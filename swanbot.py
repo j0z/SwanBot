@@ -231,6 +231,7 @@ class SwanBot(irc.IRCClient):
 				_restart = True
 				logging.info('Update: Updates have been made to the core.')
 				self.msg(user['name'],'The core has updated. Restart issued.',to=user['name'])
+				_restart = True
 			elif line.count('mod_'):
 				logging.info('Update: \'%s\' changed.' % line.rpartition('.py')[0].strip())
 				self.msg(user['name'],'Update: \'%s\' changed.' % line.rpartition('.py')[0].strip(),
@@ -239,6 +240,7 @@ class SwanBot(irc.IRCClient):
 		
 		if _restart:
 			logging.info('Update: Restarting to apply updates.')
+			reactor.stop()
 		elif _reload:
 			logging.info('Update: Update finished. Reloading.')
 			self.msg(user['name'],'Update completed. Reloading.',to=user['name'])
