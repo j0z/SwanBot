@@ -616,6 +616,7 @@ def start():
 	reactor.run()
 
 def shutdown_and_restart():
+	print 'Restarting'
 	reactor.stop()
 	sys.exit(1)
 
