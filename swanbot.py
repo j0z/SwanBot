@@ -219,6 +219,7 @@ class SwanBot(irc.IRCClient):
 		for line in git.pull('origin','master'):
 			if line.count('swanbot.py'):
 				logging.info('Update: Updates have been made to the core. Please restart.')
+				self.msg(user['name'],'Changes to the core have been made. Restart.',to=user['name'])
 			elif line.count('mod_'):
 				logging.info('Update: \'%s\' changed.' % line.rpartition('.py')[0].strip())
 				_reload = True
