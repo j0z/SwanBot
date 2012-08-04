@@ -618,7 +618,11 @@ def start():
 def shutdown_and_restart():
 	print 'Restarting'
 	reactor.stop()
-	sys.exit(1)
+	
+	try:
+		sys.exit(1)
+	except SystemExit, e:
+		sys.exit(e)
 
 if __name__ == '__main__':
 	start()
