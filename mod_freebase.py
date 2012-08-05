@@ -34,10 +34,9 @@ __ignore__ = ['for','and','nor','but','or','yet','so','after','although','as',
 	'though','because','before','if','once','since','than','that','though','till'
 	'unless','until','when','whenever','where','wherever','while','the','i']
 
-words_db = {'words':[]}
-
 def init():
 	global words_db
+	words_db = {'words':[]}
 	
 	try:
 		_file = open(os.path.join('data','words.json'),'r')
@@ -106,7 +105,13 @@ def research_topic(topic):
 	return _result
 
 def add_word(word,score=1):
-	word = word.lower().replace(',','').replace('.','').replace(';','')
+	word = word.lower()
+	for char in ['.',',',';',':','|',')','(','>','<']:
+		word = word.replace(char,'')
+	
+	word = word.replace(' ','')
+	if not len(word):
+		return None
 	
 	if word in __ignore__:
 		print 'Discarding \'%s\'' % word
