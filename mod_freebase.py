@@ -32,7 +32,7 @@ __research_url__ = 'https://www.googleapis.com/freebase/v1/search?query=%search%
 __info_url__ = 'https://www.googleapis.com/freebase/v1/text/%mid%'
 __ignore__ = ['for','and','nor','but','or','yet','so','after','although','as',
 	'though','because','before','if','once','since','than','that','though','till'
-	'unless','until','when','whenever','where','wherever','while','the']
+	'unless','until','when','whenever','where','wherever','while','the','i']
 
 words_db = []
 
@@ -106,11 +106,11 @@ def research_topic(topic):
 	return _result
 
 def add_word(word,score=1):
+	word = word.lower().replace(',','').replace('.','').replace(';','')
+	
 	if word in __ignore__:
 		print 'Discarding \'%s\'' % word
 		return None
-	
-	word = word.lower().replace(',','').replace('.','').replace(';','')
 	
 	_words = [{entry['word']:entry} for entry in words_db]
 	
