@@ -411,7 +411,7 @@ class SwanBot(irc.IRCClient):
 		for module in self.modules:
 			try:
 				module['module'].init()
-			except:
+			except Exception, e:
 				pass
 		
 		if not self.owner:

@@ -34,7 +34,7 @@ __ignore__ = ['for','and','nor','but','or','yet','so','after','although','as',
 	'though','because','before','if','once','since','than','that','though','till'
 	'unless','until','when','whenever','where','wherever','while','the','i']
 
-words_db = []
+words_db = {'words':[]}
 
 def init():
 	global words_db
