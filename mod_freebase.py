@@ -45,7 +45,7 @@ def init():
 		for entry in words_db['words']:
 			for key in entry:
 				if isinstance(entry[key],unicode):
-					entry[key] = str(entry[key])
+					entry[key] = entry[key].encode("utf-8")
 		
 		_file.close()
 		words_db = words_db['words']
@@ -168,17 +168,32 @@ def parse(commands,callback,channel,user):
 		
 		return 1
 	elif commands[0] == '.topic_ext':
-		_topic = ' '.join([topic['word'] for topic in get_topics()[:2]])
-		callback.msg(channel,'Topic: %s' % _topic,to=user['name'])
+		_combined_topics = None
+		_res_combined = None
+		_res_topic = None
+		_topics = get_topics()
 		
-		if _topic == 'No topic could be found.':
+		if _topics == 'No topic could be found.':
 			print 'No topic!'
 			return 1
 		
-		_res = research_topic(_topic)
+		#Sometimes combining the first two topics can give us a better result
+		if len(_topics)>=2:
+			_combined_topic = ' '.join([topic['word'] for topic in _topics[:2]])
+			_res_combined = research_topic(_combined_topic)
+			
+			if _res_combined:
+				callback.msg(channel,'Combined topic: %s (%s)' % (_combined_topic,_res_combined['score']),
+					to=user['name'])
 		
-		if _res:
-			callback.msg(channel,'Result: %s' % get_info(_res['mid']),to=user['name'])
+		_res = research_topic(_topics[0]['word'])
+		callback.msg(channel,'Single topic: %s (%s)' % (_topics[0]['word'],_res['score']),
+			to=user['name'])
+		
+		if _res and _res_combined and _res['score']>_res_combined['score']:
+			callback.msg(channel,'Single: %s' % get_info(_res['mid']),to=user['name'])
+		elif _res and _res_combined and _res['score']<_res_combined['score']:
+			callback.msg(channel,'Combined: %s' % get_info(_res_combined['mid']),to=user['name'])
 		else:
 			print 'Not a valid topic. Resetting.'
 			add_word(_topic,score=-50)
