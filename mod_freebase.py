@@ -152,8 +152,6 @@ def parse(commands,callback,channel,user):
 	if commands[0] == '.search' and len(commands)>=2:
 		callback.msg(channel,'Result: %s' % (perform_search(' '.join(commands[1:]))),to=user['name'])
 		
-		#Since we are explicitly telling SwanBot to look up this term,
-		#we should weight it a bit heavier.
 		for word in commands[1:]:
 			add_word(word,score=10)
 		
@@ -178,6 +176,9 @@ def parse(commands,callback,channel,user):
 			print 'Not a valid topic. Resetting.'
 			add_word(_topic,score=-50)
 		
+		return 1
+	elif commands[0] == '.topic_ban' and len(commands)==2:
+		add_word(commands[1],score=-50)
 		return 1
 	
 	for word in commands[0:]:

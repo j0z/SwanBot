@@ -56,6 +56,9 @@ def parse(commands,callback,channel,user):
 					to=user['name'])
 	
 	for _user in callback.get_users():
+		if user['name'] == _user['name']:
+			continue
+		
 		if not _user.has_key('notify_on'):
 			_user['notify_on'] = []
 			_user['growl_host'] = None

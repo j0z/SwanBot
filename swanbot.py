@@ -323,8 +323,8 @@ class SwanBot(irc.IRCClient):
 		
 		if _match['command']:
 			return _match
-		else:
-			return None
+		
+		return None
 	
 	def notify(self,title,text,image=None,hostname='localhost'):
 		if not __NOTIFICATIONS__:
