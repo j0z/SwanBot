@@ -178,7 +178,7 @@ def parse(commands,callback,channel,user):
 			return 1
 		
 		#Sometimes combining the first two topics can give us a better result
-		if len(_topics)>=2:
+		if len(_topics)>=2 and _topics[1]['word']:
 			_combined_topic = ' '.join([topic['word'] for topic in _topics[:2]])
 			_res_combined = research_topic(_combined_topic)
 			
