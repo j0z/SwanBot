@@ -173,6 +173,8 @@ def parse(commands,callback,channel,user):
 		_res_topic = None
 		_topics = get_topics()
 		
+		print _topics
+		
 		if _topics == 'No topic could be found.':
 			print 'No topic!'
 			return 1
