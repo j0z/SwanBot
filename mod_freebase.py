@@ -173,8 +173,6 @@ def parse(commands,callback,channel,user):
 		_res_topic = None
 		_topics = get_topics()
 		
-		print _topics
-		
 		if _topics == 'No topic could be found.':
 			print 'No topic!'
 			return 1
@@ -198,8 +196,8 @@ def parse(commands,callback,channel,user):
 		elif _res and _res_combined and _res['score']<_res_combined['score']:
 			callback.msg(channel,'Combined: %s' % get_info(_res_combined['mid']),to=user['name'])
 		else:
-			print 'Not a valid topic. Resetting.'
-			add_word(_topic,score=-50)
+			callback.msg(channel,'Not a valid topic: %s' % _topics[0]['word'],to=user['name'])
+			add_word(_topics[0]['word'],score=-50)
 		
 		return 1
 	elif commands[0] == '.topic_ban' and len(commands)==2:
