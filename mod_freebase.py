@@ -189,8 +189,9 @@ def parse(commands,callback,channel,user):
 					to=user['name'])
 		
 		_res = research_topic(_topics[0]['word'])
-		callback.msg(channel,'Single topic: %s (%s)' % (_topics[0]['word'],_res['score']),
-			to=user['name'])
+		if _res:
+			callback.msg(channel,'Single topic: %s (%s)' % (_topics[0]['word'],_res['score']),
+				to=user['name'])
 		
 		if _res and _res_combined and _res['score']>_res_combined['score']:
 			callback.msg(channel,'Single: %s' % get_info(_res['mid']),to=user['name'])
