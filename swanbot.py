@@ -602,9 +602,10 @@ class SwanBot(irc.IRCClient):
 		for module in self.modules:
 			try:
 				module['module'].on_nick_change(old_nick,new_nick,self)
+			except AttributeError:
+				pass
 			except:
 				logging.error('ERROR in %s.on_nick_change()' % module['name'])
-		#logging.info("%s is now known as %s" % (old_nick, new_nick))
 
 	def alterCollidedNick(self, nickname):
 		return nickname + '_'
