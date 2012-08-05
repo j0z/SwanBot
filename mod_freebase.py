@@ -30,10 +30,9 @@ __parse_always__ = True
 __search_url__ = 'https://www.googleapis.com/freebase/v1/text/en/%search%'
 __research_url__ = 'https://www.googleapis.com/freebase/v1/search?query=%search%'
 __info_url__ = 'https://www.googleapis.com/freebase/v1/text/%mid%'
-__ignore__ = ['for','and','nor','but','or','yet','so','after','although','as',
-	'though','because','before','if','once','since','than','that','though','till'
-	'unless','until','when','whenever','where','wherever','while','the','i','it',
-	'this','to']
+__ignore__ = ['after','although','though','because','before','once','since','than',
+	'that','though','till','unless','until','when','whenever','where','wherever',
+	'while','the','this']
 
 def init():
 	global words_db
@@ -95,7 +94,6 @@ def research_topic(topic):
 		_result = json.loads(urllib.urlopen(__research_url__.replace('%search%',topic.lower())
 			.replace(' ','_')).read())
 	except:
-		print __research_url__.replace('%search%',topic.lower())
 		return None
 	
 	_result = _result['result'][0]
@@ -107,11 +105,13 @@ def research_topic(topic):
 
 def add_word(word,score=1):
 	word = word.lower()
-	for char in ['.',',',';',':','|',')','(','>','<']:
+	for char in ['.',',',';',':','\'','|',')','(','>','<']:
 		word = word.replace(char,'')
 	
 	word = word.replace(' ','')
-	if not len(word):
+	
+	_len = len(word)
+	if not _len or _len<=3:
 		return None
 	
 	if word in __ignore__:
@@ -128,17 +128,21 @@ def add_word(word,score=1):
 	words_db.append({'word':word,'score':score})
 	return words_db[len(words_db)-1]
 
-def get_topic():
+def get_topics():
+	_third = {'word':None,'score':0}
+	_second = {'word':None,'score':0}
 	_highest = {'word':None,'score':0}
 	
 	for entry in words_db:
 		if entry['score']>_highest['score']:
-			_highest['word'] = entry['word']
-			_highest['score'] = entry['score']
+			_highest = entry.copy()
+		elif entry['score']>_second['score']:
+			_second = entry.copy()
+		elif entry['score']>_third['score']:
+			_third = entry.copy()
 	
 	if _highest['word']:
-		print _highest['score']
-		return _highest['word']
+		return [_highest,_second,_third]
 	
 	return 'No topic could be found.'
 
@@ -157,11 +161,14 @@ def parse(commands,callback,channel,user):
 		
 		return 1
 	elif commands[0] == '.topic':
-		_topic = get_topic()
-		callback.msg(channel,'Topic: %s' % _topic,to=user['name'])
+		_topics = get_topics()
+		
+		for _topic in _topics[:2]:
+			callback.msg(channel,'Topic: %s (%s)' % (_topic['word'],_topic['score']),to=user['name'])
+		
 		return 1
 	elif commands[0] == '.topic_ext':
-		_topic = get_topic()
+		_topic = ' '.join([topic['word'] for topic in get_topics()[:2]])
 		callback.msg(channel,'Topic: %s' % _topic,to=user['name'])
 		
 		if _topic == 'No topic could be found.':
@@ -189,8 +196,8 @@ def parse(commands,callback,channel,user):
 		
 		_ret = add_word(word,score=_score)
 		
-		if _ret:
-			print _ret['word'],_ret['score']
+		#if _ret:
+		#	print _ret['word'],_ret['score']
 
 def on_user_join(user,channel,callback):	
 	pass
