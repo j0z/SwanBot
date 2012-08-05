@@ -408,15 +408,29 @@ class SwanBot(irc.IRCClient):
 			if self.owner and self.fallback_owner:
 				break
 		
+		for module in self.modules:
+			try:
+				module['module'].init()
+			except:
+				pass
+		
 		if not self.owner:
-			logging.debug('Warning: No owner set! Message \'claim\' to %s.' % self.nickname)		
+			logging.debug('Warning: No owner set! Message \'claim\' to %s.' % self.nickname)	
 
 	def connectionLost(self, reason):
 		global _check_thread
 		
+		logging.info('Killed connection to server')		
 		irc.IRCClient.connectionLost(self, reason)
-		logging.info('Killed connection to server')
 		_check_thread.running = False
+		
+		logging.info('Shutting down modules')
+		for module in self.modules:
+			try:
+				module['module'].shutdown()
+			except:
+				pass
+		
 		save()
 
 	def signedOn(self):

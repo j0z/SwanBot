@@ -20,9 +20,11 @@
 #I welcome any info/thoughts you might have if you are more experienced in
 #anything I've mentioned.
 
+import logging
 import urllib
 import json
 import re
+import os
 
 __parse_always__ = True
 __search_url__ = 'https://www.googleapis.com/freebase/v1/text/en/%search%'
@@ -30,9 +32,38 @@ __research_url__ = 'https://www.googleapis.com/freebase/v1/search?query=%search%
 __info_url__ = 'https://www.googleapis.com/freebase/v1/text/%mid%'
 __ignore__ = ['for','and','nor','but','or','yet','so','after','although','as',
 	'though','because','before','if','once','since','than','that','though','till'
-	'unless','until','when','whenever','where','wherever','while']
+	'unless','until','when','whenever','where','wherever','while','the']
 
 words_db = []
+
+def init():
+	global words_db
+	
+	try:
+		_file = open(os.path.join('data','words.json'),'r')
+		words_db = json.loads(_file.readline())
+		
+		for entry in words_db['words']:
+			for key in entry:
+				if isinstance(entry[key],unicode):
+					entry[key] = str(entry[key])
+		
+		_file.close()
+		words_db = words_db['words']
+		logging.info('Success!')
+	except:
+		logging.error('Could not load words database from disk!')
+		_file = open(os.path.join('data','words.json'),'w')
+		_file.write(json.dumps(words_db))
+		_file.close()
+		init()
+
+def shutdown():
+	logging.info('Offloading words database to disk...')
+	_file = open(os.path.join('data','words.json'),'w')
+	_file.write(json.dumps({'words':words_db}))
+	_file.close()
+	logging.info('Success!')
 
 def get_info(mid):
 	try:
@@ -144,7 +175,7 @@ def parse(commands,callback,channel,user):
 		return 1
 	
 	for word in commands[0:]:
-		if word.istitle() and not ' '.join(commands[0:]).count('. %s' % word):
+		if word.istitle() and not ' '.join(commands[0:]).count('. %s' % word) and commands.index(word):
 			_score = 5
 		else:
 			_score = 1
