@@ -32,7 +32,8 @@ __research_url__ = 'https://www.googleapis.com/freebase/v1/search?query=%search%
 __info_url__ = 'https://www.googleapis.com/freebase/v1/text/%mid%'
 __ignore__ = ['for','and','nor','but','or','yet','so','after','although','as',
 	'though','because','before','if','once','since','than','that','though','till'
-	'unless','until','when','whenever','where','wherever','while','the','i']
+	'unless','until','when','whenever','where','wherever','while','the','i','it',
+	'this','to']
 
 def init():
 	global words_db
