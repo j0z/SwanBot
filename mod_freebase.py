@@ -104,7 +104,8 @@ def examine_topic(topic):
 	except:
 		return None
 	
-	_result = _result['result'][0]
+	if _result:
+		_result = _result['result'][0]
 	
 	if _result['score']<50:
 		return None
