@@ -242,7 +242,7 @@ def parse(commands,callback,channel,user):
 		_combined_topics = None
 		_research = None
 		_res_combined = None
-		_res_topic = None
+		#_res_topic = None
 		_topics = get_topics()
 		
 		if _topics == 'No topic could be found.':
@@ -272,8 +272,14 @@ def parse(commands,callback,channel,user):
 			_research = research_topic(_res_combined['mid'],_res_combined['notable']['id'])
 			_research[1].extend(research_related_topics(_res_combined['notable']['id']))
 		else:
-			callback.msg(channel,'Not a valid topic: %s' % _topics[0]['word'],to=user['name'])
-			add_word(_topics[0]['word'],score=-50)
+			if _res:
+				callback.msg(channel,'Not a valid topic: %s' % _topics[0]['word'],to=user['name'])
+				add_word(_topics[0]['word'],score=-50)
+			elif _res_combined:
+				callback.msg(channel,'Not a valid topic: %s' % _combined_topic,to=user['name'])
+				
+				for word in _combined_topic:
+					add_word(word,score=-50)
 		
 		if _research and len(_research)==2 and _research[1]:
 			callback.msg(channel,'I have found %s related topics: %s' %
