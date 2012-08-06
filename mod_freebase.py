@@ -156,28 +156,26 @@ def find_related_topics(topic,limit=25):
 	_topic_count = 0
 	_relevant_objects = []
 	print 'Looking for',topic
-	
-	for topic in research_db['topics']:
-		for object in research_db['topics'][topic]:
-			if object['researched']:
-				print 'Already researched',object['text']
-				continue
-			
-			print 'Researching',object['text'],object['id']
-			_research = research_topic(object['id'],topic)
-			object['researched'] = True
-			
-			if _research and len(_research)==2 and _research[1]:					
-				for _object in _research[1]:
-					if _object in _relevant_objects:
-						continue
-					
-					_relevant_objects.append(_object)
-			
-			if _topic_count>=limit:
-				return _relevant_objects
-			else:
-				_topic_count+=1
+
+	for object in research_db['topics'][topic]:
+		if object['researched']:
+			continue
+		
+		print 'Researching',object['text'],object['id']
+		_research = research_topic(object['id'],topic)
+		object['researched'] = True
+		
+		if _research and len(_research)==2 and _research[1]:					
+			for _object in _research[1]:
+				if _object in _relevant_objects:
+					continue
+				
+				_relevant_objects.append(_object)
+		
+		if _topic_count>=limit:
+			return _relevant_objects
+		else:
+			_topic_count+=1
 	
 	return _relevant_objects
 
@@ -276,6 +274,15 @@ def parse(commands,callback,channel,user):
 			callback.msg(channel,'Combined: %s' % get_info(_res_combined['mid']),to=user['name'])
 			_research = research_topic(_res_combined['mid'],_res_combined['notable']['id'])
 			_research[1].extend(find_related_topics(_res_combined['notable']['id']))
+		elif _res: 
+			callback.msg(channel,'Single: %s' % get_info(_res['mid']),to=user['name'])
+			_research = research_topic(_res['mid'],_res['notable']['id'])
+			_research[1].extend(find_related_topics(_res['notable']['id']))
+		elif _res_combined:
+			callback.msg(channel,'Combined: %s' % get_info(_res_combined['mid']),to=user['name'])
+			_research = research_topic(_res_combined['mid'],_res_combined['notable']['id'])
+			_research[1].extend(find_related_topics(_res_combined['notable']['id']))
+		
 		else:
 			if _res:
 				callback.msg(channel,'Not a valid topic: %s' % _topics[0]['word'],to=user['name'])
