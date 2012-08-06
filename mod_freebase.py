@@ -146,7 +146,13 @@ def research_topic(mid,topic):
 	
 	return _info,research_db['topics'][topic]
 
-def research_related_topics(topic,limit=25):
+def get_related_topics(topic):
+	if not topic in research_db['topics'].keys():
+		return None
+	
+	return research_db['topics'][topic]
+
+def find_related_topics(topic,limit=25):
 	_topic_count = 0
 	_relevant_objects = []
 	print 'Looking for',topic
@@ -242,11 +248,10 @@ def parse(commands,callback,channel,user):
 		_combined_topics = None
 		_research = None
 		_res_combined = None
-		#_res_topic = None
 		_topics = get_topics()
 		
 		if _topics == 'No topic could be found.':
-			print 'No topic!'
+			callback.msg(channel,'No topic can be found!',to=user['name'])
 			return 1
 		
 		#Sometimes combining the first two topics can give us a better result
@@ -266,11 +271,11 @@ def parse(commands,callback,channel,user):
 		if _res and _res_combined and _res['score']>_res_combined['score']:
 			callback.msg(channel,'Single: %s' % get_info(_res['mid']),to=user['name'])
 			_research = research_topic(_res['mid'],_res['notable']['id'])
-			_research[1].extend(research_related_topics(_res['notable']['id']))
+			_research[1].extend(find_related_topics(_res['notable']['id']))
 		elif _res and _res_combined and _res['score']<_res_combined['score']:
 			callback.msg(channel,'Combined: %s' % get_info(_res_combined['mid']),to=user['name'])
 			_research = research_topic(_res_combined['mid'],_res_combined['notable']['id'])
-			_research[1].extend(research_related_topics(_res_combined['notable']['id']))
+			_research[1].extend(find_related_topics(_res_combined['notable']['id']))
 		else:
 			if _res:
 				callback.msg(channel,'Not a valid topic: %s' % _topics[0]['word'],to=user['name'])
@@ -287,6 +292,24 @@ def parse(commands,callback,channel,user):
 				,to=user['name'])
 		
 		return 1
+	elif commands[0] == '.topic_related':
+		_topics = get_topics()
+		
+		if _topics == 'No topic could be found.':
+			callback.msg(channel,'No topic can be found!',to=user['name'])
+			return 1
+		
+		#TODO: Cache this somehow
+		_res = examine_topic(_topics[0]['word'])
+		_related = get_related_topics(_res['notable']['id'])
+		
+		if _related:
+			callback.msg(channel,'Related topics: %s' % len(_related),
+				to=user['name'])
+		else:
+			callback.msg(channel,'No topic can be found!',to=user['name'])
+			return 1
+	
 	elif commands[0] == '.topic_ban' and len(commands)==2:
 		add_word(commands[1],score=-50)
 		return 1
