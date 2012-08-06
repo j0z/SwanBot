@@ -26,17 +26,24 @@ import json
 import re
 import os
 
+try:
+	__api_key__ = '&key='+open(os.path.join('data','apikey.txt'),'r').readlines()[0]
+except:
+	__api_key__ = ''
+	logging.info('No FreeBase API key set. Place key in data%sapikey.txt' % os.sep)
+
 __parse_always__ = True
-__search_url__ = 'https://www.googleapis.com/freebase/v1/text/en/%search%'
-__research_url__ = 'https://www.googleapis.com/freebase/v1/search?query=%search%'
-__info_url__ = 'https://www.googleapis.com/freebase/v1/text/%mid%'
+__search_url__ = 'https://www.googleapis.com/freebase/v1/text/en/%search%'+__api_key__
+__topic_url__ = 'https://www.googleapis.com/freebase/v1/topic%mid%'
+__research_url__ = 'https://www.googleapis.com/freebase/v1/search?query=%search%'+__api_key__
+__info_url__ = 'https://www.googleapis.com/freebase/v1/text%mid%?maxlength=300'+__api_key__
 __ignore__ = ['after','although','though','because','before','once','since','than',
 	'that','though','till','unless','until','when','whenever','where','wherever',
 	'while','the','this']
 
 def init():
-	global words_db
-	words_db = {'words':[]}
+	global words_db,research_db
+	words_db = {'words':[],'research':{'topics':{}}}
 	
 	try:
 		_file = open(os.path.join('data','words.json'),'r')
@@ -48,6 +55,7 @@ def init():
 					entry[key] = entry[key].encode("utf-8")
 		
 		_file.close()
+		research_db = words_db['research']
 		words_db = words_db['words']
 		logging.info('Success!')
 	except:
@@ -60,7 +68,7 @@ def init():
 def shutdown():
 	logging.info('Offloading words database to disk...')
 	_file = open(os.path.join('data','words.json'),'w')
-	_file.write(json.dumps({'words':words_db}))
+	_file.write(json.dumps({'words':words_db,'research':research_db}))
 	_file.close()
 	logging.info('Success!')
 
@@ -89,7 +97,7 @@ def perform_search(query):
 	except:
 		return 'Search returned nothing.'
 
-def research_topic(topic):
+def examine_topic(topic):
 	try:
 		_result = json.loads(urllib.urlopen(__research_url__.replace('%search%',topic.lower())
 			.replace(' ','_')).read())
@@ -103,6 +111,58 @@ def research_topic(topic):
 	
 	return _result
 
+def research_topic(mid,topic):
+	#try:
+	print urllib.urlopen(__topic_url__.replace('%mid%',mid)
+		.replace(' ','_')).read()
+	_result = json.loads(urllib.urlopen(__topic_url__.replace('%mid%',mid)
+		.replace(' ','_')).read())['property']
+	#except:
+	#	print 'le wut!!'
+	#	return None
+	
+	_info = {}
+	_relevant_objects = []
+	
+	for type in _result:
+		_info[type] = {}
+		if _result[type]['valuetype'] == 'object':
+			_info[type][_result[type]['valuetype']] = []
+			for object in _result[type]['values']:
+				_tmp = {'text':object['text'],'id':object['id']}
+				_info[type][_result[type]['valuetype']].append(_tmp)
+				
+				if type.count(topic):
+					_relevant_objects.append(_tmp)
+	
+	if not topic in research_db['topics'].keys():
+		research_db['topics'][topic] = _relevant_objects
+	else:
+		for object in _relevant_objects:
+			if not object in research_db['topics'][topic]:
+				research_db['topics'][topic].append(object)
+	
+	return _info,_relevant_objects
+
+def research_related_topics(topic,limit=20):
+	_topic_count = 0
+	print 'Looking for',topic
+	
+	for topic in research_db['topics']:
+		for object in research_db['topics'][topic]:
+			print 'Researching',object['text'],object['id'],
+			_research = research_topic(object['id'],topic)
+			
+			if _research and len(_research)==2 and _research[1]:
+				print len(_research[2])
+			else:
+				print
+			
+			if _topic_count>=limit:
+				return 1
+			else:
+				_topic_count+=1
+
 def add_word(word,score=1):
 	word = word.lower()
 	for char in ['.',',',';',':','\'','|',')','(','>','<']:
@@ -115,7 +175,6 @@ def add_word(word,score=1):
 		return None
 	
 	if word in __ignore__:
-		print 'Discarding \'%s\'' % word
 		return None
 	
 	_words = [{entry['word']:entry} for entry in words_db]
@@ -169,6 +228,7 @@ def parse(commands,callback,channel,user):
 		return 1
 	elif commands[0] == '.topic_ext':
 		_combined_topics = None
+		_research = None
 		_res_combined = None
 		_res_topic = None
 		_topics = get_topics()
@@ -180,24 +240,32 @@ def parse(commands,callback,channel,user):
 		#Sometimes combining the first two topics can give us a better result
 		if len(_topics)>=2 and _topics[1]['word']:
 			_combined_topic = ' '.join([topic['word'] for topic in _topics[:2]])
-			_res_combined = research_topic(_combined_topic)
+			_res_combined = examine_topic(_combined_topic)
 			
 			if _res_combined:
-				callback.msg(channel,'Combined topic: %s (%s)' % (_combined_topic,_res_combined['score']),
-					to=user['name'])
+				callback.msg(channel,'Combined topic: %s (%s) %s' % (_combined_topic,
+					_res_combined['score'],_res_combined['notable']['id']),to=user['name'])
 		
-		_res = research_topic(_topics[0]['word'])
+		_res = examine_topic(_topics[0]['word'])
 		if _res:
-			callback.msg(channel,'Single topic: %s (%s)' % (_topics[0]['word'],_res['score']),
-				to=user['name'])
+			callback.msg(channel,'Single topic: %s (%s) %s' % (_topics[0]['word'],_res['score'],
+				_res['notable']['id']),to=user['name'])
 		
 		if _res and _res_combined and _res['score']>_res_combined['score']:
 			callback.msg(channel,'Single: %s' % get_info(_res['mid']),to=user['name'])
+			_research = research_topic(_res['mid'],_res['notable']['id'])
+			research_related_topics(_res['notable']['id'])
 		elif _res and _res_combined and _res['score']<_res_combined['score']:
 			callback.msg(channel,'Combined: %s' % get_info(_res_combined['mid']),to=user['name'])
+			_research = research_topic(_res_combined['mid'],_res_combined['notable']['id'])
+			research_related_topics(_res_combined['notable']['id'])
 		else:
 			callback.msg(channel,'Not a valid topic: %s' % _topics[0]['word'],to=user['name'])
 			add_word(_topics[0]['word'],score=-50)
+		
+		if _research and len(_research)==2 and _research[1]:
+			callback.msg(channel,'I have found %s related topics: %s' %
+				(len(_research[1]),', '.join([entry['text'] for entry in _research[1]])),to=user['name'])
 		
 		return 1
 	elif commands[0] == '.topic_ban' and len(commands)==2:
