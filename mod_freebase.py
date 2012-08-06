@@ -34,7 +34,7 @@ except:
 
 __parse_always__ = True
 __search_url__ = 'https://www.googleapis.com/freebase/v1/text/en/%search%'+__api_key__
-__topic_url__ = 'https://www.googleapis.com/freebase/v1/topic%mid%'
+__topic_url__ = 'https://www.googleapis.com/freebase/v1/topic%mid%?'+__api_key__
 __research_url__ = 'https://www.googleapis.com/freebase/v1/search?query=%search%'+__api_key__
 __info_url__ = 'https://www.googleapis.com/freebase/v1/text%mid%?maxlength=300'+__api_key__
 __ignore__ = ['after','although','though','because','before','once','since','than',
@@ -112,14 +112,11 @@ def examine_topic(topic):
 	return _result
 
 def research_topic(mid,topic):
-	#try:
-	print urllib.urlopen(__topic_url__.replace('%mid%',mid)
-		.replace(' ','_')).read()
-	_result = json.loads(urllib.urlopen(__topic_url__.replace('%mid%',mid)
-		.replace(' ','_')).read())['property']
-	#except:
-	#	print 'le wut!!'
-	#	return None
+	try:
+		_result = json.loads(urllib.urlopen(__topic_url__.replace('%mid%',mid)
+			.replace(' ','_')).read())['property']
+	except:
+		return None
 	
 	_info = {}
 	_relevant_objects = []
@@ -129,7 +126,9 @@ def research_topic(mid,topic):
 		if _result[type]['valuetype'] == 'object':
 			_info[type][_result[type]['valuetype']] = []
 			for object in _result[type]['values']:
-				_tmp = {'text':object['text'],'id':object['id']}
+				_tmp = {'text':object['text'].encode("utf-8"),
+					'id':object['id'].encode("utf-8"),
+					'researched':False}
 				_info[type][_result[type]['valuetype']].append(_tmp)
 				
 				if type.count(topic):
@@ -139,29 +138,39 @@ def research_topic(mid,topic):
 		research_db['topics'][topic] = _relevant_objects
 	else:
 		for object in _relevant_objects:
-			if not object in research_db['topics'][topic]:
+			if not object['text'] in [entry['text'] for entry in research_db['topics'][topic]]:
 				research_db['topics'][topic].append(object)
 	
-	return _info,_relevant_objects
+	return _info,research_db['topics'][topic]
 
-def research_related_topics(topic,limit=20):
+def research_related_topics(topic,limit=25):
 	_topic_count = 0
+	_relevant_objects = []
 	print 'Looking for',topic
 	
 	for topic in research_db['topics']:
 		for object in research_db['topics'][topic]:
-			print 'Researching',object['text'],object['id'],
-			_research = research_topic(object['id'],topic)
+			if object['researched']:
+				print 'Already researched',object['text']
+				continue
 			
-			if _research and len(_research)==2 and _research[1]:
-				print len(_research[2])
-			else:
-				print
+			print 'Researching',object['text'],object['id']
+			_research = research_topic(object['id'],topic)
+			object['researched'] = True
+			
+			if _research and len(_research)==2 and _research[1]:					
+				for _object in _research[1]:
+					if _object in _relevant_objects:
+						continue
+					
+					_relevant_objects.append(_object)
 			
 			if _topic_count>=limit:
-				return 1
+				return _relevant_objects
 			else:
 				_topic_count+=1
+	
+	return _relevant_objects
 
 def add_word(word,score=1):
 	word = word.lower()
@@ -254,18 +263,19 @@ def parse(commands,callback,channel,user):
 		if _res and _res_combined and _res['score']>_res_combined['score']:
 			callback.msg(channel,'Single: %s' % get_info(_res['mid']),to=user['name'])
 			_research = research_topic(_res['mid'],_res['notable']['id'])
-			research_related_topics(_res['notable']['id'])
+			_research[1].extend(research_related_topics(_res['notable']['id']))
 		elif _res and _res_combined and _res['score']<_res_combined['score']:
 			callback.msg(channel,'Combined: %s' % get_info(_res_combined['mid']),to=user['name'])
 			_research = research_topic(_res_combined['mid'],_res_combined['notable']['id'])
-			research_related_topics(_res_combined['notable']['id'])
+			_research[1].extend(research_related_topics(_res_combined['notable']['id']))
 		else:
 			callback.msg(channel,'Not a valid topic: %s' % _topics[0]['word'],to=user['name'])
 			add_word(_topics[0]['word'],score=-50)
 		
 		if _research and len(_research)==2 and _research[1]:
 			callback.msg(channel,'I have found %s related topics: %s' %
-				(len(_research[1]),', '.join([entry['text'] for entry in _research[1]])),to=user['name'])
+				(len(_research[1]),', '.join([entry['text'] for entry in _research[1]])[:300])
+				,to=user['name'])
 		
 		return 1
 	elif commands[0] == '.topic_ban' and len(commands)==2:
