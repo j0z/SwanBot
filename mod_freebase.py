@@ -228,6 +228,11 @@ def user_tick(user,callback):
 	pass
 
 def parse(commands,callback,channel,user):
+	#Age existing entries
+	for word in words_db:
+		if word['score']:
+			word['score']-=1
+	
 	if commands[0] == '.search' and len(commands)>=2:
 		callback.msg(channel,'Result: %s' % (perform_search(' '.join(commands[1:]))),to=user['name'])
 		
