@@ -438,7 +438,7 @@ class SwanBot(irc.IRCClient):
 		for module in self.modules:
 			try:
 				module['module'].shutdown()
-			except:
+			except Exception, e:
 				pass
 		
 		save()
@@ -509,7 +509,7 @@ class SwanBot(irc.IRCClient):
 				to=name)	
 		
 		elif ' '.join(_args)=='kill connection' and (channel==self.nickname or _highlighted):
-			if name == self.owner:
+			if name == self.owner or name == self.fallback_owner:
 				logging.info('Shutdown called by \'%s\'' % name)
 				reactor.stop()
 		
