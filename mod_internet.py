@@ -2,6 +2,7 @@ import BeautifulSoup
 import urllib
 import re
 
+__parse_always__ = True
 __url_re__ = '(?:http://|www.)[^"]+'
 
 def get_title(url):
