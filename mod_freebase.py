@@ -442,7 +442,7 @@ def parse(commands,callback,channel,user):
 				if not entry['valuetype'] == 'object':
 					continue
 					
-				_nodes.append('%s (%s)' % (entry['text'],node_db.index(entry)))
+				_nodes.append('%s (#%s)' % (entry['text'],node_db.index(entry)))
 			
 			callback.msg(channel,'Nodes matching \'%s\': %s' % (_search,', '.join(_nodes)))
 				
