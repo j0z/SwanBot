@@ -28,10 +28,10 @@ def parse(commands,callback,channel,user):
 			if len(commands)>3:
 				_what = ' '.join(commands[3:])
 				add_alarm(user,commands[2],what=_what)
-				callback.msg(channel,'%s: Alarm set for %s (%s)' % (user['name'],commands[2],_what))
+				callback.msg(channel,'Alarm set for %s (%s)' % (commands[2],_what),to=user['name'])
 			else:
 				add_alarm(user,commands[2])
-				callback.msg(channel,'%s: Alarm set for %s' % (user['name'],commands[2]))
+				callback.msg(channel,'Alarm set for %s' % (commands[2]),to=user['name'])
 
 def on_user_join(user,channel,callback):
 	pass

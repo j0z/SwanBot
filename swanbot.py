@@ -354,8 +354,10 @@ class SwanBot(irc.IRCClient):
 		if len(message)/412:
 			irc.IRCClient.msg(self,channel,str(message[:412]))
 			self.msg(channel,message[412:],to=to)
+			return 1
 		else:
 			irc.IRCClient.msg(self,channel,str(message))
+			return 1
 		
 		irc.IRCClient.msg(self,channel,str(message))
 	
@@ -513,7 +515,7 @@ class SwanBot(irc.IRCClient):
 				logging.info('Shutdown called by \'%s\'' % name)
 				reactor.stop()
 		
-		elif _args[0] == 'set':
+		elif _args and _args[0] == 'set':
 			if len(_args)==3 and _args[1] == 'message_on_highlight':
 				if _args[2] == 'on':
 					_registered['message_on_highlight'] = True
