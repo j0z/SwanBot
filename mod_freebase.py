@@ -169,7 +169,7 @@ def examine_topic(topic):
 	
 	return _result
 
-def research_topic(mid,topic,keyword):
+def research_topic(mid,topic):
 	try:
 		_result = json.loads(urllib.urlopen(__topic_url__.replace('%mid%',mid)
 			.replace(' ','_')).read())['property']
@@ -188,8 +188,8 @@ def research_topic(mid,topic,keyword):
 				
 				_node_ref = add_node(_tmp)
 				
-				if type.count(topic):
-					_relevant_objects.append(_node_ref)
+				#if type.count(topic):
+				_relevant_objects.append(_node_ref)
 		elif _result[type]['valuetype'] == 'uri':
 			for object in _result[type]['values']:
 				_tmp = {'text':object['text'].encode('utf-8'),
@@ -241,34 +241,53 @@ def get_related_links(topic):
 	
 	return _ret
 
+def research_node(node,topic=None):
+	_relevant_objects = []
+	
+	print 'Researching',node['text'],node['id']
+	
+	for _topic in research_db['topics'].keys():
+		if topic and not _topic == topic:
+			continue
+		
+		_research = research_topic(node['id'],_topic)
+		node['researched'] = True
+		
+		if _research:
+			for _object in _research:
+				if _object in _relevant_objects or _object in research_db['topics'][_topic]:
+					continue
+				
+				_relevant_objects.append(_object)
+	
+	return _relevant_objects
+
 def find_related_topics(data,limit=25):
 	_topic_count = 0
 	_relevant_objects = []
-	topic = data['notable']['id']
-	keyword = data['name']
-	print 'Looking for',topic,keyword
-
-	for node in research_db['topics'][topic]:
-		_object = node_db[node]
-		if _object['researched'] or not _object['valuetype']=='object':
+	
+	if data.has_key('notable'):
+		_topic = data['notable']['id']
+		keyword = data['name']
+	else:
+		logging.error('Invalid data sent to find_related_topics()')
+		return 1
+	
+	print 'Looking for',_topic,keyword
+	
+	for node in research_db['topics'][_topic]:
+		_node = node_db[node]
+		
+		if _node['researched'] or not _node['valuetype']=='object':
 			continue
 		
-		print 'Researching',_object['text'],_object['id']
-		_research = research_topic(_object['id'],topic,keyword)
-		_object['researched'] = True
-		
-		if _research:
-			for __object in _research:
-				if __object in _relevant_objects or __object in research_db['topics'][topic]:
-					continue
-				
-				_relevant_objects.append(__object)
+		_relevant_objects.extend(research_node(_node,topic=_topic))
 		
 		if _topic_count>=limit:
 			return _relevant_objects
 		else:
 			_topic_count+=1
-	
+		
 	return _relevant_objects
 
 def get_topics():
@@ -347,21 +366,19 @@ def parse(commands,callback,channel,user):
 		
 		if _res and _res_combined and _res['score']>_res_combined['score']:
 			callback.msg(channel,'Single: %s' % get_info(_res['mid']),to=user['name'])
-			_research = research_topic(_res['mid'],_res['notable']['id'],_res['name'])
+			_research = research_topic(_res['mid'],_res['notable']['id'])
 			_research.extend(find_related_topics(_res))
 		elif _res and _res_combined and _res['score']<_res_combined['score']:
 			callback.msg(channel,'Combined: %s' % get_info(_res_combined['mid']),to=user['name'])
-			_research = research_topic(_res_combined['mid'],_res_combined['notable']['id'],
-				_res_combined['name'])
+			_research = research_topic(_res_combined['mid'],_res_combined['notable']['id'])
 			_research.extend(find_related_topics(_res_combined))
 		elif _res: 
 			callback.msg(channel,'Single: %s' % get_info(_res['mid']),to=user['name'])
-			_research = research_topic(_res['mid'],_res['notable']['id'],_res['name'])
+			_research = research_topic(_res['mid'],_res['notable']['id'])
 			_research.extend(find_related_topics(_res))
 		elif _res_combined:
 			callback.msg(channel,'Combined: %s' % get_info(_res_combined['mid']),to=user['name'])
-			_research = research_topic(_res_combined['mid'],_res_combined['notable']['id'],
-				_res_combined['name'])
+			_research = research_topic(_res_combined['mid'],_res_combined['notable']['id'])
 			_research.extend(find_related_topics(_res_combined))
 		
 		else:
@@ -396,7 +413,8 @@ def parse(commands,callback,channel,user):
 				to=user['name'])
 		else:
 			callback.msg(channel,'No topic can be found!',to=user['name'])
-			return 1
+		
+		return 1
 	
 	elif commands[0] == '.research' and len(commands)>=2:
 		_topic = ' '.join(commands[1:])
@@ -408,13 +426,15 @@ def parse(commands,callback,channel,user):
 			callback.msg(channel,'Nothing could be found.',to=user['name'])
 			return 1
 		
-		_research = research_topic(_res['mid'],_res['notable']['id'],_res['name'])
+		_research = research_topic(_res['mid'],_res['notable']['id'])
 		_research.extend(find_related_topics(_res))
 		
 		if _research:
 			callback.msg(channel,'I have built a node mesh of size %s. Some related topics are: %s' %
 				(len(_research),', '.join([node_db[entry]['text'] for entry in _research
 				if node_db[entry]['valuetype'] == 'object'])[:300]),to=user['name'])
+		
+		return 1
 	
 	elif commands[0] == '.find_node' and len(commands)>=2:
 		_search = ' '.join(commands[1:])
@@ -448,6 +468,8 @@ def parse(commands,callback,channel,user):
 				
 		else:
 			callback.msg(channel,'\'%s\' does not exist in the mesh.' % _search,to=user['name'])
+		
+		return 1
 	
 	elif commands[0] == '.show_node' and len(commands)==2:
 		try:
@@ -461,6 +483,29 @@ def parse(commands,callback,channel,user):
 		
 		callback.msg(channel,'Node #%s: %s' % (commands[1],', '.join([str(_node[key]) for key in
 			_node.iterkeys()])),to=user['name'])
+		
+		return 1
+	
+	elif commands[0] == '.research_node' and len(commands)==2:
+		try:
+			_node = node_db[int(commands[1])]
+		except ValueError:
+			callback.msg(channel,'\'%s\' is not an integer.' % commands[1],to=user['name'])
+			return 1
+		except IndexError:
+			callback.msg(channel,'Node #%s does not exist.' % commands[1],to=user['name'])
+			return 1
+		
+		callback.msg(channel,'Researching node #%s...' % commands[1],to=user['name'])
+		
+		_research = research_node(_node)
+		
+		if _research:
+			callback.msg(channel,'I have built a node mesh of size %s. Some related topics are: %s' %
+				(len(_research),', '.join([node_db[entry]['text'] for entry in _research
+				if node_db[entry]['valuetype'] == 'object'])[:300]),to=user['name'])
+		
+		return 1
 	
 	elif commands[0] == '.topic_links':
 		if len(commands)==2:
