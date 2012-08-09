@@ -416,6 +416,33 @@ def parse(commands,callback,channel,user):
 				(len(_research),', '.join([node_db[entry]['text'] for entry in _research
 				if node_db[entry]['valuetype'] == 'object'])[:300]),to=user['name'])
 	
+	elif commands[0] == '.find_node' and len(commands)>=2:
+		_search = ' '.join(commands[1:])
+		_ret = []
+		
+		for node in node_db:
+			if node['text'].count(_search):
+				_ret.append(node)
+		
+		if _ret:
+			if len(_ret)==1:
+				_word = 'entry'
+			else:
+				_word = 'entries'
+			
+			callback.msg(channel,'I\'ve located %s %s for %s in the mesh.' % (len(_ret),_word,_search),
+				to=user['name'])
+			
+			if len(_ret)>15:
+				callback.msg(channel,'There are too many results to list! Tighten your search.')
+				return 1
+			
+			callback.msg(channel,'Nodes matching \'%s\': %s' % (_search,', '.join([entry['text'] for entry
+				in _ret])))
+				
+		else:
+			callback.msg(channel,'\'%s\' does not exist in the mesh.' % _search,to=user['name'])
+	
 	elif commands[0] == '.topic_links':
 		if len(commands)==2:
 			try:
