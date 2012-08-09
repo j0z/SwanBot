@@ -343,13 +343,13 @@ class SwanBot(irc.IRCClient):
 			
 			if _user['message_on_highlight'] or not channel==to:
 				if len(message)/412:
-					irc.IRCClient.msg(self,channel,str(message[:412]))
+					irc.IRCClient.msg(self,channel,message[:412])
 					self.msg(channel,message[412:],to=to)
 				else:
-					irc.IRCClient.msg(self,channel,str(message))
+					irc.IRCClient.msg(self,channel,message)
 				return 1
 			else:
-				irc.IRCClient.notice(self,to,str(message))
+				irc.IRCClient.notice(self,to,message)
 				return 1
 		
 		if len(message)/412:
@@ -360,7 +360,7 @@ class SwanBot(irc.IRCClient):
 			self.msg(channel,message[412:],to=to)
 			return 1
 		else:
-			irc.IRCClient.msg(self,channel,str(message))
+			irc.IRCClient.msg(self,channel,message)
 			return 1
 		
 		irc.IRCClient.msg(self,channel,str(message))
