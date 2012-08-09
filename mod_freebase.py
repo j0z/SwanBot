@@ -430,18 +430,37 @@ def parse(commands,callback,channel,user):
 			else:
 				_word = 'entries'
 			
-			callback.msg(channel,'I\'ve located %s %s for %s in the mesh.' % (len(_ret),_word,_search),
+			callback.msg(channel,'I\'ve located %s %s for \'%s\' in the mesh.' % (len(_ret),_word,_search),
 				to=user['name'])
 			
 			if len(_ret)>15:
 				callback.msg(channel,'There are too many results to list! Tighten your search.')
 				return 1
 			
-			callback.msg(channel,'Nodes matching \'%s\': %s' % (_search,', '.join([entry['text'] for entry
-				in _ret])))
+			_nodes = []
+			for entry in _ret:
+				if not entry['valuetype'] == 'object':
+					continue
+					
+				_nodes.append('%s (%s)' % (entry['text'],node_db.index(entry)))
+			
+			callback.msg(channel,'Nodes matching \'%s\': %s' % (_search,', '.join(_nodes)))
 				
 		else:
 			callback.msg(channel,'\'%s\' does not exist in the mesh.' % _search,to=user['name'])
+	
+	elif commands[0] == '.show_node' and len(commands)==2:
+		try:
+			_node = node_db[int(commands[1])]
+		except ValueError:
+			callback.msg(channel,'\'%s\' is not an integer.' % commands[1],to=user['name'])
+			return 1
+		except IndexError:
+			callback.msg(channel,'Node #%s does not exist.' % commands[1],to=user['name'])
+			return 1
+		
+		callback.msg(channel,'Node #%s: %s' % (commands[1],', '.join([str(_node[key]) for key in
+			_node.iterkeys()])),to=user['name'])
 	
 	elif commands[0] == '.topic_links':
 		if len(commands)==2:

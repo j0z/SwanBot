@@ -335,6 +335,7 @@ class SwanBot(irc.IRCClient):
 	
 	def msg(self,channel,message,to=None):
 		_user = is_registered(to)
+		message = message.encode('utf-8')
 		
 		if _user:			
 			if _user['speech_highlight_in_public']:
@@ -352,7 +353,10 @@ class SwanBot(irc.IRCClient):
 				return 1
 		
 		if len(message)/412:
-			irc.IRCClient.msg(self,channel,str(message[:412]))
+			#try:
+			irc.IRCClient.msg(self,channel,message[:412])
+			#except:
+			#	print message[:412]
 			self.msg(channel,message[412:],to=to)
 			return 1
 		else:
