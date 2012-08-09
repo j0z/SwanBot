@@ -82,7 +82,11 @@ def add_node(data):
 			except:
 				_temp = data.copy()
 				_temp['researched'] = True
-				return node_db.index(_temp)
+				try:
+					return node_db.index(_temp)
+				except:
+					logging.error('Failed to find node \'%s\' in node_db!' % data['text'])
+					return 1
 		else:
 			try:
 				return node_db.index(data)
@@ -296,6 +300,8 @@ def parse(commands,callback,channel,user):
 	for word in words_db:
 		if word['score']:
 			word['score']-=1
+		else:
+			words_db.remove(word)
 	
 	if commands[0] == '.search' and len(commands)>=2:
 		callback.msg(channel,'Result: %s' % (perform_search(' '.join(commands[1:]))),to=user['name'])
@@ -369,7 +375,7 @@ def parse(commands,callback,channel,user):
 					add_word(word,score=-50)
 		
 		if _research:
-			callback.msg(channel,'I have built a node mesh of size %s. Some related topics: %s' %
+			callback.msg(channel,'I have built a node mesh of size %s. Some related topics are: %s' %
 				(len(_research),', '.join([node_db[entry]['text'] for entry in _research
 				if node_db[entry]['valuetype'] == 'object'])[:300]),to=user['name'])
 		
@@ -391,6 +397,24 @@ def parse(commands,callback,channel,user):
 		else:
 			callback.msg(channel,'No topic can be found!',to=user['name'])
 			return 1
+	
+	elif commands[0] == '.research' and len(commands)>=2:
+		_topic = ' '.join(commands[1:])
+		callback.msg(channel,'Researching \'%s\'...' % _topic,to=user['name'])
+		
+		_res = examine_topic(_topic)
+		
+		if not _res:
+			callback.msg(channel,'Nothing could be found.',to=user['name'])
+			return 1
+		
+		_research = research_topic(_res['mid'],_res['notable']['id'],_res['name'])
+		_research.extend(find_related_topics(_res))
+		
+		if _research:
+			callback.msg(channel,'I have built a node mesh of size %s. Some related topics are: %s' %
+				(len(_research),', '.join([node_db[entry]['text'] for entry in _research
+				if node_db[entry]['valuetype'] == 'object'])[:300]),to=user['name'])
 	
 	elif commands[0] == '.topic_links':
 		if len(commands)==2:
