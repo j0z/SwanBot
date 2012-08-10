@@ -290,6 +290,22 @@ def get_topics():
 	
 	return 'No topic could be found.'
 
+def build_view(node):
+	_ret = node['related'][:]
+	_tmp = []
+	
+	while not _ret == _tmp:
+		_tmp = _ret[:]
+		
+		for _node in _tmp:
+			for __node in node_db[_node]['related']:
+				if not __node in _tmp:
+					_tmp.append(__node)
+		
+		_ret = _tmp[:]
+	
+	return _ret
+
 def tick(callback):
 	pass
 
@@ -504,13 +520,36 @@ def parse(commands,callback,channel,user):
 		_related = []
 		
 		for node in _node['related']:
-			_related.append('%s (%s)' % (node_db[node]['text'],commands[1]),to=user['name'])
+			_related.append('%s (%s)' % (node_db[node]['text'],commands[1]))
 		
 		if _related:
 			callback.msg(channel,'Found %s nodes related to #%s: %s' % (len(_related),commands[1],
 				', '.join(_related)),to=user['name'])
 		else:
 			callback.msg(channel,'No related nodes were found.',to=user['name'])
+	
+	elif commands[0] == '.build_view' and len(commands)==2:
+		try:
+			_node = node_db[int(commands[1])]
+		except ValueError:
+			callback.msg(channel,'\'%s\' is not an integer.' % commands[1],to=user['name'])
+			return 1
+		except IndexError:
+			callback.msg(channel,'Node #%s does not exist.' % commands[1],to=user['name'])
+			return 1
+		
+		if not _node['related']:
+			callback.msg(channel,'No view could be built because node #%s has no related nodes.'
+				% commands[1],to=user['name'])
+			return 1
+		
+		_view = []
+		
+		for node in build_view(_node):
+			_view.append('%s (%s)' % (node_db[node]['text'],commands[1]))
+		
+		callback.msg(channel,'Found %s nodes in view of node #%s: %s' % (len(_view),commands[1],
+			', '.join(_view)),to=user['name'])
 	
 	elif commands[0] == '.topic_links':
 		if len(commands)==2:
