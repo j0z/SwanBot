@@ -245,6 +245,7 @@ def research_node(node,topic=None):
 	_relevant_objects = []
 	
 	print 'Researching',node['text'],node['id']
+	_start_index = len(node_db)-1
 	
 	for _topic in research_db['topics'].keys():
 		if topic and not _topic == topic:
@@ -255,12 +256,12 @@ def research_node(node,topic=None):
 		
 		if _research:
 			for _object in _research:
-				if _object in _relevant_objects or _object in research_db['topics'][_topic]:
+				if _object in _relevant_objects:
 					continue
 				
 				_relevant_objects.append(_object)
 	
-	return _relevant_objects
+	return [i for i in range(_start_index+1,len(node_db)-1)]
 
 def find_related_topics(data,limit=25):
 	_topic_count = 0
@@ -504,6 +505,8 @@ def parse(commands,callback,channel,user):
 			callback.msg(channel,'I have built a node mesh of size %s. Some related topics are: %s' %
 				(len(_research),', '.join([node_db[entry]['text'] for entry in _research
 				if node_db[entry]['valuetype'] == 'object'])[:300]),to=user['name'])
+		else:
+			callback.msg(channel,'No new nodes were created.',to=user['name'])
 		
 		return 1
 	
@@ -543,9 +546,6 @@ def parse(commands,callback,channel,user):
 			_score = 1
 		
 		_ret = add_word(word,score=_score)
-		
-		#if _ret:
-		#	print _ret['word'],_ret['score']
 
 def on_user_join(user,channel,callback):	
 	pass

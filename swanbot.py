@@ -112,7 +112,7 @@ class check_thread(threading.Thread):
 						self.blacklist.append(module['name'])
 			
 			if not self.update_timer:
-				#Check if owner is online
+				#TODO: Check if owner is online
 				self.callback.update(is_registered(self.callback.owner))
 				self.update_timer = self.update_timer_max
 			else:
