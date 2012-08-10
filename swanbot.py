@@ -46,6 +46,9 @@ except:
 	print 'simplegit module not found. Git disabled.'
 	__GIT__ = False
 
+if '--no-git' in sys.argv:
+	__GIT__ = False
+
 #Set up proper logging
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)

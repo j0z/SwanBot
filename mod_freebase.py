@@ -43,7 +43,7 @@ __ignore__ = ['after','although','though','because','before','once','since','tha
 
 def init():
 	global words_db,research_db,node_db
-	words_db = {'words':[],'research':{'topics':{}},'nodes':[]}
+	words_db = {'words':[],'nodes':[]}
 	
 	try:
 		_file = open(os.path.join('data','words.json'),'r')
@@ -55,7 +55,6 @@ def init():
 					entry[key] = entry[key].encode("utf-8")
 		
 		_file.close()
-		research_db = words_db['research']
 		node_db = words_db['nodes']
 		words_db = words_db['words']
 		logging.info('Success!')
@@ -69,34 +68,23 @@ def init():
 def shutdown():
 	logging.info('Offloading words database to disk...')
 	_file = open(os.path.join('data','words.json'),'w')
-	_file.write(json.dumps({'words':words_db,'research':research_db,'nodes':node_db},ensure_ascii=True))
+	_file.write(json.dumps({'words':words_db,'nodes':node_db},ensure_ascii=True))
 	_file.close()
 	logging.info('Success!')
 
-def add_node(data):
-	#Incoming the worst Python code I have ever written!
-	if data['text'] in [entry['text'] for entry in node_db]:
-		if data.has_key('id') and data['id'] in [entry['id'] for entry in node_db if entry.has_key('id')]:
-			try:
-				return node_db.index(data)
-			except:
-				_temp = data.copy()
-				_temp['researched'] = True
-				try:
-					return node_db.index(_temp)
-				except:
-					logging.error('Failed to find node \'%s\' in node_db!' % data['text'])
-					return 1
-		else:
-			try:
-				return node_db.index(data)
-			except:
-				_temp = data.copy()
-				_temp['researched'] = True
-				try:
-					return node_db.index(_temp)
-				except:
-					pass
+def add_node(data,parent=None):
+	for _node in node_db:
+		if _node['text'] == data['text']:
+			if data.has_key('id') and data['id'] == _node['id']:
+				return node_db.index(_node)
+			else:
+				return node_db.index(_node)
+	
+	data['related'] = []
+	
+	if parent:
+		if not parent in data['related']:
+			data['related'].append(node_db.index(parent))
 	
 	node_db.append(data)
 	return len(node_db)-1
@@ -169,7 +157,36 @@ def examine_topic(topic):
 	
 	return _result
 
-def research_topic(mid,topic):
+def get_related_topics(topic):
+	if not topic in research_db['topics'].keys():
+		return None
+	
+	logging.error('get_related_topics() is currently broken!')
+	
+	_ret = []
+	
+	#for node in research_db['topics'][topic]:
+	#	_object = node_db[node]
+	#	if _object['valuetype']=='object':
+	#		_ret.append(_object)
+	
+	return _ret
+
+def get_related_links(topic):
+	if not topic in research_db['topics'].keys():
+		return None
+	
+	_ret = []
+	
+	#for node in research_db['topics'][topic]:
+	#	_object = node_db[node]
+	#	if _object['valuetype']=='uri':
+	#		_ret.append(_object)
+	
+	return _ret
+
+def research_topic(mid,parent=None):
+	"""Scrapes data from topic 'mid', creating nodes."""
 	try:
 		_result = json.loads(urllib.urlopen(__topic_url__.replace('%mid%',mid)
 			.replace(' ','_')).read())['property']
@@ -181,15 +198,18 @@ def research_topic(mid,topic):
 	for type in _result:
 		if _result[type]['valuetype'] == 'object':
 			for object in _result[type]['values']:
+				_tmp = object.copy()
+				
 				_tmp = {'text':object['text'].encode('utf-8'),
 					'id':object['id'].encode('utf-8'),
 					'valuetype':_result[type]['valuetype'],
 					'researched':False}
 				
-				_node_ref = add_node(_tmp)
+				_node_ref = add_node(_tmp,parent=parent)
 				
 				#if type.count(topic):
 				_relevant_objects.append(_node_ref)
+		
 		elif _result[type]['valuetype'] == 'uri':
 			for object in _result[type]['values']:
 				_tmp = {'text':object['text'].encode('utf-8'),
@@ -203,67 +223,30 @@ def research_topic(mid,topic):
 				if _tmp['text'].count('jp.wikipedia'):
 					continue
 				
-				_node_ref = add_node(_tmp)
+				_node_ref = add_node(_tmp,parent=parent)
 				_relevant_objects.append(_node_ref)
 	
-	if not topic in research_db['topics'].keys():
-		research_db['topics'][topic] = _relevant_objects
-	else:
-		for node in _relevant_objects:
-			if not node in research_db['topics'][topic]:
-				research_db['topics'][topic].append(node)
-	
-	return research_db['topics'][topic]
+	return _relevant_objects
 
-def get_related_topics(topic):
-	if not topic in research_db['topics'].keys():
+def research_node(node,parent=None,topic=None):
+	if node['researched']:
+		logging.error('Node already marked as researched!')
 		return None
 	
-	_ret = []
-	
-	for node in research_db['topics'][topic]:
-		_object = node_db[node]
-		if _object['valuetype']=='object':
-			_ret.append(_object)
-	
-	return _ret
-
-def get_related_links(topic):
-	if not topic in research_db['topics'].keys():
-		return None
-	
-	_ret = []
-	
-	for node in research_db['topics'][topic]:
-		_object = node_db[node]
-		if _object['valuetype']=='uri':
-			_ret.append(_object)
-	
-	return _ret
-
-def research_node(node,topic=None):
-	_relevant_objects = []
+	_start_index = len(node_db)-1
+	_research = research_topic(node['id'],parent=node)
+	node['researched'] = True	
 	
 	print 'Researching',node['text'],node['id']
-	_start_index = len(node_db)-1
 	
-	for _topic in research_db['topics'].keys():
-		if topic and not _topic == topic:
-			continue
-		
-		_research = research_topic(node['id'],_topic)
-		node['researched'] = True
-		
-		if _research:
-			for _object in _research:
-				if _object in _relevant_objects:
-					continue
-				
-				_relevant_objects.append(_object)
+	if _research:
+		for _object in _research:
+			if not _object in node['related']:
+				node['related'].append(_object)
 	
 	return [i for i in range(_start_index+1,len(node_db)-1)]
 
-def find_related_topics(data,limit=25):
+def expand_related_nodes(data,limit=25):
 	_topic_count = 0
 	_relevant_objects = []
 	
@@ -271,18 +254,16 @@ def find_related_topics(data,limit=25):
 		_topic = data['notable']['id']
 		keyword = data['name']
 	else:
-		logging.error('Invalid data sent to find_related_topics()')
+		logging.error('Invalid data sent to expand_related_nodes()')
 		return 1
 	
 	print 'Looking for',_topic,keyword
 	
-	for node in research_db['topics'][_topic]:
-		_node = node_db[node]
-		
-		if _node['researched'] or not _node['valuetype']=='object':
+	for node in node_db:		
+		if node['researched'] or not node['valuetype']=='object':
 			continue
 		
-		_relevant_objects.extend(research_node(_node,topic=_topic))
+		_relevant_objects.extend(research_node(node,topic=_topic))
 		
 		if _topic_count>=limit:
 			return _relevant_objects
@@ -368,19 +349,19 @@ def parse(commands,callback,channel,user):
 		if _res and _res_combined and _res['score']>_res_combined['score']:
 			callback.msg(channel,'Single: %s' % get_info(_res['mid']),to=user['name'])
 			_research = research_topic(_res['mid'],_res['notable']['id'])
-			_research.extend(find_related_topics(_res))
+			_research.extend(expand_related_nodes(_res))
 		elif _res and _res_combined and _res['score']<_res_combined['score']:
 			callback.msg(channel,'Combined: %s' % get_info(_res_combined['mid']),to=user['name'])
 			_research = research_topic(_res_combined['mid'],_res_combined['notable']['id'])
-			_research.extend(find_related_topics(_res_combined))
+			_research.extend(expand_related_nodes(_res_combined))
 		elif _res: 
 			callback.msg(channel,'Single: %s' % get_info(_res['mid']),to=user['name'])
 			_research = research_topic(_res['mid'],_res['notable']['id'])
-			_research.extend(find_related_topics(_res))
+			_research.extend(expand_related_nodes(_res))
 		elif _res_combined:
 			callback.msg(channel,'Combined: %s' % get_info(_res_combined['mid']),to=user['name'])
 			_research = research_topic(_res_combined['mid'],_res_combined['notable']['id'])
-			_research.extend(find_related_topics(_res_combined))
+			_research.extend(expand_related_nodes(_res_combined))
 		
 		else:
 			if _res:
@@ -427,8 +408,8 @@ def parse(commands,callback,channel,user):
 			callback.msg(channel,'Nothing could be found.',to=user['name'])
 			return 1
 		
-		_research = research_topic(_res['mid'],_res['notable']['id'])
-		_research.extend(find_related_topics(_res))
+		_research = research_topic(_res['mid'])
+		_research.extend(expand_related_nodes(_res))
 		
 		if _research:
 			callback.msg(channel,'I have built a node mesh of size %s. Some related topics are: %s' %
@@ -499,7 +480,7 @@ def parse(commands,callback,channel,user):
 		
 		callback.msg(channel,'Researching node #%s...' % commands[1],to=user['name'])
 		
-		_research = research_node(_node)
+		_research = research_node(_node,parent=_node)
 		
 		if _research:
 			callback.msg(channel,'I have built a node mesh of size %s. Some related topics are: %s' %
@@ -509,6 +490,27 @@ def parse(commands,callback,channel,user):
 			callback.msg(channel,'No new nodes were created.',to=user['name'])
 		
 		return 1
+	
+	elif commands[0] == '.show_related_nodes' and len(commands)==2:
+		try:
+			_node = node_db[int(commands[1])]
+		except ValueError:
+			callback.msg(channel,'\'%s\' is not an integer.' % commands[1],to=user['name'])
+			return 1
+		except IndexError:
+			callback.msg(channel,'Node #%s does not exist.' % commands[1],to=user['name'])
+			return 1
+		
+		_related = []
+		
+		for node in _node['related']:
+			_related.append('%s (%s)' % (node_db[node]['text'],commands[1]),to=user['name'])
+		
+		if _related:
+			callback.msg(channel,'Found %s nodes related to #%s: %s' % (len(_related),commands[1],
+				', '.join(_related)),to=user['name'])
+		else:
+			callback.msg(channel,'No related nodes were found.',to=user['name'])
 	
 	elif commands[0] == '.topic_links':
 		if len(commands)==2:
