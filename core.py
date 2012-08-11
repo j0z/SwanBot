@@ -17,7 +17,6 @@ def parse(commands,callback,channel,user):
 			else:
 				callback.add_module(commands[1])
 				callback.msg(channel,'%s: Loaded module %s' % (user['name'],commands[1]))
-				callback.reload()
 		except ImportError:
 			callback.msg(channel,'%s: Could not load module %s' % (user['name'],commands[1]))
 			logging.error('No module named \'%s\'' % commands[1])

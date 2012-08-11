@@ -385,6 +385,12 @@ class SwanBot(irc.IRCClient):
 		try:
 			exec('import %s as temp' % name)
 			self.modules.append({'name':name,'module':temp})
+			
+			try:
+				temp.init()
+			except:
+				pass
+			
 			logging.info('Loaded module \'%s\'' % name)
 		except ImportError:
 			logging.error('ImportError occurred when loading module \'%s\'' % name)
