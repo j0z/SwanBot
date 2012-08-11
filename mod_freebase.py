@@ -63,6 +63,7 @@ def init():
 		_file = open(os.path.join('data','words.json'),'w')
 		_file.write(json.dumps(words_db))
 		_file.close()
+		logging.error('Created words database.')
 		init()
 
 def shutdown():
