@@ -247,7 +247,7 @@ def research_node(node,parent=None,topic=None):
 	
 	return [i for i in range(_start_index+1,len(node_db)-1)]
 
-def expand_related_nodes(data,limit=25):
+def expand_nodes_in_range(data,range,limit=25):
 	_topic_count = 0
 	_relevant_objects = []
 	
@@ -258,16 +258,34 @@ def expand_related_nodes(data,limit=25):
 		_topic = data['id']
 		keyword = data['name']
 	else:
-		logging.error('Invalid data sent to expand_related_nodes()')
+		logging.error('Invalid data sent to expand_nodes_in_range()')
 		return 1
 	
 	print 'Looking for',_topic,keyword
+	
+	#TODO: Finish this!
+	for node in node_db[len(node_db)-range:]:
+		if node['researched'] or not node['valuetype']=='object':
+			continue
+		
+		_relevant_objects.extend(research_node(node,topic=_topic))
+		
+		if _topic_count>=limit:
+			return _relevant_objects
+		else:
+			_topic_count+=1
+		
+	return _relevant_objects
+
+def expand_all_nodes(limit=25):
+	_topic_count = 0
+	_relevant_objects = []
 	
 	for node in node_db:
 		if node['researched'] or not node['valuetype']=='object':
 			continue
 		
-		_relevant_objects.extend(research_node(node,topic=_topic))
+		_relevant_objects.extend(research_node(node))
 		
 		if _topic_count>=limit:
 			return _relevant_objects
@@ -369,19 +387,19 @@ def parse(commands,callback,channel,user):
 		if _res and _res_combined and _res['score']>_res_combined['score']:
 			callback.msg(channel,'Single: %s' % get_info(_res['mid']),to=user['name'])
 			_research = research_topic(_res['mid'],_res['notable']['id'])
-			_research.extend(expand_related_nodes(_res))
+			_research.extend(expand_nodes_in_range(_res))
 		elif _res and _res_combined and _res['score']<_res_combined['score']:
 			callback.msg(channel,'Combined: %s' % get_info(_res_combined['mid']),to=user['name'])
 			_research = research_topic(_res_combined['mid'],_res_combined['notable']['id'])
-			_research.extend(expand_related_nodes(_res_combined))
+			_research.extend(expand_nodes_in_range(_res_combined))
 		elif _res: 
 			callback.msg(channel,'Single: %s' % get_info(_res['mid']),to=user['name'])
 			_research = research_topic(_res['mid'],_res['notable']['id'])
-			_research.extend(expand_related_nodes(_res))
+			_research.extend(expand_nodes_in_range(_res))
 		elif _res_combined:
 			callback.msg(channel,'Combined: %s' % get_info(_res_combined['mid']),to=user['name'])
 			_research = research_topic(_res_combined['mid'],_res_combined['notable']['id'])
-			_research.extend(expand_related_nodes(_res_combined))
+			_research.extend(expand_nodes_in_range(_res_combined))
 		
 		else:
 			if _res:
@@ -429,7 +447,7 @@ def parse(commands,callback,channel,user):
 			return 1
 		
 		_research = research_topic(_res['mid'])
-		_research.extend(expand_related_nodes(_res))
+		_research.extend(expand_nodes_in_range(_res))
 		
 		if _research:
 			callback.msg(channel,'I have built a node mesh of size %s. Some related topics are: %s' %
