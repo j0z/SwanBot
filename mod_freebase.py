@@ -254,13 +254,16 @@ def expand_related_nodes(data,limit=25):
 	if data.has_key('notable'):
 		_topic = data['notable']['id']
 		keyword = data['name']
+	elif data.has_key('id'):
+		_topic = data['id']
+		keyword = data['name']
 	else:
 		logging.error('Invalid data sent to expand_related_nodes()')
 		return 1
 	
 	print 'Looking for',_topic,keyword
 	
-	for node in node_db:		
+	for node in node_db:
 		if node['researched'] or not node['valuetype']=='object':
 			continue
 		
