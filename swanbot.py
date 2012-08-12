@@ -83,6 +83,8 @@ __user__ = {'name':'',
 	'speech_highlight_in_public':False,
 	'message_on_highlight':True}
 
+event_db = []
+
 class check_thread(threading.Thread):
 	running = True
 	callback = None
@@ -265,6 +267,25 @@ class SwanBot(irc.IRCClient):
 		self.msg(user['alert_channel'],'Reload completed.',to=user['name'])
 		logging.info('Done reloading modules')		
 	
+	def create_event(self,status,text,callback):
+		print 'Create event'
+		_event = {'status':status,
+			'text':text,
+			'callback':callback,
+			'id':len(event_db)-1}
+		
+		event_db.append(_event)
+		
+		return _event['id']
+	
+	def get_events(self,limit=5):
+		if not event_db:
+			return None
+		
+		#print len(event_db),(len(event_db)-1)-5
+		
+		return event_db[(len(event_db))-limit:]
+	
 	def parse(self,text):
 		text = text.replace('?','')
 		text = text.split()
@@ -338,7 +359,7 @@ class SwanBot(irc.IRCClient):
 	
 	def msg(self,channel,message,to=None):
 		_user = is_registered(to)
-		message = message.encode('utf-8')
+		message = message.encode('utf-8','ignore')
 		
 		if _user:			
 			if _user['speech_highlight_in_public']:

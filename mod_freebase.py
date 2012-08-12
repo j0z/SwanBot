@@ -496,6 +496,7 @@ def parse(commands,callback,channel,user):
 			return 1
 		
 		callback.msg(channel,'Researching node #%s...' % commands[1],to=user['name'])
+		callback.create_event(True,'Starting research for node #%s.' % commands[1],'mod_freebase')
 		
 		_research = research_node(_node,parent=_node)
 		
@@ -503,8 +504,11 @@ def parse(commands,callback,channel,user):
 			callback.msg(channel,'I have built a node mesh of size %s. Some related topics are: %s' %
 				(len(_research),', '.join([node_db[entry]['text'] for entry in _research
 				if node_db[entry]['valuetype'] == 'object'])[:300]),to=user['name'])
+			
+			callback.create_event(True,'Finished research for node #%s.' % commands[1],'mod_freebase')
 		else:
 			callback.msg(channel,'No new nodes were created.',to=user['name'])
+			callback.create_event(False,'Finished research for node #%s.' % commands[1],'mod_freebase')
 		
 		return 1
 	
@@ -526,8 +530,14 @@ def parse(commands,callback,channel,user):
 		if _related:
 			callback.msg(channel,'Found %s nodes related to #%s: %s' % (len(_related),commands[1],
 				', '.join(_related)),to=user['name'])
+			
+			callback.create_event(False,'Found %s nodes related to #%s.' % (len(_related),commands[1])
+				,'mod_freebase')
 		else:
 			callback.msg(channel,'No related nodes were found.',to=user['name'])
+			
+			callback.create_event(False,'No related nodes were found for #%s.'
+				% commands[1],'mod_freebase')
 	
 	elif commands[0] == '.build_view' and len(commands)==2:
 		try:
@@ -542,15 +552,21 @@ def parse(commands,callback,channel,user):
 		if not _node['related']:
 			callback.msg(channel,'No view could be built because node #%s has no related nodes.'
 				% commands[1],to=user['name'])
+			
+			callback.create_event(False,'Failed to build view for node #%s' % commands[1],
+				'mod_freebase')
 			return 1
 		
 		_view = []
 		
 		for node in build_view(_node):
-			_view.append('%s (%s)' % (node_db[node]['text'],commands[1]))
+			_view.append('%s (%s)' % (node_db[node]['text'],node))
 		
 		callback.msg(channel,'Found %s nodes in view of node #%s: %s' % (len(_view),commands[1],
 			', '.join(_view)),to=user['name'])
+		
+		callback.create_event(True,'Found %s nodes in view of node #%s: %s'
+			% (len(_view),commands[1]),'mod_freebase')
 	
 	elif commands[0] == '.topic_links':
 		if len(commands)==2:
