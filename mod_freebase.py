@@ -247,28 +247,17 @@ def research_node(node,parent=None,topic=None):
 	
 	return [i for i in range(_start_index+1,len(node_db)-1)]
 
-def expand_nodes_in_range(data,range,limit=25):
+def expand_nodes(nodes,limit=25):
 	_topic_count = 0
 	_relevant_objects = []
 	
-	if data.has_key('notable'):
-		_topic = data['notable']['id']
-		keyword = data['name']
-	elif data.has_key('id'):
-		_topic = data['id']
-		keyword = data['name']
-	else:
-		logging.error('Invalid data sent to expand_nodes_in_range()')
-		return 1
-	
-	print 'Looking for',_topic,keyword
-	
 	#TODO: Finish this!
-	for node in node_db[len(node_db)-range:]:
+	for _node in nodes:
+		node = node_db[_node]
 		if node['researched'] or not node['valuetype']=='object':
 			continue
 		
-		_relevant_objects.extend(research_node(node,topic=_topic))
+		_relevant_objects.extend(research_node(node))
 		
 		if _topic_count>=limit:
 			return _relevant_objects
@@ -412,9 +401,10 @@ def parse(commands,callback,channel,user):
 					add_word(word,score=-50)
 		
 		if _research:
-			callback.msg(channel,'I have built a node mesh of size %s. Some related topics are: %s' %
+			callback.msg(channel,'I have built a node mesh of size %s.' %
 				(len(_research),', '.join([node_db[entry]['text'] for entry in _research
-				if node_db[entry]['valuetype'] == 'object'])[:300]),to=user['name'])
+				if node_db[entry]['valuetype'] == 'object'])[:300]).encode('utf-8','ignore'),
+				to=user['name'])
 		
 		return 1
 	elif commands[0] == '.topic_related':
@@ -447,12 +437,13 @@ def parse(commands,callback,channel,user):
 			return 1
 		
 		_research = research_topic(_res['mid'])
-		_research.extend(expand_nodes_in_range(_res))
+		_research.extend(expand_nodes(_research))
 		
 		if _research:
 			callback.msg(channel,'I have built a node mesh of size %s. Some related topics are: %s' %
 				(len(_research),', '.join([node_db[entry]['text'] for entry in _research
-				if node_db[entry]['valuetype'] == 'object'])[:300]),to=user['name'])
+				if node_db[entry]['valuetype'] == 'object'])[:300]).encode('utf-8','ignore'),
+				to=user['name'])
 		
 		return 1
 	
