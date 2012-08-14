@@ -55,7 +55,7 @@ def init():
 					entry[key] = entry[key].encode("utf-8")
 		
 		_file.close()
-		node_db = words_db['nodes']
+		#node_db = words_db['nodes']
 		words_db = words_db['words']
 		logging.info('Success!')
 	except:
@@ -72,6 +72,14 @@ def shutdown():
 	_file.write(json.dumps({'words':words_db,'nodes':node_db},ensure_ascii=True))
 	_file.close()
 	logging.info('Success!')
+
+def load_node_db(data):
+	logging.info('Received node_db from core.')
+	node_db = data
+
+def connected_to_core(core):
+	print 'YO DUUDE!!!!!!!!'
+	core.get_node_db(load_node_db)
 
 def add_node(data,parent=None):
 	for _node in node_db:

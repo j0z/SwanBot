@@ -25,6 +25,7 @@ from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol
 import threading
 import logging
+import client
 import core
 import time
 import json
@@ -219,10 +220,25 @@ class IRCBot(irc.IRCClient):
 	modules = []
 	owner = None
 	fallback_owner = None
+	core = None
 	versionName = 'SwanBot'
 	versionNum = '0.3.5'
 	versionEnv = 'Wayne Brady\'s Cat'
+	
+	def __init__(self):
+		logging.info('Connecting to core...')
+		client.start(self)
 
+	def connected_to_client(self,client):
+		logging.info('Connected to core.')
+		self.core = client
+		
+		for module in self.modules:
+			try:
+				module['module'].connected_to_core(self.core)
+			except Exception, e:
+				print e
+	
 	def update(self,user):
 		if not __GIT__:
 			return 1
