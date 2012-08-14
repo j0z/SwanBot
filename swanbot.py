@@ -214,7 +214,7 @@ if '-p' in sys.argv:
 if '-c' in sys.argv:
 	__channels__ = sys.argv[sys.argv.index('-c')+1].split(',')
 
-class SwanBot(irc.IRCClient):
+class IRCBot(irc.IRCClient):
 	nickname = __botname__
 	modules = []
 	owner = None
@@ -656,12 +656,12 @@ class SwanBot(irc.IRCClient):
 	def alterCollidedNick(self, nickname):
 		return nickname + '_'
 
-class SwanBotFactory(protocol.ClientFactory):
+class IRCBotFactory(protocol.ClientFactory):
 	def __init__(self, channels):
 		self.channels = channels
 
 	def buildProtocol(self, addr):
-		p = SwanBot()
+		p = IRCBot()
 		p.factory = self
 		return p
 
@@ -673,7 +673,7 @@ class SwanBotFactory(protocol.ClientFactory):
 		reactor.stop()
 
 def start():
-	_factory = SwanBotFactory(__channels__)
+	_factory = IRCBotFactory(__channels__)
 	reactor.connectTCP(__server__, __port__, _factory)
 	reactor.run()
 
