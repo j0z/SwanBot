@@ -495,6 +495,8 @@ def parse(commands,callback,channel,user):
 		callback.msg(channel,'Node #%s: %s' % (commands[1],', '.join([str(_node[key]) for key in
 			_node.iterkeys()])),to=user['name'])
 		
+		callback.msg(channel,get_info(_node['id']),to=user['name'])
+		
 		return 1
 	
 	elif commands[0] == '.research_node' and len(commands)==2:
