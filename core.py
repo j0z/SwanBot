@@ -1,5 +1,4 @@
 import logging
-import time
 
 def parse(commands,callback,channel,user):
 	if not user['name'] == callback.owner:

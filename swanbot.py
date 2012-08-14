@@ -25,6 +25,7 @@ class SwanBot(LineReceiver):
 	node_db_start_index = 0
 	node_db_end_index = chunk_size
 	node_string = ''
+	recv_node_string = ''
 	
 	def __init__(self):
 		self.state = 'connected'
@@ -56,6 +57,20 @@ class SwanBot(LineReceiver):
 			if _args[1] == 'nodes':
 				self.node_string = json.dumps(self.factory.node_db)
 				self.send_nodes(0)
+		
+		elif _args[0] == 'send':
+			if _args[1] == 'start-node':
+				self.recv_node_string = ''
+			elif _args[1] == 'nodes':
+				self.recv_node_string += ':'.join(_args[2:])
+				
+				try:
+					_node_db = json.loads(self.recv_node_string)
+					
+					self.factory.node_db = _node_db
+					logging.info('node_db was uploaded!')
+				except:
+					logging.info('Downloading chunk: %s' % len(self.recv_node_string))
 	
 	def handle_login(self,line):
 		"""NOTE: 'password' must be an md5 hash."""
@@ -138,7 +153,7 @@ class SwanBotFactory(Factory):
 			
 			logging.error('Could not load words database from disk!')
 			_file = open(os.path.join('data','words.json'),'w')
-			_file.write(json.dumps(words_db))
+			_file.write(json.dumps(self.words_db))
 			_file.close()
 			logging.error('Created words database.')
 			self.load_words_db(error=True)

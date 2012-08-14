@@ -66,19 +66,43 @@ def init():
 		logging.error('Created words database.')
 		init()
 
-def shutdown():
-	logging.info('Offloading words database to disk...')
-	_file = open(os.path.join('data','words.json'),'w')
+def shutdown(core):
+	global node_db
+	
+	logging.info('Offloading local words database to disk...')
+	_file = open(os.path.join('data','local_words.json'),'w')
 	_file.write(json.dumps({'words':words_db,'nodes':node_db},ensure_ascii=True))
 	_file.close()
 	logging.info('Success!')
+	
+	logging.info('Uploading words database to core...')
+	
+	chunk_size = 15000
+	node_db_start_index = 0
+	node_db_end_index = chunk_size
+	node_db_string = json.dumps(node_db)
+	
+	core.start_send_node_db()
+	
+	while 1:
+		_send = node_db_string[node_db_start_index:node_db_end_index]
+		if not len(_send):
+			break
+		
+		core.send_node_db(_send)
+		
+		node_db_start_index = node_db_end_index
+		node_db_end_index += chunk_size
+	
+	logging.info('Uploaded words database to core!')
 
 def load_node_db(data):
+	global node_db
+	
 	logging.info('Received node_db from core.')
 	node_db = data
 
 def connected_to_core(core):
-	print 'YO DUUDE!!!!!!!!'
 	core.get_node_db(load_node_db)
 
 def add_node(data,parent=None):

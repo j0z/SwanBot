@@ -72,6 +72,7 @@ logger.addHandler(ch)
 __botname__ = 'Holo'
 __server__ = '192.168.1.2'
 __port__ = 6667
+__core_port__ = 9002
 __password__ = 'yerpderp'
 __email__ = 'clearlyfake@itsfakeimnotkidding.org'
 __channels__ = ['#talk','#holo']
@@ -227,7 +228,7 @@ class IRCBot(irc.IRCClient):
 	
 	def __init__(self):
 		logging.info('Connecting to core...')
-		client.start(self)
+		client.start(self,__core_port__)
 
 	def connected_to_client(self,client):
 		logging.info('Connected to core.')
@@ -237,7 +238,7 @@ class IRCBot(irc.IRCClient):
 			try:
 				module['module'].connected_to_core(self.core)
 			except Exception, e:
-				print e
+				pass
 	
 	def update(self,user):
 		if not __GIT__:
@@ -489,7 +490,7 @@ class IRCBot(irc.IRCClient):
 		logging.info('Shutting down modules')
 		for module in self.modules:
 			try:
-				module['module'].shutdown()
+				module['module'].shutdown(self.core)
 			except Exception, e:
 				pass
 		
@@ -563,7 +564,15 @@ class IRCBot(irc.IRCClient):
 		elif ' '.join(_args)=='kill connection' and (channel==self.nickname or _highlighted):
 			if name == self.owner or name == self.fallback_owner:
 				logging.info('Shutdown called by \'%s\'' % name)
-				reactor.stop()
+				
+				for module in self.modules:
+					try:
+						module['module'].shutdown(self.core)
+					except Exception, e:
+						pass
+				
+				t = threading.Timer(3,reactor.stop)
+				t.start()			
 		
 		elif _args and _args[0] == 'set':
 			if len(_args)==3 and _args[1] == 'message_on_highlight':

@@ -7,6 +7,7 @@ import json
 class Client(basic.LineReceiver):
 	node_db_callback = None
 	callback = None
+	recv_node_db_string = ''
 	
 	def __init__(self,callback):
 		self.node_db_string = ''
@@ -61,6 +62,13 @@ class Client(basic.LineReceiver):
 	def get_node_db(self,callback):
 		self.send('get:nodes')
 		self.node_db_callback = callback
+	
+	def start_send_node_db(self):
+		self.send('send:start-node')
+	
+	def send_node_db(self,data):
+		self.send('send:nodes:%s' % data)
+		logging.info('Uploading node_db to server (chunk %s)' % len(data))
 
 class ClientFactory(protocol.ClientFactory):
 	def __init__(self,callback,user='test',password='test'):
@@ -73,27 +81,11 @@ class ClientFactory(protocol.ClientFactory):
 		p.factory = self
 		return p
 
-class placeholder:
-	client = None
-	
-	def get_nodes(self,data):
-		print data[0]
-	
-	def connected_to_client(self,client):
-		print 'Connected to client.'
-		self.client = client
-		
-		self.client.get_node_db(self.get_nodes)
-
-#test = placeholder()
-
-def start(callback):
+def start(callback,core_port):
 	f = ClientFactory(callback)
-	reactor.connectTCP('localhost',9002,f)
+	reactor.connectTCP('localhost',core_port,f)
 	
 	try:
 		reactor.run()
 	except:
 		logging.info('Reactor was already running.')
-	
-#start(test)
