@@ -72,6 +72,7 @@ logger.addHandler(ch)
 __botname__ = 'Holo'
 __server__ = '192.168.1.2'
 __port__ = 6667
+__core_host__ = '192.168.1.10'
 __core_port__ = 9002
 __password__ = 'yerpderp'
 __email__ = 'clearlyfake@itsfakeimnotkidding.org'
@@ -228,7 +229,7 @@ class IRCBot(irc.IRCClient):
 	
 	def __init__(self):
 		logging.info('Connecting to core...')
-		client.start(self,__core_port__)
+		client.start(self,__core_host__,__core_port__)
 
 	def connected_to_client(self,client):
 		logging.info('Connected to core.')

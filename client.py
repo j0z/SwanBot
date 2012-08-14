@@ -151,9 +151,9 @@ class ClientFactory(protocol.ClientFactory):
 		p.factory = self
 		return p
 
-def start(callback,core_port):
+def start(callback,core_host,core_port):
 	f = ClientFactory(callback)
-	reactor.connectTCP('localhost',core_port,f)
+	reactor.connectTCP(core_host,core_port,f)
 	
 	try:
 		reactor.run()
