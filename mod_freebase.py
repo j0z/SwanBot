@@ -403,7 +403,7 @@ def parse(commands,callback,channel,user):
 		if _research:
 			callback.msg(channel,'I have built a node mesh of size %s.' %
 				(len(_research),', '.join([node_db[entry]['text'] for entry in _research
-				if node_db[entry]['valuetype'] == 'object'])[:300]).encode('utf-8','ignore'),
+				if node_db[entry]['valuetype'] == 'object'])[:300]),
 				to=user['name'])
 		
 		return 1
