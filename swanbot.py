@@ -4,6 +4,7 @@ from twisted.internet.endpoints import TCP4ServerEndpoint
 from twisted.internet.protocol import Factory, Protocol
 from twisted.protocols.basic import LineReceiver
 from twisted.internet import reactor
+import mod_freebase
 import logging
 import hashlib
 import json
@@ -57,6 +58,60 @@ class SwanBot(LineReceiver):
 			if _args[1] == 'nodes':
 				self.node_string = json.dumps(self.factory.node_db)
 				self.send_nodes(0)
+			
+			elif _args[1] == 'examine_topic':
+				_id = _args[2]
+				_range = int(_args[3])
+				
+				_send_string = json.dumps(mod_freebase.examine_topic(':'.join(_args[4:])))
+				
+				self.send('send:data:%s:%s' % (_id,_send_string[_range:_range+self.chunk_size]))
+			
+			elif _args[1] == 'research_topic':
+				_id = _args[2]
+				_range = _args[3]
+				
+				_send_string = json.dumps(mod_freebase.research_topic(':'.join(_args[4:]),self.factory))
+				
+				self.send('send:data:%s:%s' % (_id,_send_string))
+			
+			elif _args[1] == 'expand_nodes':
+				_id = _args[2]
+				_range = _args[3]
+				
+				_nodes = json.loads(':'.join(_args[4:]))
+				_send_string = json.dumps(mod_freebase.expand_nodes(_nodes,self.factory))
+				
+				self.send('send:data:%s:%s' % (_id,_send_string))
+			
+			elif _args[1] == 'nodes_to_string':
+				_id = _args[2]
+				_range = _args[3]
+				
+				_nodes = json.loads(':'.join(_args[4:]))
+				_send_string = {'text':', '.join([self.factory.node_db[entry]['text'] for entry in _nodes
+					if self.factory.node_db[entry]['valuetype'] == 'object'])\
+						[:300].encode('utf-8','ignore')}
+				
+				self.send('send:data:%s:%s' % (_id,json.dumps(_send_string)))
+			
+			elif _args[1] == 'find_node':
+				_id = _args[2]
+				_range = _args[3]
+				
+				_search = ':'.join(_args[4:])
+				_send_string = json.dumps({'text':mod_freebase.find_node(_search,self.factory)})
+				
+				self.send('send:data:%s:%s' % (_id,_send_string))
+			
+			elif _args[1] == 'show_node':
+				_id = _args[2]
+				_range = _args[3]
+				
+				_index = int(_args[4])
+				_send_string = json.dumps({'text':mod_freebase.show_node(_index,self.factory)})
+				
+				self.send('send:data:%s:%s' % (_id,_send_string))
 		
 		elif _args[0] == 'send':
 			if _args[1] == 'start-node':
@@ -83,7 +138,7 @@ class SwanBot(LineReceiver):
 			self.state = 'identified'
 			self.send('login:success')
 			
-			logging.info('Logged in!')
+			logging.info('%s logged in.' % user)
 		else:
 			self.send('login:failed')
 			

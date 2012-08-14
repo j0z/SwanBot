@@ -490,7 +490,7 @@ class IRCBot(irc.IRCClient):
 		logging.info('Shutting down modules')
 		for module in self.modules:
 			try:
-				module['module'].shutdown(self.core)
+				module['module'].shutdown()
 			except Exception, e:
 				pass
 		
@@ -567,7 +567,7 @@ class IRCBot(irc.IRCClient):
 				
 				for module in self.modules:
 					try:
-						module['module'].shutdown(self.core)
+						module['module'].shutdown()
 					except Exception, e:
 						pass
 				
@@ -629,8 +629,8 @@ class IRCBot(irc.IRCClient):
 				self.nickserv_identify()
 			elif msg.count('now recognized') or msg.count('now identified'):
 				logging.info('NICKSERV: I am identified with NICKSERV.')
-			else:
-				logging.info('NICKSERV: %s' % msg)
+			#else:
+			#	logging.info('NICKSERV: %s' % msg)
 	
 	def who(self, channel):
 		self.sendLine('WHO %s' % channel)
