@@ -181,7 +181,7 @@ class SwanBotFactory(Factory):
 			_file = open(os.path.join('data','core_users.json'),'w')
 			_file.write(json.dumps(self.users))
 			_file.close()
-			logging.error('Created words database.')
+			logging.info('Created words database.')
 			self.load_users_db(error=True)
 	
 	def load_words_db(self,error=False):
@@ -210,7 +210,7 @@ class SwanBotFactory(Factory):
 			_file = open(os.path.join('data','words.json'),'w')
 			_file.write(json.dumps(self.words_db))
 			_file.close()
-			logging.error('Created words database.')
+			logging.info('Created words database.')
 			self.load_words_db(error=True)
 		
 	def save_users_db(self):

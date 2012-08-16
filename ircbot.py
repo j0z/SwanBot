@@ -72,7 +72,7 @@ logger.addHandler(ch)
 __botname__ = 'Holo'
 __server__ = '192.168.1.2'
 __port__ = 6667
-__core_host__ = '192.168.1.10'
+__core_host__ = 'localhost'
 __core_port__ = 9002
 __password__ = 'yerpderp'
 __email__ = 'clearlyfake@itsfakeimnotkidding.org'
@@ -216,6 +216,10 @@ if '-p' in sys.argv:
 
 if '-c' in sys.argv:
 	__channels__ = sys.argv[sys.argv.index('-c')+1].split(',')
+	
+if '--core' in sys.argv:
+	__core_host__,__core_port__ = sys.argv[sys.argv.index('--core')+1].split(':')
+	__core_port__ = int(__core_port__)
 
 class IRCBot(irc.IRCClient):
 	nickname = __botname__
