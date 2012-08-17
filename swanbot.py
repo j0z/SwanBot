@@ -43,8 +43,6 @@ class SwanBot(LineReceiver):
 		self.transport.write(line+'\r\n')
 	
 	def lineReceived(self,line):
-		#print line
-		
 		if self.state == 'connected':
 			self.handle_login(line)
 			return 0
@@ -58,6 +56,13 @@ class SwanBot(LineReceiver):
 			if _args[1] == 'nodes':
 				self.node_string = json.dumps(self.factory.node_db)
 				self.send_nodes(0)
+			
+			elif _args[1] == 'user_value':
+				_id = _args[2]
+				
+				_send_string = json.dumps(self.factory.get_user_value(_args[3],_args[4]))
+				
+				self.send('send:data:%s:%s' % (_id,_send_string))
 			
 			elif _args[1] == 'examine_topic':
 				_id = _args[2]
@@ -116,6 +121,7 @@ class SwanBot(LineReceiver):
 		elif _args[0] == 'send':
 			if _args[1] == 'start-node':
 				self.recv_node_string = ''
+			
 			elif _args[1] == 'nodes':
 				self.recv_node_string += ':'.join(_args[2:])
 				
@@ -126,6 +132,14 @@ class SwanBot(LineReceiver):
 					logging.info('node_db was uploaded!')
 				except:
 					logging.info('Downloading chunk: %s' % len(self.recv_node_string))
+			
+			elif _args[1] == 'user_value':
+				_id = _args[2]
+				
+				_send_string = json.dumps(self.factory.set_user_value(_args[3],_args[4],
+					':'.join(_args[5:])))
+				
+				self.send('send:data:%s:%s' % (_id,_send_string))
 	
 	def handle_login(self,line):
 		"""NOTE: 'password' must be an md5 hash."""
@@ -238,6 +252,18 @@ class SwanBotFactory(Factory):
 				return True
 		
 		return False
+	
+	def get_user_value(self,name,value):
+		for user in self.users:
+			if user['name'] == name:
+				return user[value]
+	
+	def set_user_value(self,name,value,to):
+		for user in self.users:
+			if user['name'] == name:
+				user[value] = to
+				
+				return user[value]
 
 endpoint = TCP4ServerEndpoint(reactor, 9002)
 endpoint.listen(SwanBotFactory())
