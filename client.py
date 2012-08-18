@@ -3,7 +3,6 @@ from twisted.protocols import basic
 import logging
 import hashlib
 import json
-import sys
 
 class Client(basic.LineReceiver):
 	node_db_callback = None
@@ -198,10 +197,6 @@ class ClientFactory(protocol.ClientFactory):
 		return p
 
 def start(callback,core_host,core_port,execute=None):
-	if not execute and len(sys.argv)>1:
-		execute = ' '.join(sys.argv[1:])
-		print execute
-	
 	f = ClientFactory(callback,execute=execute)
 	reactor.connectTCP(core_host,core_port,f)
 	
