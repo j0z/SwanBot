@@ -3,6 +3,7 @@ from twisted.protocols import basic
 import logging
 import hashlib
 import json
+import sys
 
 class Client(basic.LineReceiver):
 	node_db_callback = None
@@ -16,7 +17,12 @@ class Client(basic.LineReceiver):
 		self.execute = execute
 		self.queries = []
 	
+	def restart(self):
+		pass
+	
 	def quit(self):
+		print 'Quit called?'
+		self.transport.loseConnection()
 		reactor.stop()
 	
 	def create_query(self):
@@ -48,13 +54,18 @@ class Client(basic.LineReceiver):
 		
 		if self.execute:
 			try:
+				#print 'self.%s(%s)' % (self.execute['command'],self.execute['value'])
 				exec('self.%s(%s)' % (self.execute['command'],self.execute['value']))
 			except Exception, e:
 				print e
 				print 'self.%s(%s)' % (self.execute['command'],self.execute['value'])
 	
 	def connectionLost(self,reason):
-		pass
+		if self.callback:
+			try:
+				self.callback.client_disconnected()
+			except:
+				pass
 	
 	def send(self,line):
 		self.transport.write(line.encode('utf-8')+'\r\n')
@@ -108,7 +119,7 @@ class Client(basic.LineReceiver):
 					if self.execute:
 						self.callback.get_data(_data)
 				except:
-					print 'Data invalid, sending for more chunks...'
+					logging.error('Data invalid, sending for more chunks...')
 	
 	def get_user_value(self,name,value):
 		_query = self.create_query()
@@ -130,6 +141,7 @@ class Client(basic.LineReceiver):
 		self.send('send:start-node')
 	
 	def send_node_db(self,data):
+		_client = ['python','client.py']
 		self.send('send:nodes:%s' % data)
 		logging.info('Uploading node_db to server (chunk %s)' % len(data))
 	
@@ -176,16 +188,26 @@ class ClientFactory(protocol.ClientFactory):
 		self.password = hashlib.sha224(password).hexdigest()
 		self.execute = execute
 
+		#def clientConnectionLost(self, connector, reason):
+		#print 'Reconnecting?'
+		#connector.connect()
+
 	def buildProtocol(self,addr):
 		p = Client(self.callback,execute=self.execute)
 		p.factory = self
 		return p
 
 def start(callback,core_host,core_port,execute=None):
+	if not execute and len(sys.argv)>1:
+		execute = ' '.join(sys.argv[1:])
+		print execute
+	
 	f = ClientFactory(callback,execute=execute)
 	reactor.connectTCP(core_host,core_port,f)
 	
 	try:
 		reactor.run()
 	except:
-		pass
+		logging.info('Reactor still running...')
+		
+		

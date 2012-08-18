@@ -83,5 +83,5 @@ def compare(face_to_check,learn=False):
 		#draw_str(vis, (20, 20), 'time: %.1f ms' % (dt*1000))
 		#cv2.imshow('facedetect', vis)
 
-print compare('luke_facing.jpg',learn=True)
+#print compare('luke_facing.jpg',learn=True)
 

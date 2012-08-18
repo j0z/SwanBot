@@ -60,7 +60,7 @@ class SwanBot(LineReceiver):
 			elif _args[1] == 'user_value':
 				_id = _args[2]
 				
-				_send_string = json.dumps(self.factory.get_user_value(_args[3],_args[4]))
+				_send_string = json.dumps({'text':self.factory.get_user_value(_args[3],_args[4])})
 				
 				self.send('send:data:%s:%s' % (_id,_send_string))
 			
@@ -256,7 +256,11 @@ class SwanBotFactory(Factory):
 	def get_user_value(self,name,value):
 		for user in self.users:
 			if user['name'] == name:
-				return user[value]
+				try:
+					return user[value]
+				except:
+					logging.error('User %s has no value \'%s\'' % (name,value))
+					return None
 	
 	def set_user_value(self,name,value,to):
 		for user in self.users:
