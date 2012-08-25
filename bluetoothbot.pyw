@@ -37,7 +37,6 @@ class Start(threading.Thread):
 		global bot
 		
 		if bot.core:
-			#bot.connect_to_client()
 			bot.pair_device_with_user('test','bluetooth',bot.devices[1]['address'][0])
 			bot.watch_for_user('test')
 
@@ -105,8 +104,6 @@ class BluetoothBot():
 			if not _found:
 				self.devices.append({'address':device,'connection':None})
 				logging.debug('Added new bluetooth device %s (%s)' % (device[0],device[1]))
-				
-		self.devices
 	
 	def list_devices(self):
 		for device in self.devices:
@@ -193,10 +190,6 @@ class BluetoothBot():
 				_sleep_for = 30
 				logging.info('%s has left. Scan time set to: %s' % (user,_sleep_for))
 				lock_screen()
-			else:
-				pass
-				#_sleep_for = 30
-				print 'Not here!'
 			
 			#print _sleep_for
 			
@@ -212,4 +205,4 @@ def lock_screen():
 bot = BluetoothBot()
 
 _start = Start()
-client.start(_start,'localhost',9002)
+client.start(_start,'musicbox.net',9002)

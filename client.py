@@ -20,7 +20,6 @@ class Client(basic.LineReceiver):
 		pass
 	
 	def quit(self):
-		print 'Quit called?'
 		self.transport.loseConnection()
 		reactor.stop()
 	
