@@ -1,7 +1,6 @@
 from twisted.internet import protocol, reactor
 from twisted.protocols import basic
 import logging
-import hashlib
 import json
 
 class Client(basic.LineReceiver):
@@ -10,10 +9,9 @@ class Client(basic.LineReceiver):
 	recv_node_db_string = ''
 	query_id = 0
 	
-	def __init__(self,callback,execute=None):
+	def __init__(self,callback):
 		self.node_db_string = ''
 		self.callback = callback
-		self.execute = execute
 		self.queries = []
 	
 	def restart(self):
@@ -49,14 +47,6 @@ class Client(basic.LineReceiver):
 				logging.error('Could not find callback.connected_to_client!')
 		else:
 			logging.warning('No callback set for core! How\'d you manage that?')
-		
-		if self.execute:
-			try:
-				#print 'self.%s(%s)' % (self.execute['command'],self.execute['value'])
-				exec('self.%s(%s)' % (self.execute['command'],self.execute['value']))
-			except Exception, e:
-				print e
-				print 'self.%s(%s)' % (self.execute['command'],self.execute['value'])
 	
 	def connectionLost(self,reason):
 		if self.callback:
@@ -113,11 +103,17 @@ class Client(basic.LineReceiver):
 					_data = json.loads(_query['data'])
 					#_query['callback'](_data)
 					_query['done'] = True
-					
-					if self.execute:
-						self.callback.get_data(_data)
 				except:
-					logging.error('Data invalid, sending for more chunks...')
+					logging.error('Data invalid. Got...')
+					print _query['data']
+				
+				try:
+					self.callback.get_data(_data)
+				except:
+					logging.error('Callback is missing function \'get_data()\'')
+			
+			elif _args[1] == 'comm':
+				print 'COMMAND CAME BACK TO CLIENT'
 	
 	def get_user_value(self,name,value):
 		_query = self.create_query()
@@ -130,6 +126,10 @@ class Client(basic.LineReceiver):
 		self.send('send:user_value:%s:%s:%s:%s' % (_query['id'],name,value,to))
 		
 		return _query
+	
+	def run_command(self,args):
+		print 'comm:'+':'.join(args)
+		self.send('comm:'+':'.join(args))
 	
 	def get_node_db(self,callback):
 		self.send('get:nodes')
@@ -180,23 +180,22 @@ class Client(basic.LineReceiver):
 		return _query
 
 class ClientFactory(protocol.ClientFactory):
-	def __init__(self,callback,user='test',password='test',execute=None):
+	def __init__(self,callback,user='',password=''):
 		self.callback = callback
 		self.user = user
-		self.password = hashlib.sha224(password).hexdigest()
-		self.execute = execute
+		self.password = password
 
 		#def clientConnectionLost(self, connector, reason):
 		#print 'Reconnecting?'
 		#connector.connect()
 
 	def buildProtocol(self,addr):
-		p = Client(self.callback,execute=self.execute)
+		p = Client(self.callback)
 		p.factory = self
 		return p
 
-def start(callback,core_host,core_port,execute=None):
-	f = ClientFactory(callback,execute=execute)
+def start(callback,core_host,core_port,user='',password=''):
+	f = ClientFactory(callback,user=user,password=password)
 	reactor.connectTCP(core_host,core_port,f)
 	
 	try:

@@ -29,6 +29,7 @@ class SwanBot(LineReceiver):
 	recv_node_string = ''
 	
 	def __init__(self):
+		self.name = 'Client'
 		self.state = 'connected'
 	
 	def connectionMade(self):
@@ -37,7 +38,7 @@ class SwanBot(LineReceiver):
 		logging.info('Client connected.')
 	
 	def connectionLost(self,reason):
-		logging.info('Client disconnected.')
+		logging.info('%s disconnected.' % self.name)
 	
 	def send(self,line):
 		self.transport.write(line+'\r\n')
@@ -140,6 +141,9 @@ class SwanBot(LineReceiver):
 					':'.join(_args[5:])))
 				
 				self.send('send:data:%s:%s' % (_id,_send_string))
+		
+		elif _args[0] == 'comm':
+			logging.info('Command: '+' '.join(_args[1:]))
 	
 	def handle_login(self,line):
 		"""NOTE: 'password' must be an md5 hash."""
@@ -153,6 +157,7 @@ class SwanBot(LineReceiver):
 			self.send('login:success')
 			
 			logging.info('%s logged in.' % user)
+			self.name = user
 		else:
 			self.send('login:failed')
 			
