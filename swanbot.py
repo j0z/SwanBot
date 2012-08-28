@@ -143,7 +143,12 @@ class SwanBot(LineReceiver):
 				self.send('send:data:%s:%s' % (_id,_send_string))
 		
 		elif _args[0] == 'comm':
+			self.handle_command(_args[1:])
+			
 			logging.info('Command: '+' '.join(_args[1:]))
+	
+	def handle_command(self,args):
+		
 	
 	def handle_login(self,line):
 		"""NOTE: 'password' must be an md5 hash."""

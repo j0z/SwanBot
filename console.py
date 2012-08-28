@@ -72,6 +72,9 @@ class Console:
 			if self.INPUT == '\n\n\n':
 				self.RUN_LEVEL = -1
 			else:
+				if not len(self.INPUT):
+					continue
+				
 				self.CALLBACK.run_command(self.INPUT)
 		else:
 			print '\nExiting...'
