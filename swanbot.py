@@ -187,7 +187,7 @@ class SwanBot(LineReceiver):
 			_script_id = self.create_script(_matches[0],args)
 			
 			#TODO: Client needs to log this!
-			self.send('comm:id:%s:%s' % (id,_script_id))
+			#self.send('comm:id:%s:%s' % (id,_script_id))
 			
 			self.run_script(_script_id)
 			
@@ -235,8 +235,10 @@ class SwanBot(LineReceiver):
 		return 1
 	
 	def create_script(self,module,args):
-		_script = {'script':module['module'].Script(args),
+		_script = {'script':module['module'].Script(args,self),
 			'id':len(self.scripts)+1}
+		
+		_script['script'].id = _script['id']
 		
 		self.scripts.append(_script)
 		logging.info('Created script with id #%s' % _script['id'])
@@ -245,7 +247,6 @@ class SwanBot(LineReceiver):
 	
 	def run_script(self,id):
 		for script in self.scripts:
-			print script['id'],id
 			if script['id'] == id:
 				script['script'].parse()
 
