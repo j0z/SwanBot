@@ -9,6 +9,7 @@ import logging
 import hashlib
 import json
 import sys
+import imp
 import os
 
 logger = logging.getLogger()
@@ -150,14 +151,31 @@ class SwanBot(LineReceiver):
 		
 		if args[0] == 'loadmod' and len(args)==2:
 			try:
-				exec('import %s as TEMP_MOD' % args[1])
+				_mod_name = args[1]
+				
+				if not _mod_name.count('py'):
+					_mod_name = _mod_name+'.py'
+				
+				TEMP_MOD = imp.load_source(args[1].replace('.py',''),\
+					os.path.join('modules',_mod_name))
+				#exec('import %s as TEMP_MOD' % args[1])
 				if self.add_module(args[1],TEMP_MOD):
 					logging.info('Loaded module: %s' % args[1])
+					self.send('comm:data:%s:\'%s\' loaded.' % (id,args[1]))
+					
+					return True
 				else:
 					logging.error('Module already loaded: %s' % args[1])
+					self.send('comm:data:%s:\'%s\' already loaded.' % (id,args[1]))
+					
+					return True
 			except Exception, e:
 				logging.error('Failed to import mod \'%s\'' % args[1])
 				logging.error(e)
+				
+				self.send('comm:data:%s:%s' % (id,e))
+				
+				return False
 			
 		for module in self.factory.modules:
 			_RETURN = module['module'].parse(args)
