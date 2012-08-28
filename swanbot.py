@@ -28,6 +28,7 @@ class SwanBot(LineReceiver):
 	node_db_end_index = chunk_size
 	node_string = ''
 	recv_node_string = ''
+	scripts = []
 	
 	def __init__(self):
 		self.name = 'Client'
@@ -147,7 +148,8 @@ class SwanBot(LineReceiver):
 			self.handle_command(_args[2:],_args[1])
 	
 	def handle_command(self,args,id):
-		_ret = []
+		_matches = []
+		_return = []
 		
 		if args[0] == 'loadmod' and len(args)==2:
 			try:
@@ -178,13 +180,23 @@ class SwanBot(LineReceiver):
 				return False
 			
 		for module in self.factory.modules:
-			_RETURN = module['module'].parse(args)
-			
-			if _RETURN:
-				_ret.append(_RETURN)
+			if args[0] in module['module'].COMMANDS:
+				_matches.append(module)
 		
-		for entry in _ret:
-			self.send('comm:data:%s:%s' % (id,entry))
+		if len(_matches)==1:
+			_script_id = self.create_script(_matches[0],args)
+			
+			#TODO: Client needs to log this!
+			self.send('comm:id:%s:%s' % (id,_script_id))
+			
+			self.run_script(_script_id)
+			
+		elif len(_matches)>1:
+			_matches_string = '\t'.join([entry['name'] for entry in _matches])
+			self.send('comm:data:%s:%s' % (id,_matches_string))
+		
+		else:
+			self.send('comm:data:%s:%s' % (id,'Nothing!'))
 	
 	def handle_login(self,line):
 		"""NOTE: 'password' must be a sha224 hash."""
@@ -221,6 +233,21 @@ class SwanBot(LineReceiver):
 		self.factory.modules.append({'name':name,'module':module})
 		
 		return 1
+	
+	def create_script(self,module,args):
+		_script = {'script':module['module'].Script(args),
+			'id':len(self.scripts)+1}
+		
+		self.scripts.append(_script)
+		logging.info('Created script with id #%s' % _script['id'])
+		
+		return _script['id']
+	
+	def run_script(self,id):
+		for script in self.scripts:
+			print script['id'],id
+			if script['id'] == id:
+				script['script'].parse()
 
 class SwanBotFactory(Factory):
 	protocol = SwanBot
