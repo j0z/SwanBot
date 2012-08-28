@@ -1,4 +1,5 @@
-#coreutils - Makes 
+#coreutils - Provices tools to add/remove users and perform
+#maintenance
 
 def parse(args):
-	print args
+	return 'It works!'

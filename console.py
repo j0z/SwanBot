@@ -43,10 +43,10 @@ class Console_Thread(threading.Thread):
 		self.CONSOLE.run()
 
 class Console:
-	CONNECTION = {'host':None,'port':9002}
 	RUN_LEVEL = 0
 	CALLBACK = None
 	INPUT = ''
+	LOCK = False
 	
 	def get_input(self):
 		_line = ''
@@ -61,7 +61,8 @@ class Console:
 			return '\n\n\n'
 	
 	def get_data(self,data):
-		print data
+		print '>',data
+		self.LOCK = False
 	
 	def run(self):
 		time.sleep(0.5)
@@ -71,18 +72,25 @@ class Console:
 			
 			if self.INPUT == '\n\n\n':
 				self.RUN_LEVEL = -1
+			elif ''.join(self.INPUT) in ['quit','exit']:
+				self.CALLBACK.quit()
+				self.RUN_LEVEL = -1
 			else:
 				if not len(self.INPUT):
 					continue
 				
+				self.LOCK = True
 				self.CALLBACK.run_command(self.INPUT)
+				
+				while self.LOCK:
+					pass
 		else:
 			print '\nExiting...'
 
 #print 'Username:',
 USER = 'root'#raw_input()
 
-PASSWORD = hashlib.sha224('test').hexdigest()
+PASSWORD = hashlib.sha224('root').hexdigest()
 #hashlib.sha224(getpass.getpass()).hexdigest()
 
 CONSOLE_THREAD = Console_Thread()

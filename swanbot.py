@@ -143,15 +143,33 @@ class SwanBot(LineReceiver):
 				self.send('send:data:%s:%s' % (_id,_send_string))
 		
 		elif _args[0] == 'comm':
-			self.handle_command(_args[1:])
-			
-			logging.info('Command: '+' '.join(_args[1:]))
+			self.handle_command(_args[2:],_args[1])
 	
-	def handle_command(self,args):
+	def handle_command(self,args,id):
+		_ret = []
 		
+		if args[0] == 'loadmod' and len(args)==2:
+			try:
+				exec('import %s as TEMP_MOD' % args[1])
+				if self.add_module(args[1],TEMP_MOD):
+					logging.info('Loaded module: %s' % args[1])
+				else:
+					logging.error('Module already loaded: %s' % args[1])
+			except Exception, e:
+				logging.error('Failed to import mod \'%s\'' % args[1])
+				logging.error(e)
+			
+		for module in self.factory.modules:
+			_RETURN = module['module'].parse(args)
+			
+			if _RETURN:
+				_ret.append(_RETURN)
+		
+		for entry in _ret:
+			self.send('comm:data:%s:%s' % (id,entry))
 	
 	def handle_login(self,line):
-		"""NOTE: 'password' must be an md5 hash."""
+		"""NOTE: 'password' must be a sha224 hash."""
 		try:
 			user,password = line.split(':')
 		except Exception, e:
@@ -174,10 +192,21 @@ class SwanBot(LineReceiver):
 		self.node_db_end_index += self.chunk_size
 		
 		self.send('send:nodes:%s' % self.node_string)
-		#self.send('test')
+	
+	def add_module(self,name,module):
+		#Sanitize input to prevent duplicates
+		name = name.replace('mod_','').replace('.py','')
+		
+		if name in [mod['name'] for mod in self.factory.modules]:
+			return 0
+		
+		self.factory.modules.append({'name':name,'module':module})
+		
+		return 1
 
 class SwanBotFactory(Factory):
 	protocol = SwanBot
+	modules = []
 
 	def __init__(self):
 		self.motd = 'Welcome to SwanBot!'
@@ -202,7 +231,20 @@ class SwanBotFactory(Factory):
 				sys.exit(1)
 			
 			logging.error('Could not load words database from disk!')
+			
+			try:
+				os.mkdir('data')
+			except:
+				pass
+			
 			_file = open(os.path.join('data','core_users.json'),'w')
+			
+			if '--init' in sys.argv:
+				self.users = [{'name':'root',
+					'password':'871ce144069ea0816545f52f09cd135d1182262c3b235808fa5a3281'}]
+				
+				logging.info('Creating new user DB...')
+			
 			_file.write(json.dumps(self.users))
 			_file.close()
 			logging.info('Created words database.')
