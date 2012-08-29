@@ -145,7 +145,10 @@ class SwanBot(LineReceiver):
 				self.send('send:data:%s:%s' % (_id,_send_string))
 		
 		elif _args[0] == 'comm':
-			self.handle_command(_args[2:],_args[1])
+			if _args[1] == 'get':
+				self.handle_command(_args[3:],_args[2])
+			elif _args[1] == 'input':
+				pass
 	
 	def handle_command(self,args,id):
 		_matches = []

@@ -138,7 +138,7 @@ class Client(basic.LineReceiver):
 	
 	def run_command(self,args):
 		_query = self.create_query()
-		self.send('comm:'+str(_query['id'])+':'+':'.join(args))
+		self.send('comm:get:'+str(_query['id'])+':'+':'.join(args))
 	
 	def get_node_db(self,callback):
 		self.send('get:nodes')
