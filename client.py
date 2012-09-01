@@ -2,6 +2,7 @@ from twisted.internet import protocol, reactor
 from twisted.protocols import basic
 import logging
 import json
+import sys
 
 class Client(basic.LineReceiver):
 	node_db_callback = None
@@ -26,7 +27,8 @@ class Client(basic.LineReceiver):
 		self.queries.append(_temp)
 		self.query_id+=1
 		
-		logging.info('Created query #%s' % _temp['id'])
+		if '--debug' in sys.argv:
+			logging.info('Created query #%s' % _temp['id'])
 		
 		return _temp
 	
@@ -112,8 +114,15 @@ class Client(basic.LineReceiver):
 				except:
 					logging.error('Callback is missing function \'get_data()\'')
 			
-			elif _args[1] == 'comm':
-				print 'COMMAND CAME BACK TO CLIENT'
+		elif _args[0] == 'comm':
+			if _args[1] == 'data':
+				try:
+					self.callback.get_data(' '.join(_args[3:]))
+				except:
+					logging.error('Callback is missing function \'get_data()\'')
+			
+			elif _args[1] == 'input':
+				_script_id = int(args[2])
 	
 	def get_user_value(self,name,value):
 		_query = self.create_query()
@@ -128,8 +137,8 @@ class Client(basic.LineReceiver):
 		return _query
 	
 	def run_command(self,args):
-		print 'comm:'+':'.join(args)
-		self.send('comm:'+':'.join(args))
+		_query = self.create_query()
+		self.send('comm:get:'+str(_query['id'])+':'+':'.join(args))
 	
 	def get_node_db(self,callback):
 		self.send('get:nodes')

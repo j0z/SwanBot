@@ -9,6 +9,7 @@ import logging
 import hashlib
 import json
 import sys
+import imp
 import os
 
 logger = logging.getLogger()
@@ -27,6 +28,7 @@ class SwanBot(LineReceiver):
 	node_db_end_index = chunk_size
 	node_string = ''
 	recv_node_string = ''
+	scripts = []
 	
 	def __init__(self):
 		self.name = 'Client'
@@ -143,15 +145,64 @@ class SwanBot(LineReceiver):
 				self.send('send:data:%s:%s' % (_id,_send_string))
 		
 		elif _args[0] == 'comm':
-			self.handle_command(_args[1:])
-			
-			logging.info('Command: '+' '.join(_args[1:]))
+			if _args[1] == 'get':
+				self.handle_command(_args[3:],_args[2])
+			elif _args[1] == 'input':
+				pass
 	
-	def handle_command(self,args):
+	def handle_command(self,args,id):
+		_matches = []
+		_return = []
 		
+		if args[0] == 'loadmod' and len(args)==2:
+			try:
+				_mod_name = args[1]
+				
+				if not _mod_name.count('py'):
+					_mod_name = _mod_name+'.py'
+				
+				TEMP_MOD = imp.load_source(args[1].replace('.py',''),\
+					os.path.join('modules',_mod_name))
+				#exec('import %s as TEMP_MOD' % args[1])
+				if self.add_module(args[1],TEMP_MOD):
+					logging.info('Loaded module: %s' % args[1])
+					self.send('comm:data:%s:\'%s\' loaded.' % (id,args[1]))
+					
+					return True
+				else:
+					logging.error('Module already loaded: %s' % args[1])
+					self.send('comm:data:%s:\'%s\' already loaded.' % (id,args[1]))
+					
+					return True
+			except Exception, e:
+				logging.error('Failed to import mod \'%s\'' % args[1])
+				logging.error(e)
+				
+				self.send('comm:data:%s:%s' % (id,e))
+				
+				return False
+			
+		for module in self.factory.modules:
+			if args[0] in module['module'].COMMANDS:
+				_matches.append(module)
+		
+		if len(_matches)==1:
+			_script_id = self.create_script(_matches[0],args)
+			
+			#TODO: Client needs to log this!
+			#self.send('comm:id:%s:%s' % (id,_script_id))
+			
+			self.run_script(_script_id)
+			
+		elif len(_matches)>1:
+			_matches_string = '\t'.join([entry['name'] for entry in _matches])
+			self.send('comm:data:%s:%s' % (id,_matches_string))
+		
+		else:
+			self.send('comm:data:%s:%s' % (id,'Nothing!'))
 	
 	def handle_login(self,line):
-		"""NOTE: 'password' must be an md5 hash."""
+		"""NOTE: 'password' must be a sha224 hash."""
 		try:
 			user,password = line.split(':')
 		except Exception, e:
@@ -174,10 +225,37 @@ class SwanBot(LineReceiver):
 		self.node_db_end_index += self.chunk_size
 		
 		self.send('send:nodes:%s' % self.node_string)
-		#self.send('test')
+	
+	def add_module(self,name,module):
+		#Sanitize input to prevent duplicates
+		name = name.replace('mod_','').replace('.py','')
+		
+		if name in [mod['name'] for mod in self.factory.modules]:
+			return 0
+		
+		self.factory.modules.append({'name':name,'module':module})
+		
+		return 1
+	
+	def create_script(self,module,args):
+		_script = {'script':module['module'].Script(args,self),
+			'id':len(self.scripts)+1}
+		
+		_script['script'].id = _script['id']
+		
+		self.scripts.append(_script)
+		logging.info('Created script with id #%s' % _script['id'])
+		
+		return _script['id']
+	
+	def run_script(self,id):
+		for script in self.scripts:
+			if script['id'] == id:
+				script['script'].parse()
 
 class SwanBotFactory(Factory):
 	protocol = SwanBot
+	modules = []
 
 	def __init__(self):
 		self.motd = 'Welcome to SwanBot!'
@@ -202,7 +280,20 @@ class SwanBotFactory(Factory):
 				sys.exit(1)
 			
 			logging.error('Could not load words database from disk!')
+			
+			try:
+				os.mkdir('data')
+			except:
+				pass
+			
 			_file = open(os.path.join('data','core_users.json'),'w')
+			
+			if '--init' in sys.argv:
+				self.users = [{'name':'root',
+					'password':'871ce144069ea0816545f52f09cd135d1182262c3b235808fa5a3281'}]
+				
+				logging.info('Creating new user DB...')
+			
 			_file.write(json.dumps(self.users))
 			_file.close()
 			logging.info('Created words database.')
