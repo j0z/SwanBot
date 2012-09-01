@@ -7,7 +7,6 @@ COMMANDS = ['adduser']
 
 class Script(Base_Script):
 	def parse(self):
-		#Copy this over since it's useful to keep the original
 		args = self.ARGS[:]
 		
 		if self.STATE == 'running':
@@ -18,4 +17,4 @@ class Script(Base_Script):
 					self.get_input(self.handle_name)
 	
 	def handle_name(self,data):
-		print data
+		print 'Yo, got this:',data

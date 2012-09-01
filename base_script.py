@@ -13,4 +13,10 @@ class Base_Script:
 		self.STATE = 'input'
 		self.INPUT_CALLBACK = callback
 		
-		self.CALLBACK.send('comm:get:')
+		self.CALLBACK.send('comm:input:%s' % self.ID)
+	
+	def send_input(self,user_input):
+		self.STATE = 'running'
+		self.INPUT_CALLBACK(user_input)
+		
+		self.INPUT_CALLBACK = None

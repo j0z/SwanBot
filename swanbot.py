@@ -148,7 +148,7 @@ class SwanBot(LineReceiver):
 			if _args[1] == 'get':
 				self.handle_command(_args[3:],_args[2])
 			elif _args[1] == 'input':
-				pass
+				self.handle_script_input(_args[3:],int(_args[2]))
 	
 	def handle_command(self,args,id):
 		_matches = []
@@ -201,6 +201,11 @@ class SwanBot(LineReceiver):
 		else:
 			self.send('comm:data:%s:%s' % (id,'Nothing!'))
 	
+	def handle_script_input(self,args,id):	
+		for script in self.scripts:
+			if script['id'] == id:
+				script['script'].send_input(args)
+	
 	def handle_login(self,line):
 		"""NOTE: 'password' must be a sha224 hash."""
 		try:
@@ -238,10 +243,9 @@ class SwanBot(LineReceiver):
 		return 1
 	
 	def create_script(self,module,args):
-		_script = {'script':module['module'].Script(args,self),
-			'id':len(self.scripts)+1}
-		
-		_script['script'].id = _script['id']
+		_script_id = len(self.scripts)+1
+		_script = {'script':module['module'].Script(args,self,_script_id),
+			'id':_script_id}
 		
 		self.scripts.append(_script)
 		logging.info('Created script with id #%s' % _script['id'])

@@ -122,7 +122,13 @@ class Client(basic.LineReceiver):
 					logging.error('Callback is missing function \'get_data()\'')
 			
 			elif _args[1] == 'input':
-				_script_id = int(args[2])
+				_script_id = int(_args[2])
+				logging.info('Script with ID \'%s\' requests input.' % _script_id)
+				
+				try:
+					self.callback.get_input(_script_id)
+				except:
+					logging.error('Callback is missing function \'get_input()\'')
 	
 	def get_user_value(self,name,value):
 		_query = self.create_query()

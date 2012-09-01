@@ -37,6 +37,11 @@ class Console_Thread(threading.Thread):
 	def get_data(self,data):
 		self.CONSOLE.get_data(data)
 	
+	def get_input(self,id):
+		_user_input = self.CONSOLE.get_input()
+		
+		self.CORE.send('comm:input:%s:%s' % (id,_user_input))
+	
 	def run(self):
 		self.CONSOLE = Console()
 		self.CONSOLE.CALLBACK = self.CORE
