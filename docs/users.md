@@ -41,5 +41,7 @@ root-only Commands
 		databases to disk, and stops.
 	loadmod <module> - Loads a module.
 	delmod <module> - Unloads module.
-	lmods - Lists all available modules and shows their status (Loaded or Unloaded.)
-	modinfo <module> - Shows the status of the specified module.
+	lmods - Lists all available modules and shows their status
+		(Loaded or Unloaded.)
+	modinfo <module> - Shows the status of the specified
+		module.
