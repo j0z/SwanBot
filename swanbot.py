@@ -145,10 +145,18 @@ class SwanBot(LineReceiver):
 				self.send('send:data:%s:%s' % (_id,_send_string))
 		
 		elif _args[0] == 'comm':
+			_script_id = int(_args[2])
+			
 			if _args[1] == 'get':
-				self.handle_command(_args[3:],_args[2])
+				self.handle_command(_args[3:],_script_id)
+			
+			elif _args[1] == 'got':
+				for script in self.scripts:
+					if script['id'] == _script_id:
+						script['script'].parse()
+			
 			elif _args[1] == 'input':
-				self.handle_script_input(_args[3:],int(_args[2]))
+				self.handle_script_input(_args[3:],_script_id)
 	
 	def handle_command(self,args,id):
 		_matches = []
@@ -163,15 +171,15 @@ class SwanBot(LineReceiver):
 				
 				TEMP_MOD = imp.load_source(args[1].replace('.py',''),\
 					os.path.join('modules',_mod_name))
-				#exec('import %s as TEMP_MOD' % args[1])
+				
 				if self.add_module(args[1],TEMP_MOD):
 					logging.info('Loaded module: %s' % args[1])
-					self.send('comm:data:%s:\'%s\' loaded.' % (id,args[1]))
+					self.send('comm:text:%s:\'%s\' loaded.' % (id,args[1]))
 					
 					return True
 				else:
 					logging.error('Module already loaded: %s' % args[1])
-					self.send('comm:data:%s:\'%s\' already loaded.' % (id,args[1]))
+					self.send('comm:text:%s:\'%s\' already loaded.' % (id,args[1]))
 					
 					return True
 			except Exception, e:
@@ -256,6 +264,11 @@ class SwanBot(LineReceiver):
 		for script in self.scripts:
 			if script['id'] == id:
 				script['script'].parse()
+	
+	def script_fire_event(self,id,event,event_value):
+		for script in self.scripts:
+			if script['id'] == id:
+				script['script'].script_finished()
 
 class SwanBotFactory(Factory):
 	protocol = SwanBot

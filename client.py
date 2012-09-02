@@ -61,7 +61,7 @@ class Client(basic.LineReceiver):
 		self.transport.write(line.encode('utf-8')+'\r\n')
 
 	def lineReceived(self,line):
-		#print line
+		#print '>>>',line
 		
 		_args = line.split(':')
 		
@@ -113,22 +113,39 @@ class Client(basic.LineReceiver):
 					self.callback.get_data(_data)
 				except:
 					logging.error('Callback is missing function \'get_data()\'')
-			
+		
 		elif _args[0] == 'comm':
-			if _args[1] == 'data':
+			_script_id = int(_args[2])
+			
+			if _args[1] == 'text':
+				try:
+					self.callback.get_text(' '.join(_args[3:]))
+					self.send('comm:got:%s' % _script_id)
+				except:
+					logging.error('Callback is missing function \'get_text()\'')
+			
+			elif _args[1] == 'data':
 				try:
 					self.callback.get_data(' '.join(_args[3:]))
+					self.send('comm:got:%s' % _script_id)
 				except:
 					logging.error('Callback is missing function \'get_data()\'')
 			
 			elif _args[1] == 'input':
-				_script_id = int(_args[2])
 				logging.info('Script with ID \'%s\' requests input.' % _script_id)
 				
 				try:
 					self.callback.get_input(_script_id)
 				except:
 					logging.error('Callback is missing function \'get_input()\'')
+			
+			elif _args[1] == 'term':
+				logging.info('Script with ID \'%s\' terminated.' % _script_id)
+				
+				try:
+					self.callback.unlock(_script_id)
+				except:
+					logging.error('Callback is missing function \'unlock()\'')
 	
 	def get_user_value(self,name,value):
 		_query = self.create_query()

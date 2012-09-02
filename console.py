@@ -34,13 +34,20 @@ class Console_Thread(threading.Thread):
 		
 		self.start()
 	
+	def get_text(self,data):
+		self.CONSOLE.get_text(data)
+	
 	def get_data(self,data):
 		self.CONSOLE.get_data(data)
 	
 	def get_input(self,id):
+		self.CONSOLE.lock()
 		_user_input = self.CONSOLE.get_input()
 		
 		self.CORE.send('comm:input:%s:%s' % (id,_user_input))
+	
+	def unlock(self,id):
+		self.CONSOLE.unlock()
 	
 	def run(self):
 		self.CONSOLE = Console()
@@ -65,9 +72,20 @@ class Console:
 		except EOFError:
 			return '\n\n\n'
 	
+	def lock(self):
+		print '**Locked**'
+		self.LOCK = True
+	
+	def unlock(self):
+		print '**Unlocked**'
+		self.LOCK = False
+	
+	def get_text(self,text):
+		print '=',text
+		self.unlock()
+	
 	def get_data(self,data):
 		print '>',data
-		self.LOCK = False
 	
 	def run(self):
 		time.sleep(0.5)
@@ -84,7 +102,7 @@ class Console:
 				if not len(self.INPUT):
 					continue
 				
-				self.LOCK = True
+				self.lock()
 				self.CALLBACK.run_command(self.INPUT)
 				
 				while self.LOCK:

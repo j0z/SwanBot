@@ -6,15 +6,32 @@ from base_script import Base_Script
 COMMANDS = ['adduser']
 
 class Script(Base_Script):
+	NAME = ''
+	PASSWORD  = ''
+	
 	def parse(self):
 		args = self.ARGS[:]
 		
 		if self.STATE == 'running':
 			if args[0] == 'adduser':
-				if len(args)==2:
-					_name = args[1]
+				if not self.NAME:
+					if len(args)==2:
+						self.handle_name(args[1])
+					else:
+						self.get_input(self.handle_name)
+				elif not self.PASSWORD:
+					self.get_input(self.handle_password)
 				else:
-					self.get_input(self.handle_name)
+					self.CALLBACK.script_fire_event(self.ID,'finished',True)
 	
-	def handle_name(self,data):
-		print 'Yo, got this:',data
+	def handle_name(self,name):
+		#print 'Name set:',name
+		self.NAME = name
+		
+		self.CALLBACK.send('comm:data:%s:Name was set! Cool!' % self.ID)
+	
+	def handle_password(self,password):
+		#print 'Password set:',password
+		self.PASSWORD = password
+		
+		self.CALLBACK.send('comm:data:%s:Password was set! Cool!' % self.ID)

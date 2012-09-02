@@ -20,3 +20,7 @@ class Base_Script:
 		self.INPUT_CALLBACK(user_input)
 		
 		self.INPUT_CALLBACK = None
+	
+	def script_finished(self):
+		self.STATE = 'finished'
+		self.CALLBACK.send('comm:term:%s' % self.ID)
