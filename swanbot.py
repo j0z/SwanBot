@@ -204,10 +204,10 @@ class SwanBot(LineReceiver):
 			
 		elif len(_matches)>1:
 			_matches_string = '\t'.join([entry['name'] for entry in _matches])
-			self.send('comm:data:%s:%s' % (id,_matches_string))
+			self.send('comm:text:%s:%s' % (id,_matches_string))
 		
 		else:
-			self.send('comm:data:%s:%s' % (id,'Nothing!'))
+			self.send('comm:text:%s:%s' % (id,'Nothing!'))
 	
 	def handle_script_input(self,args,id):	
 		for script in self.scripts:

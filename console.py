@@ -73,11 +73,9 @@ class Console:
 			return '\n\n\n'
 	
 	def lock(self):
-		print '**Locked**'
 		self.LOCK = True
 	
 	def unlock(self):
-		print '**Unlocked**'
 		self.LOCK = False
 	
 	def get_text(self,text):
