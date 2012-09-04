@@ -59,6 +59,9 @@ class Client(basic.LineReceiver):
 	
 	def send(self,line):
 		self.transport.write(line.encode('utf-8')+'\r\n')
+	
+	def fire_event(self,type,value):
+		self.send('event:%s:%s' % (type,value))
 
 	def lineReceived(self,line):
 		#print '>>>',line

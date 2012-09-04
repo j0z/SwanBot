@@ -14,5 +14,11 @@ all incoming event packets sent to the client are
 assumed to be from the server and require no response,
 just handling by the client.
 
-    event:type:data - Sends an event of 'type'.
-		'data' can be any value.
+    event:type:value - Sends an event of 'type' to all
+		connected clients authenticated as the user who
+		created the event.'value' can be anything.
+
+If the `client.py` moudle is being used, a helper
+function is available.
+
+    client.fire_event(type,value)
