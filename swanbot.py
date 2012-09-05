@@ -36,11 +36,16 @@ class SwanBot(LineReceiver):
 	
 	def connectionMade(self):
 		self.send(self.factory.motd)
+		self.client_host = self.transport.getPeer().host
+		self.client_port = self.transport.getPeer().port
 		
-		logging.info('Client connected.')
+		logging.info('Client (%s:%s) connected.' % (self.client_host,self.client_port))
 	
-	def connectionLost(self,reason):
-		logging.info('%s disconnected.' % self.name)
+	def connectionLost(self,reason):		
+		self.factory.delete_client(self.client_name,self.transport,self.name)
+		
+		logging.info('%s via %s (%s:%s) disconnected.' %
+			(self.name,self.client_name,self.client_host,self.client_port))
 	
 	def send(self,line):
 		self.transport.write(line+'\r\n')
@@ -157,6 +162,13 @@ class SwanBot(LineReceiver):
 			
 			elif _args[1] == 'input':
 				self.handle_script_input(_args[3:],_script_id)
+		
+		elif _args[0] == 'event':
+			if len(_args)<3:
+				logging.info('Threw out event')
+				return False
+				
+			self.create_event(_args[1],_args[2])
 	
 	def handle_command(self,args,id):
 		_matches = []
@@ -217,16 +229,24 @@ class SwanBot(LineReceiver):
 	def handle_login(self,line):
 		"""NOTE: 'password' must be a sha224 hash."""
 		try:
-			user,password = line.split(':')
+			user,password,client_name = line.split(':')
 		except Exception, e:
 			print e
 		
 		if self.factory.login(user,password):
+			logging.info('%s (%s:%s) -> %s' % (self.name,self.client_host,self.client_port,user))
+			self.name = user
 			self.state = 'identified'
 			self.send('login:success')
 			
+			self.client_name = client_name
+			
+			if not self.factory.create_client(client_name,self.transport,user):
+				self.send('login:failed')
+				
+				return False
+			
 			logging.info('%s logged in.' % user)
-			self.name = user
 		else:
 			self.send('login:failed')
 			
@@ -249,6 +269,12 @@ class SwanBot(LineReceiver):
 		self.factory.modules.append({'name':name,'module':module})
 		
 		return 1
+	
+	def create_event(self,type,value):
+		"""Creates and broadcasts of event of type 'type' with value 'value'"""
+		logging.info('Event created: %s - %s' % (type,value))
+		
+		self.factory.broadcast_event(type,value,self.name)
 	
 	def create_script(self,module,args):
 		_script_id = len(self.scripts)+1
@@ -273,6 +299,7 @@ class SwanBot(LineReceiver):
 class SwanBotFactory(Factory):
 	protocol = SwanBot
 	modules = []
+	clients = []
 
 	def __init__(self):
 		self.motd = 'Welcome to SwanBot!'
@@ -370,6 +397,57 @@ class SwanBotFactory(Factory):
 				return True
 		
 		return False
+	
+	def create_client(self,client_name,transport,user):
+		_host = transport.getPeer().host
+		_port = transport.getPeer().port
+		
+		for client in self.clients:
+			_client_host = client['transport'].getPeer().host
+			_client_port = client['transport'].getPeer().port
+			
+			if client['client_name'] == client_name and _client_host == _host and\
+				_client_port == _port and client['user'] == user:
+				
+				logging.info('%s via %s (%s:%s) failed to log in due to a duplicate connection.'
+					% (user,client_name,_host,_port))
+				return False
+		
+		self.clients.append({'client_name':client_name,
+			'transport':transport,'user':user})
+		
+		logging.info('%s connected via \'%s\' (%s:%s)' % (user,client_name,_host,_port))
+		return True
+	
+	def delete_client(self,client_name,transport,user):
+		_host = transport.getPeer().host
+		_port = transport.getPeer().port
+		
+		for client in self.clients:
+			_client_host = client['transport'].getPeer().host
+			_client_port = client['transport'].getPeer().port
+			
+			if client['client_name'] == client_name and _client_host == _host and\
+				_client_port == _port and client['user'] == user:
+				self.clients.remove(client)
+				
+				return True
+		
+		logging.error('Could not find matching client: %s via %s (%s:%s)'
+			% (user,client_name,host,port))
+		
+		return False
+	
+	def broadcast_event(self,type,value,user):
+		_event = 'event:%s:%s' % (type,value)
+		
+		for client in self.clients:
+			if client['user'] == user:
+				_client_host = client['transport'].getPeer().host
+				_client_port = client['transport'].getPeer().port
+				client['transport'].write(_event+'\r\n')
+				
+				logging.info('Event sent to (%s:%s)!' % (_client_host,_client_port))
 	
 	def get_user_value(self,name,value):
 		for user in self.users:
