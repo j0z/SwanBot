@@ -270,6 +270,10 @@ class SwanBot(LineReceiver):
 		
 		return 1
 	
+	def tick_modules(self):
+		for module in self.factory.modules:
+			module['module'].tick()
+	
 	def create_event(self,type,value):
 		"""Creates and broadcasts of event of type 'type' with value 'value'"""
 		logging.info('Event created: %s - %s' % (type,value))
