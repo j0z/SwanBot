@@ -165,10 +165,10 @@ class SwanBot(LineReceiver):
 		
 		elif _args[0] == 'event':
 			if len(_args)<3:
-				logging.info('Threw out event')
+				logging.info('Threw out event: %s' % line)
 				return False
 				
-			self.create_event(_args[1],_args[2])
+			self.create_event(_args[1],':'.join(_args[2:]))
 	
 	def handle_command(self,args,id):
 		_matches = []

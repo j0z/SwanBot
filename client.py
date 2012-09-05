@@ -156,7 +156,7 @@ class Client(basic.LineReceiver):
 				return False
 			
 			try:
-				self.callback.get_event(_args[1],' '.join(_args[2:]))
+				self.callback.get_event(_args[1],':'.join(_args[2:]))
 			except:
 				logging.error('Callback is missing function \'get_event()\'')
 	
