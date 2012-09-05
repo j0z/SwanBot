@@ -46,6 +46,9 @@ class Console_Thread(threading.Thread):
 		
 		self.CORE.send('comm:input:%s:%s' % (id,_user_input))
 	
+	def get_event(self,type,value):
+		self.CONSOLE.handle_event(type,value)
+	
 	def unlock(self,id):
 		self.CONSOLE.unlock()
 	
@@ -85,6 +88,9 @@ class Console:
 	def get_data(self,data):
 		print '>',data
 	
+	def handle_event(self,type,value):
+		logging.info('Event occurred: %s - %s' % (type,value))
+	
 	def run(self):
 		time.sleep(0.5)
 		
@@ -96,6 +102,9 @@ class Console:
 			elif ''.join(self.INPUT) in ['quit','exit']:
 				self.CALLBACK.quit()
 				self.RUN_LEVEL = -1
+			elif self.INPUT[0] == 'fire' and len(self.INPUT)>=3:
+				print 'Firing event...'
+				self.CALLBACK.fire_event(self.INPUT[1],' '.join(self.INPUT[2:]))
 			else:
 				if not len(self.INPUT):
 					continue
@@ -119,4 +128,5 @@ client.start(CONSOLE_THREAD,
 	sys.argv[1],
 	int(sys.argv[2]),
 	user=USER,
-	password=PASSWORD)
+	password=PASSWORD,
+	clientname='Console')

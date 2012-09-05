@@ -40,7 +40,8 @@ class Client(basic.LineReceiver):
 		return -1
 		
 	def connectionMade(self):
-		self.send('%s:%s' % (self.factory.user,self.factory.password))
+		self.send('%s:%s:%s' % (self.factory.user,self.factory.password,
+			self.factory.clientname))
 		
 		if self.callback:
 			try:
@@ -149,6 +150,15 @@ class Client(basic.LineReceiver):
 					self.callback.unlock(_script_id)
 				except:
 					logging.error('Callback is missing function \'unlock()\'')
+		
+		elif _args[0] == 'event':
+			if len(_args)<3:
+				return False
+			
+			try:
+				self.callback.get_event(_args[1],' '.join(_args[2:]))
+			except:
+				logging.error('Callback is missing function \'get_event()\'')
 	
 	def get_user_value(self,name,value):
 		_query = self.create_query()
@@ -215,10 +225,11 @@ class Client(basic.LineReceiver):
 		return _query
 
 class ClientFactory(protocol.ClientFactory):
-	def __init__(self,callback,user='',password=''):
+	def __init__(self,callback,user='',password='',clientname='Unnamed'):
 		self.callback = callback
 		self.user = user
 		self.password = password
+		self.clientname = clientname
 
 		#def clientConnectionLost(self, connector, reason):
 		#print 'Reconnecting?'
@@ -229,8 +240,8 @@ class ClientFactory(protocol.ClientFactory):
 		p.factory = self
 		return p
 
-def start(callback,core_host,core_port,user='',password=''):
-	f = ClientFactory(callback,user=user,password=password)
+def start(callback,core_host,core_port,user='',password='',clientname='Unnamed'):
+	f = ClientFactory(callback,user=user,password=password,clientname=clientname)
 	reactor.connectTCP(core_host,core_port,f)
 	
 	try:

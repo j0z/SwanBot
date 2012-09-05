@@ -18,7 +18,7 @@ just handling by the client.
 		connected clients authenticated as the user who
 		created the event.'value' can be anything.
 
-If the `client.py` moudle is being used, a helper
+If the `client.py` module is being used, a helper
 function is available.
 
     client.fire_event(type,value)
