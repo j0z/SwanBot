@@ -6,7 +6,7 @@ to clients authenticated as the user who created the
 event.
 
 Structure
-=========
+---------
 While events are entirely optional, the methods used to
 both send and receive them are similar to sending data
 packets, except there is no concept of "send" or "get"-

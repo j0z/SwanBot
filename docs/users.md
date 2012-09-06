@@ -9,7 +9,7 @@ Nodes
 -----
 Each user occupies a space known as a 'node,' which they can
 use however they want. Data can be added or removed at will,
-made public or private, or "routed" (see 'routing.md').
+or made public or private.
 
 This ability to add/remove data on command enables SwanBot
 to be used in any application that follows the API, providing
