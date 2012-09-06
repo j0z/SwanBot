@@ -42,13 +42,13 @@ class ModuleThread(threading.Thread):
 		
 		self.RUNNING = False
 	
-	def run(self):
-		logging.info('Module thread: Starting up...')
-		
+	def run(self):		
 		if not self.CALLBACK:
 			logging.error('Module thread: No callback set.')
 			
 			return False
+		
+		logging.info('Module thread: Running.')
 		
 		while self.RUNNING:
 			self.CALLBACK.tick_modules()
@@ -236,6 +236,25 @@ class SwanBot(LineReceiver):
 				self.send('comm:data:%s:%s' % (id,e))
 				
 				return False
+		
+		elif args[0] == 'delmod' and len(args)==2:
+			if len(args)==2:
+				_mod_name = args[1]
+				
+				if self.remove_module(_mod_name):
+					logging.info('Unloaded module: %s' % args[1])
+					self.send('comm:text:%s:\'%s\' unloaded.' % (id,args[1]))
+				else:
+					logging.error('Module is not loaded: %s' % args[1])
+					self.send('comm:text:%s:\'%s\' is not loaded.' % (id,args[1]))
+					return False
+			
+			else:
+				self.send('comm:text:%s:Usage: delmod <mod>' % (id,args[1]))
+				
+				return False
+			
+			return True	
 			
 		for module in self.factory.modules:
 			if args[0] in module['module'].COMMANDS:
@@ -305,6 +324,16 @@ class SwanBot(LineReceiver):
 		
 		return 1
 	
+	def remove_module(self,name):
+		name = name.replace('mod_','').replace('.py','')
+		
+		for mod in self.factory.modules:
+			if mod['name'] == name:
+				self.factory.modules.remove(mod)
+				return 1
+		
+		return 0
+	
 	def create_event(self,type,value):
 		"""Creates and broadcasts of event of type 'type' with value 'value'"""
 		logging.info('Event created: %s - %s' % (type,value))
@@ -325,11 +354,6 @@ class SwanBot(LineReceiver):
 		for script in self.scripts:
 			if script['id'] == id:
 				script['script'].parse()
-	
-	def script_fire_event(self,id,event,event_value):
-		for script in self.scripts:
-			if script['id'] == id:
-				script['script'].script_finished()
 
 class SwanBotFactory(Factory):
 	protocol = SwanBot
