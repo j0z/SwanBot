@@ -5,8 +5,10 @@ from twisted.internet.protocol import Factory, Protocol
 from twisted.protocols.basic import LineReceiver
 from twisted.internet import reactor
 import mod_freebase
+import threading
 import logging
 import hashlib
+import time
 import json
 import sys
 import imp
@@ -21,6 +23,39 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
 ch.setFormatter(console_formatter)
 logger.addHandler(ch)
+
+class ModuleThread(threading.Thread):
+	RUNNING = True
+	CALLBACK = None
+	
+	def start(self,callback):
+		self.CALLBACK = callback
+		self.RUNNING = True
+		
+		threading.Thread.start(self)
+	
+	def stop(self):
+		if not self.CALLBACK:
+			logging.error('Module thread: No callback set.')
+			
+			return False
+		
+		self.RUNNING = False
+	
+	def run(self):
+		logging.info('Module thread: Starting up...')
+		
+		if not self.CALLBACK:
+			logging.error('Module thread: No callback set.')
+			
+			return False
+		
+		while self.RUNNING:
+			self.CALLBACK.tick_modules()
+			
+			time.sleep(1)
+		
+		logging.info('Module thread: Shut down.')
 
 class SwanBot(LineReceiver):
 	chunk_size = 15000
@@ -270,10 +305,6 @@ class SwanBot(LineReceiver):
 		
 		return 1
 	
-	def tick_modules(self):
-		for module in self.factory.modules:
-			module['module'].tick()
-	
 	def create_event(self,type,value):
 		"""Creates and broadcasts of event of type 'type' with value 'value'"""
 		logging.info('Event created: %s - %s' % (type,value))
@@ -388,12 +419,23 @@ class SwanBotFactory(Factory):
 	
 	def startFactory(self):
 		logging.info('SwanBot is up and running.')
+		
+		self.module_thread = ModuleThread()
+		self.module_thread.start(self)
 	
 	def stopFactory(self):
 		self.save_users_db()
 		self.save_words_db
 		
 		logging.info('SwanBot is shutting down.')
+		self.module_thread.stop()
+	
+	def tick_modules(self):
+		for module in self.modules:
+			try:
+				module['module'].tick()
+			except Exception, e:
+				print e
 	
 	def login(self,name,password):
 		for user in self.users:

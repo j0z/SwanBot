@@ -33,7 +33,7 @@ account, which severely limits its use outside of maintenance
 and general upkeep.
 
 root-only Commands
-==================
+------------------
 
     adduser - Creates a new user.
 	deluser <name> - Deletes user.
@@ -45,3 +45,6 @@ root-only Commands
 		(Loaded or Unloaded.)
 	modinfo <module> - Shows the status of the specified
 		module.
+
+User Structure
+--------------

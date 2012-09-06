@@ -5,6 +5,9 @@ from base_script import Base_Script
 
 COMMANDS = ['adduser']
 
+def tick():
+	print 'Module tick!'
+
 class Script(Base_Script):
 	NAME = ''
 	PASSWORD  = ''
