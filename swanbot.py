@@ -350,7 +350,11 @@ class SwanBotFactory(Factory):
 			_file = open(os.path.join('data','core_users.json'),'r')
 			self.users = json.loads(_file.readline())
 			
-			
+			#Set the current highest node ID
+			for user in self.users:
+				for node in user['nodes']:
+					if node['id']>nodes.NODE_ID:
+						nodes.NODE_ID = node['id']
 			
 			_file.close()
 			logging.info('Loaded user database.')
@@ -511,7 +515,7 @@ class SwanBotFactory(Factory):
 				_node['public'] = public
 				
 				user['nodes'].append(_node)
-				logging.info('Created node with ID WIWDHIWHWIH')
+				logging.info('Created node with ID #%s' % _node['id'])
 	
 	def get_public_user_nodes(self):
 		_public_user_nodes = []
