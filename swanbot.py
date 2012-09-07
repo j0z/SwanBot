@@ -11,7 +11,6 @@ import hashlib
 import nodes
 import time
 import json
-import copy
 import sys
 import imp
 import os
@@ -351,6 +350,8 @@ class SwanBotFactory(Factory):
 			_file = open(os.path.join('data','core_users.json'),'r')
 			self.users = json.loads(_file.readline())
 			
+			
+			
 			_file.close()
 			logging.info('Loaded user database.')
 		except Exception, e:
@@ -410,17 +411,8 @@ class SwanBotFactory(Factory):
 			self.load_words_db(error=True)
 		
 	def save_users_db(self):
-		_file = open(os.path.join('data','core_users.json'),'w')
-		
-		_users = copy.deepcopy(self.users)
-		for user in _users:
-			_nodes = []
-			for node in user['nodes']:
-				_nodes.append(node.dump())
-			
-			user['nodes'] = _nodes
-		
-		_file.write(json.dumps(_users))
+		_file = open(os.path.join('data','core_users.json'),'w')		
+		_file.write(json.dumps(self.users))
 		_file.close()
 	
 	def save_words_db(self):
@@ -513,10 +505,10 @@ class SwanBotFactory(Factory):
 	def create_node(self,username,type,public):
 		for user in self.users:
 			if user['name'] == username:
-				_node = nodes.Node()
-				_node.OWNER = username
-				_node.TYPE = type
-				_node.PUBLIC = public
+				_node = nodes.create_node()
+				_node['owner'] = username
+				_node['type'] = type
+				_node['public'] = public
 				
 				user['nodes'].append(_node)
 				logging.info('Created node with ID WIWDHIWHWIH')
