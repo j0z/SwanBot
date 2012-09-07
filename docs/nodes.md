@@ -27,7 +27,7 @@ Nodes consist of the following information:
     OWNER: String. Username of the creator.
     DATE: String. Datetime string of when the node was added
         to the mesh.
-	TYPE: String. Describes in vague terms what data the node
+    TYPE: String. Describes in vague terms what data the node
         carries.
     FILTER: String. If used, the node forfeits 'data' and
         begins to connect existing and incoming nodes to
