@@ -48,3 +48,14 @@ root-only Commands
 
 User Structure
 --------------
+In the database, each user is represented by a dictionary.
+
+    user---------------
+	  |               |
+	  public          private
+	  | |             |
+	  | flags         | <userdata>
+	  |
+	  | <userdata> 
+
+    *<userdata> denotes all data defined by the user.

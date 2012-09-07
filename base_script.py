@@ -9,9 +9,12 @@ class Base_Script:
 		self.ARGS = args
 		self.ID = id
 	
-	def get_input(self,callback):
+	def get_input(self,callback,text=''):
 		self.STATE = 'input'
 		self.INPUT_CALLBACK = callback
+		
+		if text:
+			self.CALLBACK.send('comm:data:%s:%s' % (self.ID,text))
 		
 		self.CALLBACK.send('comm:input:%s' % self.ID)
 	
@@ -21,6 +24,6 @@ class Base_Script:
 		
 		self.INPUT_CALLBACK = None
 	
-	def script_finished(self):
+	def quit(self):
 		self.STATE = 'finished'
 		self.CALLBACK.send('comm:term:%s' % self.ID)

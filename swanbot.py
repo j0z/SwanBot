@@ -210,16 +210,8 @@ class SwanBot(LineReceiver):
 		_return = []
 		
 		if args[0] == 'loadmod' and len(args)==2:
-			try:
-				_mod_name = args[1]
-				
-				if not _mod_name.count('py'):
-					_mod_name = _mod_name+'.py'
-				
-				TEMP_MOD = imp.load_source(args[1].replace('.py',''),\
-					os.path.join('modules',_mod_name))
-				
-				if self.add_module(args[1],TEMP_MOD):
+			try:				
+				if self.factory.add_module(args[1]):
 					logging.info('Loaded module: %s' % args[1])
 					self.send('comm:text:%s:\'%s\' loaded.' % (id,args[1]))
 					
@@ -237,11 +229,11 @@ class SwanBot(LineReceiver):
 				
 				return False
 		
-		elif args[0] == 'delmod' and len(args)==2:
+		elif args[0] == 'delmod':
 			if len(args)==2:
 				_mod_name = args[1]
 				
-				if self.remove_module(_mod_name):
+				if self.factory.remove_module(_mod_name):
 					logging.info('Unloaded module: %s' % args[1])
 					self.send('comm:text:%s:\'%s\' unloaded.' % (id,args[1]))
 				else:
@@ -313,29 +305,8 @@ class SwanBot(LineReceiver):
 		
 		self.send('send:nodes:%s' % self.node_string)
 	
-	def add_module(self,name,module):
-		#Sanitize input to prevent duplicates
-		name = name.replace('mod_','').replace('.py','')
-		
-		if name in [mod['name'] for mod in self.factory.modules]:
-			return 0
-		
-		self.factory.modules.append({'name':name,'module':module})
-		
-		return 1
-	
-	def remove_module(self,name):
-		name = name.replace('mod_','').replace('.py','')
-		
-		for mod in self.factory.modules:
-			if mod['name'] == name:
-				self.factory.modules.remove(mod)
-				return 1
-		
-		return 0
-	
 	def create_event(self,type,value):
-		"""Creates and broadcasts of event of type 'type' with value 'value'"""
+		"""Creates and broadcasts event of type 'type' with value 'value'"""
 		logging.info('Event created: %s - %s' % (type,value))
 		
 		self.factory.broadcast_event(type,value,self.name)
@@ -372,7 +343,7 @@ class SwanBotFactory(Factory):
 	def load_users_db(self,error=False):
 		try:
 			_file = open(os.path.join('data','core_users.json'),'r')
-			self.users.extend(json.loads(_file.readline()))
+			self.users = json.loads(_file.readline())
 			
 			_file.close()
 			logging.info('Loaded user database.')
@@ -393,7 +364,8 @@ class SwanBotFactory(Factory):
 			
 			if '--init' in sys.argv:
 				self.users = [{'name':'root',
-					'password':'871ce144069ea0816545f52f09cd135d1182262c3b235808fa5a3281'}]
+					'password':'871ce144069ea0816545f52f09cd135d1182262c3b235808fa5a3281',
+					'nodes':[]}]
 				
 				logging.info('Creating new user DB...')
 			
@@ -444,6 +416,8 @@ class SwanBotFactory(Factory):
 	def startFactory(self):
 		logging.info('SwanBot is up and running.')
 		
+		self.add_module('mod_coreutils')
+		
 		self.module_thread = ModuleThread()
 		self.module_thread.start(self)
 	
@@ -455,9 +429,11 @@ class SwanBotFactory(Factory):
 		self.module_thread.stop()
 	
 	def tick_modules(self):
+		_public_nodes = self.get_public_user_nodes()
+		
 		for module in self.modules:
 			try:
-				module['module'].tick()
+				module['module'].tick(_public_nodes)
 			except Exception, e:
 				print e
 	
@@ -519,6 +495,20 @@ class SwanBotFactory(Factory):
 				
 				logging.info('Event sent to (%s:%s)!' % (_client_host,_client_port))
 	
+	def get_public_user_nodes(self):
+		_public_user_nodes = []
+		
+		for user in self.users:
+			_nodes = []
+			
+			for node in user['nodes']:
+				if node['public']:
+					_nodes.append(node)
+			
+			_public_user_nodes.append({'name':user['name'],'nodes':_nodes})
+		
+		return _public_user_nodes
+	
 	def get_user_value(self,name,value):
 		for user in self.users:
 			if user['name'] == name:
@@ -534,6 +524,35 @@ class SwanBotFactory(Factory):
 				user[value] = to
 				
 				return user[value]
+	
+	def add_module(self,name):
+		#Sanitize input to prevent duplicates
+		_sanitized_name = name.replace('mod_','').replace('.py','')
+		
+		if _sanitized_name in [mod['name'] for mod in self.modules]:
+			return 0
+		
+		_mod_name = name
+				
+		if not _mod_name.count('py'):
+			_mod_name = _mod_name+'.py'
+
+		_module = imp.load_source(name.replace('.py',''),\
+			os.path.join('modules',_mod_name))
+		
+		self.modules.append({'name':_sanitized_name,'module':_module})
+		
+		return 1
+	
+	def remove_module(self,name):
+		name = name.replace('mod_','').replace('.py','')
+		
+		for mod in self.modules:
+			if mod['name'] == name:
+				self.modules.remove(mod)
+				return 1
+		
+		return 0
 
 endpoint = TCP4ServerEndpoint(reactor, 9002)
 endpoint.listen(SwanBotFactory())

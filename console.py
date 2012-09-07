@@ -70,7 +70,9 @@ class Console:
 			_line+='#'
 		
 		try:
-			print _line,
+			if not self.LOCK:
+				print _line,
+			
 			return raw_input().split()
 		except EOFError:
 			return '\n\n\n'

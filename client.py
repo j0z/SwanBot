@@ -123,20 +123,20 @@ class Client(basic.LineReceiver):
 			
 			if _args[1] == 'text':
 				try:
-					self.callback.get_text(' '.join(_args[3:]))
+					self.callback.get_text(':'.join(_args[3:]))
 					self.send('comm:got:%s' % _script_id)
 				except:
 					logging.error('Callback is missing function \'get_text()\'')
 			
 			elif _args[1] == 'data':
 				try:
-					self.callback.get_data(' '.join(_args[3:]))
+					self.callback.get_data(':'.join(_args[3:]))
 					self.send('comm:got:%s' % _script_id)
 				except:
 					logging.error('Callback is missing function \'get_data()\'')
 			
 			elif _args[1] == 'input':
-				logging.info('Script with ID \'%s\' requests input.' % _script_id)
+				#logging.info('Script with ID \'%s\' requests input.' % _script_id)
 				
 				try:
 					self.callback.get_input(_script_id)
