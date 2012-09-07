@@ -3,6 +3,7 @@ import logging
 import hashlib
 import getpass
 import client
+import json
 import time
 import sys
 
@@ -38,11 +39,12 @@ class Console_Thread(threading.Thread):
 		self.CONSOLE.get_text(data)
 	
 	def get_data(self,data):
-		self.CONSOLE.get_data(data)
+		if not data == '\\OK':
+			self.CONSOLE.get_data(data)
 	
 	def get_input(self,id):
 		self.CONSOLE.lock()
-		_user_input = self.CONSOLE.get_input()
+		_user_input = json.dumps(self.CONSOLE.get_input())
 		
 		self.CORE.send('comm:input:%s:%s' % (id,_user_input))
 	

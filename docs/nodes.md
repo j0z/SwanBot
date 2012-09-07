@@ -17,3 +17,22 @@ If you decided that your tweets need to be private, you could
 set the main "Twitter" node to be private, which would
 then make all attached nodes (your tweets) hidden from the
 public.
+
+Structure
+---------
+Nodes consist of the following information:
+
+    ID: Int. Unique identifier automatically assigned by the
+        node mesh.
+    OWNER: String. Username of the creator.
+    DATE: String. Datetime string of when the node was added
+        to the mesh.
+	TYPE: String. Describes in vague terms what data the node
+        carries.
+    FILTER: String. If used, the node forfeits 'data' and
+        begins to connect existing and incoming nodes to
+        itself if 'type' is matched by 'filter'
+    PUBLIC: Boolean. Decides whether the node is visible to
+        the public.
+    DATA: Anything. Can be any data type that dumps to a
+        valid JSON string.

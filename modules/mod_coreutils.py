@@ -13,8 +13,9 @@ def get_status_string():
 
 class Script(Base_Script):
 	NAME = ''
+	TYPE = ''
 	PASSWORD  = ''
-	PUBLIC = False
+	PUBLIC = -1
 	
 	def parse(self):
 		args = self.ARGS[:]
@@ -33,28 +34,39 @@ class Script(Base_Script):
 					#TODO: Fire event
 			
 			elif args[0] == 'addnode':
-				if not self.NAME:
+				if not self.TYPE:
 					if len(args)==2:
 						self.handle_name(args[1])
 					else:
-						self.get_input(self.handle_name,text='What is the name of this node?')
-				elif not self.PUBLIC:
+						self.get_input(self.handle_type,text='What is the type of this node?')
+				elif self.PUBLIC == -1:
 					self.get_input(self.handle_public,text='Make this node public? y/n')
 				else:
-					self.CALLBACK.script_fire_event(self.ID,'finished',True)
+					_node_string = 'Created node \'%s\'...\nPublic:\t%s'\
+						% (self.TYPE,self.PUBLIC)
+					self.CALLBACK.send('comm:data:%s:%s' % (self.ID,_node_string))
+					self.CALLBACK.create_node(self.TYPE,self.PUBLIC)
+					self.quit()
 	
 	def handle_name(self,name):
-		#print 'Name set:',name
-		self.NAME = name
+		self.NAME = str(name[0])
 		
-		#self.CALLBACK.send('comm:data:%s:Name was set! Cool!' % self.ID)
+		self.CALLBACK.send('comm:data:%s:\\OK' % self.ID)
+	
+	def handle_type(self,type):
+		self.TYPE = str(type[0])
+		
+		self.CALLBACK.send('comm:data:%s:\\OK' % self.ID)
 	
 	def handle_password(self,password):
-		#print 'Password set:',password
 		self.PASSWORD = password
 		
-		#self.CALLBACK.send('comm:data:%s:Password was set! Cool!' % self.ID)
+		self.CALLBACK.send('comm:data:%s:\\OK' % self.ID)
 	
 	def handle_public(self,value):
-		if value.lower() in ['true','yes','y']:
+		if value[0].lower() in ['true','yes','y']:
 			self.PUBLIC = True
+		else:
+			self.PUBLIC = False
+		
+		self.CALLBACK.send('comm:data:%s:\\OK' % self.ID)

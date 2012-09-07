@@ -8,8 +8,10 @@ import mod_freebase
 import threading
 import logging
 import hashlib
+import nodes
 import time
 import json
+import copy
 import sys
 import imp
 import os
@@ -196,7 +198,7 @@ class SwanBot(LineReceiver):
 						script['script'].parse()
 			
 			elif _args[1] == 'input':
-				self.handle_script_input(_args[3:],_script_id)
+				self.handle_script_input(_args[3],_script_id)
 		
 		elif _args[0] == 'event':
 			if len(_args)<3:
@@ -251,6 +253,7 @@ class SwanBot(LineReceiver):
 		for module in self.factory.modules:
 			if args[0] in module['module'].COMMANDS:
 				_matches.append(module)
+				continue
 		
 		if len(_matches)==1:
 			_script_id = self.create_script(_matches[0],args)
@@ -304,6 +307,9 @@ class SwanBot(LineReceiver):
 		self.node_db_end_index += self.chunk_size
 		
 		self.send('send:nodes:%s' % self.node_string)
+	
+	def create_node(self,type,public):
+		self.factory.create_node(self.name,type,public)
 	
 	def create_event(self,type,value):
 		"""Creates and broadcasts event of type 'type' with value 'value'"""
@@ -405,7 +411,16 @@ class SwanBotFactory(Factory):
 		
 	def save_users_db(self):
 		_file = open(os.path.join('data','core_users.json'),'w')
-		_file.write(json.dumps(self.users))
+		
+		_users = copy.deepcopy(self.users)
+		for user in _users:
+			_nodes = []
+			for node in user['nodes']:
+				_nodes.append(node.dump())
+			
+			user['nodes'] = _nodes
+		
+		_file.write(json.dumps(_users))
 		_file.close()
 	
 	def save_words_db(self):
@@ -494,6 +509,17 @@ class SwanBotFactory(Factory):
 				client['transport'].write(_event+'\r\n')
 				
 				logging.info('Event sent to (%s:%s)!' % (_client_host,_client_port))
+	
+	def create_node(self,username,type,public):
+		for user in self.users:
+			if user['name'] == username:
+				_node = nodes.Node()
+				_node.OWNER = username
+				_node.TYPE = type
+				_node.PUBLIC = public
+				
+				user['nodes'].append(_node)
+				logging.info('Created node with ID WIWDHIWHWIH')
 	
 	def get_public_user_nodes(self):
 		_public_user_nodes = []

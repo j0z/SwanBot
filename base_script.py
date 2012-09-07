@@ -1,5 +1,6 @@
 #base_script - Provides a framework for running and storing
 #the states of scripts
+import json
 
 class Base_Script:
 	def __init__(self,args,callback,id):
@@ -20,7 +21,7 @@ class Base_Script:
 	
 	def send_input(self,user_input):
 		self.STATE = 'running'
-		self.INPUT_CALLBACK(user_input)
+		self.INPUT_CALLBACK(json.loads(user_input))
 		
 		self.INPUT_CALLBACK = None
 	
