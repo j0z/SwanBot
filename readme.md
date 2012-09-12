@@ -1,4 +1,4 @@
-SwanBot
+# SwanBot
 *******
 SwanBot is a vague project that has no real goal or intention.
 In its earlier forms, SwanBot was used to monitor a single IRC
