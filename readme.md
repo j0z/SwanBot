@@ -1,6 +1,6 @@
 # SwanBot
-*******
-SwanBot is a vague project that has no real goal or intention.
+***
+SwanBot was a vague project that has no real goal or intention.
 In its earlier forms, SwanBot was used to monitor a single IRC
 channel and provide services like weather, Last.fm status, etc.
 At one point I decided to write a module that allowed SwanBot
@@ -19,19 +19,52 @@ At one point I started wanting to automate stuff in my dorm
 room, so I set out to add stuff like OpenCV support to look
 for me as I was coming into my room, and scanning for my phone
 in the proximity of my computer's Bluetooth adapter. I ended
-up combining those two features, and them report their success
+up combining those two features, and then report their success
 /failure to SwanBot.
 
-So what happens after SwanBot gets the data?
+But what happens next?
 
-That's my current issue. Simply logging the data isn't very
-useful, but keeping it around for reference could potentially
-fire off a few ideas.
+# My Journey to Create the Ultimate Personal Assistant
+***
+For a while I've been interested in the idea of a "DLA" (a
+term that I believe was coined by the creator of Project
+Jarvis.) DLA simply stands for "Digital Life Assistant", and
+that says it all; a DLA operates passively or interactively,
+but at the end of the day, is designed entirely to adapt to
+the way you operate in your day-to-day life.
 
-I'm publishing this Git repo in hopes that someone can make
-use of it in its current state, which is very open-ended. I
-have a few plans on features I'd like to implement, but
-that's all up in the air right now.
+So what does SwanBot do?
+
+Two key terms get tossed around a lot when I speak about
+SwanBot: Inputs and Outputs. Inputs are just that- ways for
+SwanBot to accept incoming data which is then stored in the
+Node Mesh. What kind of data, though? Well, that's up to the
+user. I've placed no limitations on what can be stored in the
+Node Mesh. Even things like images can be stored inside the
+mesh, then processed by OpenCV or any other user-specified
+library.
+
+Outputs provide a way for SwanBot to communicate with the
+user in some way. I've also placed no limit on how outputs
+should be properly structured or implemented, and have also
+placed that into the hands of the user.
+
+Here's a working example:
+You're out and about, let's say 100+ miles from your home with
+friends or on vacation. Suddenly you receive a text message:
+
+    Severe weather warning for ***** is in effect until 6PM.
+
+This is a message sent by SwanBot, which has magically found
+out your current location and has warned you of possible
+severe weather. Whoa!
+
+Except, of course, it isn't magic: SwanBot barely has any work
+to do, because chances are you're updating Twitter, Facebook,
+or Google+ on the go. Taking pictures? Connecting via Wifi?
+That works too. It's redundant to explicitly tell SwanBot
+where you're at: It already has enough data to deduce that on
+its own.
 
 API
 ---
@@ -62,7 +95,7 @@ I highly recommend diving into SwanBot.py and editing things
 that you feel need to be changed.
 
 Thanks
-------
+---
 While I have my own idea for this project, I'm interested in
 seeing what other people do it. And yeah, I understand it's
 nothing special or groundbreaking, but I feel like I'd be
