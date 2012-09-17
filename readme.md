@@ -29,7 +29,7 @@ But what happens next?
 For a while I've been interested in the idea of a "DLA" (a
 term that I believe was coined by the creator of Project
 Jarvis.) DLA simply stands for "Digital Life Assistant", and
-that says it all; a DLA operates passively or interactively,
+that says it all: a DLA operates passively or interactively,
 but at the end of the day, is designed entirely to adapt to
 the way you operate in your day-to-day life.
 

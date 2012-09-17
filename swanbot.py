@@ -68,10 +68,10 @@ class SwanBot(LineReceiver):
 	
 	def __init__(self):
 		self.name = 'Client'
+		self.client_name = 'Unknown'
 		self.state = 'connected'
 	
 	def connectionMade(self):
-		self.send(self.factory.motd)
 		self.client_host = self.transport.getPeer().host
 		self.client_port = self.transport.getPeer().port
 		
@@ -87,80 +87,23 @@ class SwanBot(LineReceiver):
 		self.transport.write(line+'\r\n')
 	
 	def lineReceived(self,line):
-		if self.state == 'connected':
-			self.handle_login(line)
-			return 0
-		
 		_args = line.split(':')
+		_commands = json.loads(':'.join(_args[1:]))
 		
 		if not _args:
 			return 0
 		
-		if _args[0] == 'get':
-			if _args[1] == 'nodes':
-				self.node_string = json.dumps(self.factory.node_db)
-				self.send_nodes(0)
-			
-			elif _args[1] == 'user_value':
-				_id = _args[2]
+		if _args[0] == 'api-get':
+			if _commands['param'] == 'user_value':
+				_user = _commands['user']
+				_value = _commands['value']
 				
-				_send_string = json.dumps({'text':self.factory.get_user_value(_args[3],_args[4])})
+				_send_string = json.dumps({'text':self.factory.get_user_value(_user,_value)})
 				
-				self.send('send:data:%s:%s' % (_id,_send_string))
-			
-			elif _args[1] == 'examine_topic':
-				_id = _args[2]
-				_range = int(_args[3])
-				
-				_send_string = json.dumps(mod_freebase.examine_topic(':'.join(_args[4:])))
-				
-				self.send('send:data:%s:%s' % (_id,_send_string[_range:_range+self.chunk_size]))
-			
-			elif _args[1] == 'research_topic':
-				_id = _args[2]
-				_range = _args[3]
-				
-				_send_string = json.dumps(mod_freebase.research_topic(':'.join(_args[4:]),self.factory))
-				
-				self.send('send:data:%s:%s' % (_id,_send_string))
-			
-			elif _args[1] == 'expand_nodes':
-				_id = _args[2]
-				_range = _args[3]
-				
-				_nodes = json.loads(':'.join(_args[4:]))
-				_send_string = json.dumps(mod_freebase.expand_nodes(_nodes,self.factory))
-				
-				self.send('send:data:%s:%s' % (_id,_send_string))
-			
-			elif _args[1] == 'nodes_to_string':
-				_id = _args[2]
-				_range = _args[3]
-				
-				_nodes = json.loads(':'.join(_args[4:]))
-				_send_string = {'text':', '.join([self.factory.node_db[entry]['text'] for entry in _nodes
-					if self.factory.node_db[entry]['valuetype'] == 'object'])\
-						[:300].encode('utf-8','ignore')}
-				
-				self.send('send:data:%s:%s' % (_id,json.dumps(_send_string)))
-			
-			elif _args[1] == 'find_node':
-				_id = _args[2]
-				_range = _args[3]
-				
-				_search = ':'.join(_args[4:])
-				_send_string = json.dumps({'text':mod_freebase.find_node(_search,self.factory)})
-				
-				self.send('send:data:%s:%s' % (_id,_send_string))
-			
-			elif _args[1] == 'show_node':
-				_id = _args[2]
-				_range = _args[3]
-				
-				_index = int(_args[4])
-				_send_string = json.dumps({'text':mod_freebase.show_node(_index,self.factory)})
-				
-				self.send('send:data:%s:%s' % (_id,_send_string))
+				self.send(_send_string)
+			else:
+				self.send(json.dumps({'text':'No matching command.'}))
+				print 'Sending'
 		
 		elif _args[0] == 'send':
 			if _args[1] == 'start-node':
@@ -337,7 +280,6 @@ class SwanBotFactory(Factory):
 	clients = []
 
 	def __init__(self):
-		self.motd = 'Welcome to SwanBot!'
 		self.users = []
 		self.words_db = {'words':[],'nodes':[]}
 		self.node_db = []
@@ -491,7 +433,7 @@ class SwanBotFactory(Factory):
 				return True
 		
 		logging.error('Could not find matching client: %s via %s (%s:%s)'
-			% (user,client_name,host,port))
+			% (user,client_name,_host,_port))
 		
 		return False
 	
