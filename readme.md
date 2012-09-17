@@ -63,7 +63,7 @@ Except, of course, it isn't magic: SwanBot barely has any work
 to do, because chances are you're updating Twitter, Facebook,
 or Google+ on the go. Taking pictures? Connecting via Wifi?
 That works too. It's redundant to explicitly tell SwanBot
-where you're at: It already has enough data to deduce that on
+where you're at; It already has enough data to deduce that on
 its own.
 
 API
