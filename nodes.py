@@ -15,7 +15,7 @@ def create_node():
 	global NODE_ID
 	NODE_ID+=1
 	
-	_n = NODE.copy()
-	_n['id'] = NODE_ID
+	_node = NODE.copy()
+	_node['id'] = NODE_ID
 	
-	return _n
+	return _node

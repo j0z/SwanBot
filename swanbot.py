@@ -1,7 +1,7 @@
 #The core of SwanBot
 
 from twisted.internet.endpoints import TCP4ServerEndpoint
-from twisted.internet.protocol import Factory, Protocol
+from twisted.internet.protocol import Factory
 from twisted.protocols.basic import LineReceiver
 from twisted.internet import reactor
 import threading
@@ -214,14 +214,7 @@ class SwanBot(LineReceiver):
 			self.send('login:failed')
 			
 			logging.info('Login failed!')
-	
-	def send_nodes(self,index):
-		self.node_string = self.node_string[self.node_db_start_index:self.node_db_end_index]
-		self.node_db_start_index = self.node_db_end_index
-		self.node_db_end_index += self.chunk_size
-		
-		self.send('send:nodes:%s' % self.node_string)
-	
+
 	def create_node(self,type,public):
 		self.factory.create_node(self.name,type,public)
 	
