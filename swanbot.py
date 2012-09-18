@@ -4,10 +4,8 @@ from twisted.internet.endpoints import TCP4ServerEndpoint
 from twisted.internet.protocol import Factory, Protocol
 from twisted.protocols.basic import LineReceiver
 from twisted.internet import reactor
-import mod_freebase
 import threading
 import logging
-import hashlib
 import nodes
 import time
 import json
@@ -59,18 +57,13 @@ class ModuleThread(threading.Thread):
 		logging.info('Module thread: Shut down.')
 
 class SwanBot(LineReceiver):
-	chunk_size = 15000
-	node_db_start_index = 0
-	node_db_end_index = chunk_size
-	node_string = ''
-	recv_node_string = ''
 	scripts = []
 	
 	def __init__(self):
 		self.name = 'Client'
 		self.client_name = 'Unknown'
-		self.state = 'connected'
-	
+		self.factory = None
+
 	def connectionMade(self):
 		self.client_host = self.transport.getPeer().host
 		self.client_port = self.transport.getPeer().port
@@ -105,42 +98,14 @@ class SwanBot(LineReceiver):
 				self.send(json.dumps({'text':'No matching command.'}))
 				print 'Sending'
 		
-		elif _args[0] == 'send':
-			if _args[1] == 'start-node':
-				self.recv_node_string = ''
-			
-			elif _args[1] == 'nodes':
-				self.recv_node_string += ':'.join(_args[2:])
-				
-				try:
-					_node_db = json.loads(self.recv_node_string)
-					
-					self.factory.node_db = _node_db
-					logging.info('node_db was uploaded!')
-				except:
-					logging.info('Downloading chunk: %s' % len(self.recv_node_string))
-			
-			elif _args[1] == 'user_value':
+		elif _args[0] == 'api-send':
+			if _args[1] == 'user_value':
 				_id = _args[2]
 				
 				_send_string = json.dumps(self.factory.set_user_value(_args[3],_args[4],
 					':'.join(_args[5:])))
 				
 				self.send('send:data:%s:%s' % (_id,_send_string))
-		
-		elif _args[0] == 'comm':
-			_script_id = int(_args[2])
-			
-			if _args[1] == 'get':
-				self.handle_command(_args[3:],_script_id)
-			
-			elif _args[1] == 'got':
-				for script in self.scripts:
-					if script['id'] == _script_id:
-						script['script'].parse()
-			
-			elif _args[1] == 'input':
-				self.handle_script_input(_args[3],_script_id)
 		
 		elif _args[0] == 'event':
 			if len(_args)<3:
@@ -150,6 +115,7 @@ class SwanBot(LineReceiver):
 			self.create_event(_args[1],':'.join(_args[2:]))
 	
 	def handle_command(self,args,id):
+		#Leaving this in for now. Might adapt some of it for later use.
 		_matches = []
 		_return = []
 		
@@ -186,7 +152,7 @@ class SwanBot(LineReceiver):
 					return False
 			
 			else:
-				self.send('comm:text:%s:Usage: delmod <mod>' % (id,args[1]))
+				self.send('comm:text:%s:Usage: delmod <mod>' % (id))
 				
 				return False
 			
@@ -223,6 +189,7 @@ class SwanBot(LineReceiver):
 			user,password,client_name = line.split(':')
 		except Exception, e:
 			print e
+			return False
 		
 		if self.factory.login(user,password):
 			logging.info('%s (%s:%s) -> %s' % (self.name,self.client_host,self.client_port,user))
@@ -343,7 +310,7 @@ class SwanBotFactory(Factory):
 			self.node_db = words_db['nodes']
 			self.words_db = words_db['words']
 			logging.info('Loaded words db.')
-		except:
+		except Exception, e:
 			if error:
 				logging.error('Could not create words.json!')
 				logging.error(e)
@@ -376,7 +343,7 @@ class SwanBotFactory(Factory):
 	
 	def stopFactory(self):
 		self.save_users_db()
-		self.save_words_db
+		self.save_words_db()
 		
 		logging.info('SwanBot is shutting down.')
 		self.module_thread.stop()
@@ -501,7 +468,7 @@ class SwanBotFactory(Factory):
 		if not _mod_name.count('py'):
 			_mod_name = _mod_name+'.py'
 
-		_module = imp.load_source(name.replace('.py',''),\
+		_module = imp.load_source(name.replace('.py',''),
 			os.path.join('modules',_mod_name))
 		
 		self.modules.append({'name':_sanitized_name,'module':_module})
