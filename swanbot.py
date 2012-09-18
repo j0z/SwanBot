@@ -87,6 +87,9 @@ class SwanBot(LineReceiver):
 			return 0
 		
 		if _args[0] == 'api-get':
+			_api_key = _commands['apikey']
+			self.client_name = 'API'
+
 			if _commands['param'] == 'user_value':
 				_user = _commands['user']
 				_value = _commands['value']
@@ -96,9 +99,11 @@ class SwanBot(LineReceiver):
 				self.send(_send_string)
 			else:
 				self.send(json.dumps({'text':'No matching command.'}))
-				print 'Sending'
 		
 		elif _args[0] == 'api-send':
+			_api_key = _commands['apikey']
+			self.client_name = 'API'
+
 			if _args[1] == 'user_value':
 				_id = _args[2]
 				
