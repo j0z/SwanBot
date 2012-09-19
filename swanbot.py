@@ -81,44 +81,59 @@ class SwanBot(LineReceiver):
 	
 	def lineReceived(self,line):
 		_args = line.split(':')
-		_commands = json.loads(':'.join(_args[1:]))
 		
 		if not _args:
 			return 0
 		
 		if _args[0] == 'api-get':
-			_api_key = _commands['apikey']
 			self.client_name = 'API'
-
-			if _commands['param'] == 'user_value':
-				_user = _commands['user']
-				_value = _commands['value']
-				
-				_send_string = json.dumps({'text':self.factory.get_user_value(_user,_value)})
-				
-				self.send(_send_string)
-			else:
-				self.send(json.dumps({'text':'No matching command.'}))
+			self.handle_api_get(_args)
 		
 		elif _args[0] == 'api-send':
-			_api_key = _commands['apikey']
 			self.client_name = 'API'
-
-			if _args[1] == 'user_value':
-				_id = _args[2]
-				
-				_send_string = json.dumps(self.factory.set_user_value(_args[3],_args[4],
-					':'.join(_args[5:])))
-				
-				self.send('send:data:%s:%s' % (_id,_send_string))
+			self.handle_api_send(_args)
 		
 		elif _args[0] == 'event':
 			if len(_args)<3:
 				logging.info('Threw out event: %s' % line)
-				return False
 				
 			self.create_event(_args[1],':'.join(_args[2:]))
-	
+
+	def handle_api_get(self,args):
+		_payload = json.loads(':'.join(args[1:]))
+		_api_key = self.get_api_key_from_payload(_payload)
+		_send_string = {'text':'No matching command.'}
+
+		if not _api_key:
+			self.handle_missing_api_key()
+			return False
+
+		if _payload['param'] == 'user_value':
+			_user = _payload['user']
+			_value = _payload['value']
+			_send_string = {'text':self.factory.get_user_value(_user,_value)}
+
+		self.send(json.dumps(_send_string))
+		return True
+
+	def handle_api_send(self,args):
+		_payload = json.loads(':'.join(args[1:]))
+		_api_key = self.get_api_key_from_payload(_payload)
+		_send_string = {'text':'No matching command.'}
+
+		if not _api_key:
+			self.handle_missing_api_key()
+			return False
+
+		if args[1] == 'user_value':
+			_send_string = self.factory.set_user_value(args[3],args[4],':'.join(args[5:]))
+
+		elif args[1] == 'node':
+			pass
+
+		self.send(json.dumps(_send_string))
+		return True
+
 	def handle_command(self,args,id):
 		#Leaving this in for now. Might adapt some of it for later use.
 		_matches = []
@@ -187,6 +202,10 @@ class SwanBot(LineReceiver):
 		for script in self.scripts:
 			if script['id'] == id:
 				script['script'].send_input(args)
+
+	def handle_missing_api_key(self):
+		logging.error('Incorrect API key from %s:%s' % (self.client_host,self.client_port))
+		self.send(json.dumps({'text':'No API key found in dictionary.'}))
 	
 	def handle_login(self,line):
 		"""NOTE: 'password' must be a sha224 hash."""
@@ -214,6 +233,12 @@ class SwanBot(LineReceiver):
 			self.send('login:failed')
 			
 			logging.info('Login failed!')
+
+	def get_api_key_from_payload(self,payload):
+		if not payload.has_key('apikey'):
+			return False
+
+		return payload['apikey']
 
 	def create_node(self,type,public):
 		self.factory.create_node(self.name,type,public)
