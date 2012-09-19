@@ -26,7 +26,7 @@ logger.addHandler(ch)
 class ModuleThread(threading.Thread):
 	RUNNING = True
 	CALLBACK = None
-	
+
 	def start(self,callback):
 		self.CALLBACK = callback
 		self.RUNNING = True
@@ -56,6 +56,7 @@ class ModuleThread(threading.Thread):
 		
 		logging.info('Module thread: Shut down.')
 
+#noinspection PyMethodOverriding
 class SwanBot(LineReceiver):
 	scripts = []
 	
@@ -131,7 +132,6 @@ class SwanBot(LineReceiver):
 	def handle_command(self,args,id):
 		#Leaving this in for now. Might adapt some of it for later use.
 		_matches = []
-		_return = []
 		
 		if args[0] == 'loadmod' and len(args)==2:
 			try:				
