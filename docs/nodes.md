@@ -29,9 +29,10 @@ Nodes consist of the following information:
         to the mesh.
     TYPE: String. Describes in vague terms what data the node
         carries.
-    FILTER: String. If used, the node forfeits 'data' and
+    FILTER: Dictionary. If used, the node forfeits 'data' and
         begins to connect existing and incoming nodes to
-        itself if 'type' is matched by 'filter'
+        itself if 'type' is matched by every key/value in
+        'filter'.
     PUBLIC: Boolean. Decides whether the node is visible to
         the public.
     DATA: Anything. Can be any data type that dumps to a
