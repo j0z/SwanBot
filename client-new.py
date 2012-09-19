@@ -36,3 +36,13 @@ class Client:
 
 Client('localhost').get({'param':'user_value','user':'root','value':'password',
                          'apikey':'testkey'})
+print '='*10
+Client('localhost').send({'param':'create_node','type':'twitter','public':True,
+                         'filter':{'type':'tweet'},
+                         'apikey':'testkey'})
+print '='*10
+#Client('localhost').send({'param':'create_node','type':'tweet','public':True,
+#                          'parent':{'type':'twitter'},
+#                          'apikey':'testkey'})
+Client('localhost').send({'param':'create_node','type':'tweet','public':True,
+                          'apikey':'testkey'})

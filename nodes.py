@@ -6,8 +6,8 @@ NODE_ID = 0
 NODE = {'id':None,
 	'owner':None,
 	'date':None,
+	'filter':{},
 	'type':'',
-	'filter':'',
 	'public':'',
 	'data':''}
 
@@ -17,5 +17,7 @@ def create_node():
 	
 	_node = NODE.copy()
 	_node['id'] = NODE_ID
-	
+	_node['parents'] = []
+	_node['children'] = []
+
 	return _node

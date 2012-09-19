@@ -61,7 +61,8 @@ class SwanBot(LineReceiver):
 	
 	def __init__(self):
 		self.name = 'Client'
-		self.client_name = 'Unknown'
+		self.client_name = 'Unknown' #TODO: Naming conflict with self.name
+		self.user = None
 		self.factory = None
 
 	def connectionMade(self):
@@ -87,11 +88,19 @@ class SwanBot(LineReceiver):
 		
 		if _args[0] == 'api-get':
 			self.client_name = 'API'
-			self.handle_api_get(_args)
+			_payload = json.loads(':'.join(_args[1:]))
+			self.api_key = self.get_api_key_from_payload(_payload)
+
+			if self.auth_user_via_api_key(self.api_key):
+				self.handle_api_get(_payload)
 		
 		elif _args[0] == 'api-send':
 			self.client_name = 'API'
-			self.handle_api_send(_args)
+			_payload = json.loads(':'.join(_args[1:]))
+			self.api_key = self.get_api_key_from_payload(_payload)
+
+			if self.auth_user_via_api_key(self.api_key):
+				self.handle_api_send(_payload)
 		
 		elif _args[0] == 'event':
 			if len(_args)<3:
@@ -99,37 +108,22 @@ class SwanBot(LineReceiver):
 				
 			self.create_event(_args[1],':'.join(_args[2:]))
 
-	def handle_api_get(self,args):
-		_payload = json.loads(':'.join(args[1:]))
-		_api_key = self.get_api_key_from_payload(_payload)
+	def handle_api_get(self,payload):
 		_send_string = {'text':'No matching command.'}
 
-		if not _api_key:
-			self.handle_missing_api_key()
-			return False
-
-		if _payload['param'] == 'user_value':
-			_user = _payload['user']
-			_value = _payload['value']
+		if payload['param'] == 'user_value':
+			_user = payload['user']
+			_value = payload['value']
 			_send_string = {'text':self.factory.get_user_value(_user,_value)}
 
 		self.send(json.dumps(_send_string))
 		return True
 
-	def handle_api_send(self,args):
-		_payload = json.loads(':'.join(args[1:]))
-		_api_key = self.get_api_key_from_payload(_payload)
+	def handle_api_send(self,payload):
 		_send_string = {'text':'No matching command.'}
 
-		if not _api_key:
-			self.handle_missing_api_key()
-			return False
-
-		if args[1] == 'user_value':
-			_send_string = self.factory.set_user_value(args[3],args[4],':'.join(args[5:]))
-
-		elif args[1] == 'node':
-			pass
+		if payload['param'] == 'create_node':
+			_send_string = self.create_node_from_payload(payload)
 
 		self.send(json.dumps(_send_string))
 		return True
@@ -234,15 +228,105 @@ class SwanBot(LineReceiver):
 			
 			logging.info('Login failed!')
 
+	def auth_user_via_api_key(self,api_key):
+		for user in self.factory.users:
+			if user['api-key'] == api_key:
+				logging.info('%s -> %s' % (self.name,user['name']))
+				self.name = user['name']
+				self.user = user
+				return True
+
+		logging.error('Incorrect API key from %s:%s' % (self.client_host,self.client_port))
+		self.send(json.dumps({'text':'No user with that API key exists.'}))
+
+		return False
+
 	def get_api_key_from_payload(self,payload):
 		if not payload.has_key('apikey'):
 			return False
 
 		return payload['apikey']
 
+	def create_node_from_payload(self,payload):
+		_node = nodes.create_node()
+		_node['owner'] = self.user['name']
+
+		for key in payload:
+			_node[key] = payload[key]
+
+		if payload.has_key('parent') and payload['parent']:
+			_parent_node = self.find_node(payload['parent'])
+
+			if _parent_node:
+				logging.info('Found parent!')
+				self.add_child_to_node(_parent_node,_node)
+
+		self.user['nodes'].append(_node)
+		logging.info('Created node with ID #%s' % _node['id'])
+
+		self.filter_nodes()
+
+		return _node
+
 	def create_node(self,type,public):
 		self.factory.create_node(self.name,type,public)
-	
+
+	def add_child_to_node(self,parent,child):
+		if not parent['id'] in child['parents']:
+			child['parents'].append(parent['id'])
+
+		if not child['id'] in parent['children']:
+			parent['children'].append(child['id'])
+
+		return True
+
+	def filter_nodes(self):
+		for node1 in self.user['nodes']:
+			for node2 in self.user['nodes']:
+				_nodes_connected = False
+				_found = True
+
+				if node1['id'] == node2['id'] or not node1['filter']:
+					continue
+
+				for key in node1['filter']:
+					if not node2.has_key(key) or not node2[key] == node1['filter'][key]:
+						_found = False
+						break
+
+				if not _found:
+					continue
+
+				if not node1['id'] in node2['parents']:
+					node2['parents'].append(node1['id'])
+					_nodes_connected = True
+
+				if not node2['id'] in node1['children']:
+					node1['children'].append(node2['id'])
+					_nodes_connected = True
+
+				if _nodes_connected:
+					logging.info('Synapse: Node #%s -> Node #%s' % (node2['id'],node1['id']))
+
+	def find_node(self,query):
+		for node in self.user['nodes']:
+			_found = True
+
+			for key in query:
+				if node.has_key(key) and node[key] == query[key]:
+					pass
+				else:
+					_found = False
+					break
+
+			if not _found:
+				continue
+
+			logging.info('Found matching node: %s' % json.dumps(node))
+			return node
+
+		return None
+
 	def create_event(self,type,value):
 		"""Creates and broadcasts event of type 'type' with value 'value'"""
 		logging.info('Event created: %s - %s' % (type,value))
@@ -308,6 +392,7 @@ class SwanBotFactory(Factory):
 			if '--init' in sys.argv:
 				self.users = [{'name':'root',
 					'password':'871ce144069ea0816545f52f09cd135d1182262c3b235808fa5a3281',
+				    'api-key':'testkey',
 					'nodes':[]}]
 				
 				logging.info('Creating new user DB...')
