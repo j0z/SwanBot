@@ -24,8 +24,8 @@ Note: There's a library included with SwanBot called
     connection.connect(('localhost',9002))
 
     #Create a node that looks for nodes of type `tweet`.
-    payload = {'param':'create_node','type':'twitter','public':True,
-               'filter':{'type':'tweet'},
+    payload = {'param':'create_node','query':{'type':'twitter','public':True,
+               'filter':{'type':'tweet'}},
                'apikey':'<APIKEY>'}
 
     #Send it all down the pipe!
@@ -42,12 +42,12 @@ Payloads are extremely simple, and outside of the `param` key,
 accept basically any form of data. Let's take the above example
 and break it apart.
 
-    {'param':'create_node','type':'twitter','public':True,
-        'filter':{'type':'tweet'},
+    {'param':'create_node','query':{'type':'twitter','public':True,
+        'filter':{'type':'tweet'}},
         'apikey':'<APIKEY>'}
 
 When the server sees that the `param` is set to `create_node`,
-the rest of the payload is sent to a function that creates and
+the contents of `query` is sent to a function that creates and
 returns a node with the same information. The only required
 key is `type`, leaving everything else up to you.
 

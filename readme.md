@@ -66,33 +66,61 @@ That works too. It's redundant to explicitly tell SwanBot
 where you're at; It already has enough data to deduce that on
 its own.
 
+Adaptive Learning
+-----------------
+Once SwanBot is configured to read your various inputs for
+data, no user interaction is required- it uses the already
+existing data to provide useful information to you in whatever
+way possible.
+
+In the above example, a text message was sent to the user's
+phone. However, this isn't always the best way to communicate
+with the user. Again, this is where inputs come into play: by
+providing an input that fires when you enter your house/room,
+SwanBot can then adjust where it outputs its data. In my case,
+SwanBot users the text-to-speech function on my tablet to
+fill me in on things that are relevant to what's going on.
+
+You're probably wondering what kind of information SwanBot
+outputs. For that, read the `modules` section below.
+
+Sometimes data just isn't relevant. You want a break, you're
+in a class, etc; although SwanBot tries its best to avoid
+bothering you with alerts, it can be really hard to figure out
+what time is best. Let's use the example of my morning
+routine:
+
+On Tuesdays I wake up at 9 AM, start breakfast, and check
+Reddit's technology subreddit for breaking/interesting
+news. I then check my email and eat while browsing the various
+channels I follow on YouTube for new uploads. It's consistent-
+I do this exact routine every Tuesday and Thursday, and have
+similar patterns for the other weekdays.
+
+With SwanBot, I wake up and start breakfast, and am soon
+greeted by my tablet's TTS:
+
+    Good morning. Tech news for <date>:
+      Apple accused of plagiarizing iconic Swiss clock design
+    ...
+
+
+Modules
+-------
+Modules provide a way for SwanBot to fetch information from
+sources specified by the user(s) via the node mesh.
+
+Let's say the `mod_twitter` module was installed on the
+server. When it runs, it scans each user's node mesh for
+`twitter-details`, grabs the login credentials in the node's
+`data` key, and watches for mentions, tweets, or direct
+messages. If this information is relevant to you at all hours
+of the day, SwanBot can be configured to alert you by whatever
+means possible.
+
 API
 ---
-The API is very simple, but some of the core functionality
-is broken or non-existent. Like I've said before, this project
-is very much a trial grounds for ideas I've had but never got
-around to trying out, hence the aimlessness and sometimes
-erratic/vague code strewn about.
-
-For the client (contained in client.py, of all places) to
-connect, SwanBot.py reads the file contained in:
-	
-	data/core_users.json
-
-and compares the username/password and compares that with
-the details in that file. At some point I'll expand on this,
-but that's it... functions like:
-
-	client.set_user_value()
-	client.get_user_value()
-
-are used to store and retrieve information. For an example on
-how to use it properly, check the included "bluetoothbot.pyw"
-program. It's a good example of how to make a program work in
-conjunction with the client without getting in your way.
-
-I highly recommend diving into SwanBot.py and editing things
-that you feel need to be changed.
+See `data/api.md`
 
 Thanks
 ---
