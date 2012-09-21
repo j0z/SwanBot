@@ -72,8 +72,9 @@ class SwanBot(LineReceiver):
 		
 		logging.info('Client (%s:%s) connected.' % (self.client_host,self.client_port))
 	
-	def connectionLost(self,reason):		
-		self.factory.delete_client(self.client_name,self.transport,self.name)
+	def connectionLost(self,reason):
+		if not self.client_name == 'API':
+			self.factory.delete_client(self.client_name,self.transport,self.name)
 		
 		logging.info('%s via %s (%s:%s) disconnected.' %
 			(self.name,self.client_name,self.client_host,self.client_port))
@@ -117,6 +118,9 @@ class SwanBot(LineReceiver):
 			_value = payload['value']
 			_send_string = {'text':self.factory.get_user_value(_user,_value)}
 
+		elif payload['param'] == 'find_node':
+			_send_string = self.handle_find_nodes(payload['query'])
+
 		self.send(json.dumps(_send_string))
 		return True
 
@@ -124,7 +128,10 @@ class SwanBot(LineReceiver):
 		_send_string = {'text':'No matching command.'}
 
 		if payload['param'] == 'create_node':
-			_send_string = self.create_node_from_payload(payload)
+			if payload.has_key('query'):
+				_send_string = self.create_node_from_payload(payload['query'])
+			else:
+				_send_string = {'error':'No \'query\' key passed to create_node.'}
 
 		self.send(json.dumps(_send_string))
 		return True
@@ -255,11 +262,14 @@ class SwanBot(LineReceiver):
 			_node[key] = payload[key]
 
 		if payload.has_key('parent') and payload['parent']:
-			_parent_node = self.find_node(payload['parent'])
+			_parent_nodes = self.find_nodes(payload['parent'])
 
-			if _parent_node:
+			for parent_node in _parent_nodes:
 				logging.info('Found parent!')
-				self.add_child_to_node(_parent_node,_node)
+				_retrieved_node = self.retrieve_node_via_id(parent_node)
+				self.add_child_to_node(_retrieved_node,_node)
+
+			del _node['parent']
 
 		self.user['nodes'].append(_node)
 		logging.info('Created node with ID #%s' % _node['id'])
@@ -308,7 +318,17 @@ class SwanBot(LineReceiver):
 				if _nodes_connected:
 					logging.info('Synapse: Node #%s -> Node #%s' % (node2['id'],node1['id']))
 
-	def find_node(self,query):
+	def handle_find_nodes(self,query):
+		_found_nodes = self.find_nodes(query)
+
+		if _found_nodes:
+			return {'results':_found_nodes}
+		else:
+			return {'error':'No nodes were found.'}
+
+	def find_nodes(self,query):
+		_matching_nodes = []
+
 		for node in self.user['nodes']:
 			_found = True
 
@@ -322,8 +342,16 @@ class SwanBot(LineReceiver):
 			if not _found:
 				continue
 
-			logging.info('Found matching node: %s' % json.dumps(node))
-			return node
+			_matching_nodes.append(node['id'])
+
+		logging.info('Found %s matching nodes.' % len(_matching_nodes))
+
+		return _matching_nodes
+
+	def retrieve_node_via_id(self,id):
+		for node in self.user['nodes']:
+			if node['id'] == id:
+				return node
 
 		return None
 
@@ -506,10 +534,10 @@ class SwanBotFactory(Factory):
 				self.clients.remove(client)
 				
 				return True
-		
+
 		logging.error('Could not find matching client: %s via %s (%s:%s)'
 			% (user,client_name,_host,_port))
-		
+
 		return False
 	
 	def broadcast_event(self,type,value,user):

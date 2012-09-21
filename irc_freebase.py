@@ -202,7 +202,7 @@ def nodes_to_string(nodes):
 def find_node(search):
 	global core
 	
-	_query = core.find_node(search)
+	_query = core.find_nodes(search)
 	_stime = time.time()
 	
 	while 1:
