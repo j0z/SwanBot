@@ -103,6 +103,7 @@ class SwanBot(LineReceiver):
 
 			if self.auth_user_via_api_key(self.api_key):
 				self.handle_api_send(_payload)
+				self.update_user_node_mesh()
 		
 		elif _args[0] == 'event':
 			if len(_args)<3:
@@ -293,11 +294,11 @@ class SwanBot(LineReceiver):
 	def filter_nodes(self):
 		for node1 in self.user['nodes']:
 			for node2 in self.user['nodes']:
-				_nodes_connected = False
-				_found = True
-
 				if node1['id'] == node2['id'] or not node1['filter']:
 					continue
+
+				_nodes_connected = False
+				_found = True
 
 				for key in node1['filter']:
 					if not node2.has_key(key) or not node2[key] == node1['filter'][key]:
@@ -354,6 +355,11 @@ class SwanBot(LineReceiver):
 				return node
 
 		return None
+
+	def update_user_node_mesh(self):
+		logging.info('Debugging...')
+		self.filter_nodes()
+		self.factory.save_users_db()
 
 	def create_event(self,type,value):
 		"""Creates and broadcasts event of type 'type' with value 'value'"""
