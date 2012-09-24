@@ -98,11 +98,11 @@ I do this exact routine every Tuesday and Thursday, and have
 similar patterns for the other weekdays.
 
 With SwanBot, I wake up and start breakfast, and am soon
-greeted by my tablet's TTS:
+greeted by my tablet's robotic voice:
 
-    Good morning. Tech news for <date>:
+    Good morning. News for <date>:
       Apple accused of plagiarizing iconic Swiss clock design
-    ...
+      ...
 
 
 Modules
