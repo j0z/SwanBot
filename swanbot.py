@@ -6,6 +6,7 @@ from twisted.protocols.basic import LineReceiver
 from twisted.internet import reactor
 import threading
 import logging
+import pygeoip
 import nodes
 import time
 import json
@@ -69,7 +70,9 @@ class SwanBot(LineReceiver):
 	def connectionMade(self):
 		self.client_host = self.transport.getPeer().host
 		self.client_port = self.transport.getPeer().port
-		
+
+		print self.factory.get_country_name_from_ip(self.client_host)
+
 		logging.info('Client (%s:%s) connected.' % (self.client_host,self.client_port))
 	
 	def connectionLost(self,reason):
@@ -386,6 +389,7 @@ class SwanBotFactory(Factory):
 	protocol = SwanBot
 	modules = []
 	clients = []
+	geoip = None
 
 	def __init__(self):
 		self.users = []
@@ -394,6 +398,7 @@ class SwanBotFactory(Factory):
 		
 		self.load_users_db()
 		self.load_words_db()
+		self.load_geoip_db()
 	
 	def load_users_db(self,error=False):
 		try:
@@ -464,7 +469,27 @@ class SwanBotFactory(Factory):
 			_file.close()
 			logging.info('Created words database.')
 			self.load_words_db(error=True)
-		
+
+	def load_geoip_db(self):
+		try:
+			self.geoip = pygeoip.GeoIP(os.path.join('data','GeoIP.dat'))
+			logging.info('Loaded GeoIP database.')
+		except Exception, e:
+			logging.error('Could not locate GeoIP database.')
+			print e
+
+	def is_geoip_loaded(self):
+		return self.geoip
+
+	def get_country_name_from_ip(self,ip):
+		_ip_info = self.geoip.country_name_by_addr(ip)
+
+		if _ip_info:
+			return _ip_info
+		else:
+			logging.warning('Could not find location for \'%s\'' % ip)
+			return None
+
 	def save_users_db(self):
 		_file = open(os.path.join('data','core_users.json'),'w')		
 		_file.write(json.dumps(self.users))
