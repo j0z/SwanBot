@@ -9,4 +9,4 @@ _results = Client(HOST).get({'param':'find_nodes',
                         'apikey':'testkey'})['results']
 
 for node in Client(HOST).get({'param':'get_nodes','nodes':_results,'apikey':'testkey'})['results']:
-	droid.say('Tweet from %s. %s' % (node['from'],node['text']))
+	droid.ttsSpeak('Tweet from %s. %s' % (node['from'],node['text']))
