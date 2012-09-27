@@ -37,15 +37,15 @@ class Client:
 Client('localhost').get({'param':'user_value','user':'root','value':'password',
                          'apikey':'testkey'})
 print '='*10
-Client('localhost').send({'param':'create_node','query':{'type':'twitter','public':True,
-                         'filter':{'type':'tweet'}},
-                         'apikey':'testkey'})
+#Client('localhost').send({'param':'create_node','query':{'type':'twitter','public':True,
+#                         'filter':{'type':'tweet'}},
+#                         'apikey':'testkey'})
 #print '='*10
 #Client('localhost').send({'param':'create_node','query':{'type':'tweet','public':True,
-#                          },
-#                          'apikey':'testkey'})
+#                          },'apikey':'testkey'})
 
-#'parent':{'type':'twitter'}
+_results = Client('localhost').get({'param':'find_nodes','query':{'type':'tweet','public':True},
+                         'apikey':'testkey'})['results']
 print '='*10
-Client('localhost').get({'param':'find_node','query':{'type':'tweet','public':True},
+Client('localhost').get({'param':'get_nodes','nodes':_results,
                           'apikey':'testkey'})

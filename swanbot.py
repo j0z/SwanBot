@@ -71,9 +71,10 @@ class SwanBot(LineReceiver):
 		self.client_host = self.transport.getPeer().host
 		self.client_port = self.transport.getPeer().port
 
-		print self.factory.get_country_name_from_ip(self.client_host)
+		_location = self.factory.get_country_name_from_ip(self.client_host)
 
-		logging.info('Client (%s:%s) connected.' % (self.client_host,self.client_port))
+		logging.info('Client (%s:%s) connected from %s' %
+		             (self.client_host,self.client_port,_location))
 	
 	def connectionLost(self,reason):
 		if not self.client_name == 'API':
@@ -122,8 +123,11 @@ class SwanBot(LineReceiver):
 			_value = payload['value']
 			_send_string = {'text':self.factory.get_user_value(_user,_value)}
 
-		elif payload['param'] == 'find_node':
+		elif payload['param'] == 'find_nodes':
 			_send_string = self.handle_find_nodes(payload['query'])
+
+		elif payload['param'] == 'get_nodes':
+			_send_string = self.handle_get_nodes(payload['nodes'])
 
 		self.send(json.dumps(_send_string))
 		return True
@@ -330,6 +334,9 @@ class SwanBot(LineReceiver):
 		else:
 			return {'error':'No nodes were found.'}
 
+	def handle_get_nodes(self,query):
+		print query
+
 	def find_nodes(self,query):
 		_matching_nodes = []
 
@@ -488,7 +495,7 @@ class SwanBotFactory(Factory):
 			return _ip_info
 		else:
 			logging.warning('Could not find location for \'%s\'' % ip)
-			return None
+			return 'Unknown'
 
 	def save_users_db(self):
 		_file = open(os.path.join('data','core_users.json'),'w')		
