@@ -9,8 +9,12 @@ class Client:
 		self.connect()
 
 	def parse(self,data):
+		print '='*10
+
 		for line in ['%s: %s' % (key,data[key]) for key in data]:
 			print line
+
+		print '='*10
 
 		return data
 
@@ -36,16 +40,13 @@ class Client:
 
 Client('localhost').get({'param':'user_value','user':'root','value':'password',
                          'apikey':'testkey'})
-print '='*10
-#Client('localhost').send({'param':'create_node','query':{'type':'twitter','public':True,
-#                         'filter':{'type':'tweet'}},
-#                         'apikey':'testkey'})
-#print '='*10
-#Client('localhost').send({'param':'create_node','query':{'type':'tweet','public':True,
-#                          },'apikey':'testkey'})
+Client('localhost').send({'param':'create_node','query':{'type':'twitter','public':True,
+                         'filter':{'type':'tweet'}},
+                         'apikey':'testkey'})
+Client('localhost').send({'param':'create_node','query':{'type':'tweet','public':True,
+                          },'apikey':'testkey'})
 
 _results = Client('localhost').get({'param':'find_nodes','query':{'type':'tweet','public':True},
                          'apikey':'testkey'})['results']
-print '='*10
 Client('localhost').get({'param':'get_nodes','nodes':_results,
                           'apikey':'testkey'})

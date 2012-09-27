@@ -342,8 +342,20 @@ class SwanBot(LineReceiver):
 		else:
 			return {'error':'No nodes were found.'}
 
-	def handle_get_nodes(self,query):
-		print query
+	def handle_get_nodes(self,nodes):
+		_returned_nodes = []
+
+		_nodes_copy = nodes[:]
+
+		for node in self.user['nodes']:
+			if node['id'] in _nodes_copy:
+				_returned_nodes.append(node)
+				_nodes_copy.remove(node['id'])
+
+			if not len(_nodes_copy):
+				break
+
+		return {'results':_returned_nodes}
 
 	def find_nodes(self,query):
 		_matching_nodes = []
@@ -499,6 +511,9 @@ class SwanBotFactory(Factory):
 		return self.geoip
 
 	def get_country_name_from_ip(self,ip):
+		if not self.geoip:
+			return 'Unknown'
+
 		_ip_info = self.geoip.country_name_by_addr(ip)
 
 		if _ip_info:
