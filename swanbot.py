@@ -152,74 +152,6 @@ class SwanBot(LineReceiver):
 		self.send(json.dumps(_send_string))
 		return True
 
-	def handle_command(self,args,id):
-		#Leaving this in for now. Might adapt some of it for later use.
-		_matches = []
-		
-		if args[0] == 'loadmod' and len(args)==2:
-			try:				
-				if self.factory.add_module(args[1]):
-					logging.info('Loaded module: %s' % args[1])
-					self.send('comm:text:%s:\'%s\' loaded.' % (id,args[1]))
-					
-					return True
-				else:
-					logging.error('Module already loaded: %s' % args[1])
-					self.send('comm:text:%s:\'%s\' already loaded.' % (id,args[1]))
-					
-					return True
-			except Exception, e:
-				logging.error('Failed to import mod \'%s\'' % args[1])
-				logging.error(e)
-				
-				self.send('comm:data:%s:%s' % (id,e))
-				
-				return False
-		
-		elif args[0] == 'delmod':
-			if len(args)==2:
-				_mod_name = args[1]
-				
-				if self.factory.remove_module(_mod_name):
-					logging.info('Unloaded module: %s' % args[1])
-					self.send('comm:text:%s:\'%s\' unloaded.' % (id,args[1]))
-				else:
-					logging.error('Module is not loaded: %s' % args[1])
-					self.send('comm:text:%s:\'%s\' is not loaded.' % (id,args[1]))
-					return False
-			
-			else:
-				self.send('comm:text:%s:Usage: delmod <mod>' % (id))
-				
-				return False
-			
-			return True	
-			
-		for module in self.factory.modules:
-			if args[0] in module['module'].COMMANDS:
-				_matches.append(module)
-				continue
-		
-		if len(_matches)==1:
-			_script_id = self.create_script(_matches[0],args)
-			
-			#TODO: Client needs to log this!
-			#self.send('comm:id:%s:%s' % (id,_script_id))
-			
-			self.run_script(_script_id)
-			
-		elif len(_matches)>1:
-			_matches_string = '\t'.join([entry['name'] for entry in _matches])
-			self.send('comm:text:%s:%s' % (id,_matches_string))
-		
-		else:
-			self.send('comm:text:%s:%s' % (id,'Nothing!'))
-	
-	def handle_script_input(self,args,id):	
-		for script in self.scripts:
-			if script['id'] == id:
-				script['script'].send_input(args)
-
 	def handle_missing_api_key(self):
 		logging.error('Incorrect API key from %s:%s' % (self.client_host,self.client_port))
 		self.send(json.dumps({'text':'No API key found in dictionary.'}))
@@ -561,46 +493,6 @@ class SwanBotFactory(Factory):
 			if user['name'] == name and user['password'] == password:
 				return True
 		
-		return False
-	
-	def create_client(self,client_name,transport,user):
-		_host = transport.getPeer().host
-		_port = transport.getPeer().port
-		
-		for client in self.clients:
-			_client_host = client['transport'].getPeer().host
-			_client_port = client['transport'].getPeer().port
-			
-			if client['client_name'] == client_name and _client_host == _host and\
-				_client_port == _port and client['user'] == user:
-				
-				logging.info('%s via %s (%s:%s) failed to log in due to a duplicate connection.'
-					% (user,client_name,_host,_port))
-				return False
-		
-		self.clients.append({'client_name':client_name,
-			'transport':transport,'user':user})
-		
-		logging.info('%s connected via \'%s\' (%s:%s)' % (user,client_name,_host,_port))
-		return True
-	
-	def delete_client(self,client_name,transport,user):
-		_host = transport.getPeer().host
-		_port = transport.getPeer().port
-		
-		for client in self.clients:
-			_client_host = client['transport'].getPeer().host
-			_client_port = client['transport'].getPeer().port
-			
-			if client['client_name'] == client_name and _client_host == _host and\
-				_client_port == _port and client['user'] == user:
-				self.clients.remove(client)
-				
-				return True
-
-		logging.error('Could not find matching client: %s via %s (%s:%s)'
-			% (user,client_name,_host,_port))
-
 		return False
 	
 	def broadcast_event(self,type,value,user):
