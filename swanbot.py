@@ -1,18 +1,26 @@
 #The core of SwanBot
 
-from twisted.internet.endpoints import TCP4ServerEndpoint
-from twisted.internet.protocol import Factory
-from twisted.protocols.basic import LineReceiver
-from twisted.internet import reactor
+try:
+	from twisted.internet.endpoints import TCP4ServerEndpoint
+	from twisted.internet.protocol import Factory
+	from twisted.protocols.basic import LineReceiver
+	from twisted.internet import reactor
+except:
+	print 'Twisted could not be found.'
+
 import threading
 import logging
-import pygeoip
 import nodes
 import time
 import json
 import sys
 import imp
 import os
+
+try:
+	import pygeoip
+except:
+	print 'PyGeoIP not installed.'
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -481,6 +489,8 @@ class SwanBotFactory(Factory):
 		try:
 			self.geoip = pygeoip.GeoIP(os.path.join('data','GeoIP.dat'))
 			logging.info('Loaded GeoIP database.')
+		except NameError:
+			pass
 		except Exception, e:
 			logging.error('Could not locate GeoIP database.')
 			print e
