@@ -9,4 +9,4 @@ _results = Client(HOST).get({'param':'find_nodes',
                         'apikey':'testkey'})['results']
 
 for node in Client(HOST).get({'param':'get_nodes','nodes':_results,'apikey':'testkey'}):
-	droid.say('Tweet from %s. %s' % (node['from'],droid['text']))
+	droid.say('Tweet from %s. %s' % (node['from'],node['text']))
