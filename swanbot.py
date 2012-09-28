@@ -1,13 +1,5 @@
 #The core of SwanBot
 
-try:
-	from twisted.internet.endpoints import TCP4ServerEndpoint
-	from twisted.internet.protocol import Factory
-	from twisted.protocols.basic import LineReceiver
-	from twisted.internet import reactor
-except:
-	print 'Twisted could not be found.'
-
 import threading
 import logging
 import nodes
@@ -16,6 +8,15 @@ import json
 import sys
 import imp
 import os
+
+try:
+	from twisted.internet.endpoints import TCP4ServerEndpoint
+	from twisted.internet.protocol import Factory
+	from twisted.protocols.basic import LineReceiver
+	from twisted.internet import reactor
+except:
+	print 'Library not found: Twisted.'
+	sys.exit()
 
 try:
 	import pygeoip
@@ -149,39 +150,18 @@ class SwanBot(LineReceiver):
 			else:
 				_send_string = {'error':'No \'query\' key passed to create_node.'}
 
+		elif payload['param'] == 'delete_nodes':
+			if payload.has_key('nodes'):
+				_send_string = self.delete_nodes_from_payload(payload['nodes'])
+			else:
+				_send_string = {'error':'No \'nodes\' key passed to delete_node.'}
+
 		self.send(json.dumps(_send_string))
 		return True
 
 	def handle_missing_api_key(self):
 		logging.error('Incorrect API key from %s:%s' % (self.client_host,self.client_port))
 		self.send(json.dumps({'text':'No API key found in dictionary.'}))
-	
-	def handle_login(self,line):
-		"""NOTE: 'password' must be a sha224 hash."""
-		try:
-			user,password,client_name = line.split(':')
-		except Exception, e:
-			print e
-			return False
-		
-		if self.factory.login(user,password):
-			logging.info('%s (%s:%s) -> %s' % (self.name,self.client_host,self.client_port,user))
-			self.name = user
-			self.state = 'identified'
-			self.send('login:success')
-			
-			self.client_name = client_name
-			
-			if not self.factory.create_client(client_name,self.transport,user):
-				self.send('login:failed')
-				
-				return False
-			
-			logging.info('%s logged in.' % user)
-		else:
-			self.send('login:failed')
-			
-			logging.info('Login failed!')
 
 	def auth_user_via_api_key(self,api_key):
 		for user in self.factory.users:
@@ -226,8 +206,27 @@ class SwanBot(LineReceiver):
 
 		return _node
 
-	def create_node(self,type,public):
-		self.factory.create_node(self.name,type,public)
+	def delete_nodes_from_payload(self,nodes):
+		"""Deletes nodes, where `nodes` is an array
+		of the node IDs to be deleted.
+
+		returns: array of node IDs that could not be deleted."""
+		_nodes_copy = nodes[:]
+
+		for node in self.user['nodes']:
+			if node['id'] in _nodes_copy:
+				self.delete_node(node)
+				_nodes_copy.remove(node['id'])
+
+			if not len(_nodes_copy):
+				break
+
+		return {'results':_nodes_copy}
+
+	def delete_node(self,node):
+		logging.info('Deleted node #%s of type \'%s\'' %
+		             (node['id'],node['type']))
+		self.user['nodes'].remove(node)
 
 	def add_child_to_node(self,parent,child):
 		if not parent['id'] in child['parents']:
