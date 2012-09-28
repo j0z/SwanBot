@@ -76,8 +76,8 @@ class Client:
 
 _client = Client('localhost','testkey')
 
-#_client.create_node({'type':'twitter','filter':{'type':'tweet'}})
-#_client.create_node({'type':'twitter','filter':{'type':'tweet'}})
+_client.create_node({'type':'twitter','filter':{'type':'tweet'}})
+_client.create_node({'type':'twitter','filter':{'type':'tweet'}})
 #_client.create_node({'type':'twitter','filter':{'type':'tweet'}})
 #_client.create_node({'type':'tweet','from':'lederp',
 #        'text':'Free your mind :)','read':False,'public':True})

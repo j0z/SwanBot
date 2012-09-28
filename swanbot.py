@@ -24,7 +24,7 @@ except:
 	print 'PyGeoIP not installed.'
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 console_formatter = logging.Formatter('[%(asctime)s] %(message)s')
 
@@ -82,14 +82,14 @@ class SwanBot(LineReceiver):
 
 		_location = self.factory.get_country_name_from_ip(self.client_host)
 
-		logging.info('Client (%s:%s) connected from %s' %
+		logging.debug('Client (%s:%s) connected from %s' %
 		             (self.client_host,self.client_port,_location))
 	
 	def connectionLost(self,reason):
 		if not self.client_name == 'API':
 			self.factory.delete_client(self.client_name,self.transport,self.name)
 		
-		logging.info('%s via %s (%s:%s) disconnected.' %
+		logging.debug('%s via %s (%s:%s) disconnected.' %
 			(self.name,self.client_name,self.client_host,self.client_port))
 	
 	def send(self,line):
@@ -166,7 +166,7 @@ class SwanBot(LineReceiver):
 	def auth_user_via_api_key(self,api_key):
 		for user in self.factory.users:
 			if user['api-key'] == api_key:
-				logging.info('%s -> %s' % (self.name,user['name']))
+				logging.debug('%s -> %s' % (self.name,user['name']))
 				self.name = user['name']
 				self.user = user
 				return True
@@ -213,13 +213,10 @@ class SwanBot(LineReceiver):
 		returns: array of node IDs that could not be deleted."""
 		_nodes_copy = nodes[:]
 
-		for node in self.user['nodes']:
-			if node['id'] in _nodes_copy:
-				self.delete_node(node)
-				_nodes_copy.remove(node['id'])
-
-			if not len(_nodes_copy):
-				break
+		for node in nodes:
+			_node_to_delete = self.retrieve_node_via_id(node)
+			self.delete_node(_node_to_delete)
+			_nodes_copy.remove(node)
 
 		return {'results':_nodes_copy}
 
@@ -263,7 +260,8 @@ class SwanBot(LineReceiver):
 					_nodes_connected = True
 
 				if _nodes_connected:
-					logging.info('Synapse: Node #%s -> Node #%s' % (node2['id'],node1['id']))
+					logging.info('Synapse: Node #%s -> Node #%s' %
+					             (node2['id'],node1['id']))
 
 	def handle_find_nodes(self,query):
 		_found_nodes = self.find_nodes(query)
@@ -318,7 +316,7 @@ class SwanBot(LineReceiver):
 		return None
 
 	def update_user_node_mesh(self):
-		logging.info('Debugging...')
+		#TODO: Look over this
 		self.filter_nodes()
 		self.factory.save_users_db()
 
@@ -450,7 +448,7 @@ class SwanBotFactory(Factory):
 		if _ip_info:
 			return _ip_info
 		else:
-			logging.warning('Could not find location for \'%s\'' % ip)
+			logging.debug('Could not find location for \'%s\'' % ip)
 			return 'Unknown'
 
 	def save_users_db(self):
@@ -486,24 +484,6 @@ class SwanBotFactory(Factory):
 				module['module'].tick(_public_nodes)
 			except Exception, e:
 				print e
-	
-	def login(self,name,password):
-		for user in self.users:
-			if user['name'] == name and user['password'] == password:
-				return True
-		
-		return False
-	
-	def broadcast_event(self,type,value,user):
-		_event = 'event:%s:%s' % (type,value)
-		
-		for client in self.clients:
-			if client['user'] == user:
-				_client_host = client['transport'].getPeer().host
-				_client_port = client['transport'].getPeer().port
-				client['transport'].write(_event+'\r\n')
-				
-				logging.info('Event sent to (%s:%s)!' % (_client_host,_client_port))
 	
 	def create_node(self,username,type,public):
 		for user in self.users:
