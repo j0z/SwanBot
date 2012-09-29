@@ -68,8 +68,6 @@ class ModuleThread(threading.Thread):
 
 #noinspection PyMethodOverriding
 class SwanBot(LineReceiver):
-	scripts = []
-	
 	def __init__(self):
 		self.name = 'Client'
 		self.client_name = 'Unknown' #TODO: Naming conflict with self.name
@@ -200,7 +198,8 @@ class SwanBot(LineReceiver):
 			del _node['parent']
 
 		self.user['nodes'].append(_node)
-		logging.info('Created node with ID #%s' % _node['id'])
+		logging.info('Created node with ID #%s of type \'%s\'' %
+		             (_node['id'],_node['type']))
 
 		self.filter_nodes()
 
@@ -223,7 +222,22 @@ class SwanBot(LineReceiver):
 	def delete_node(self,node):
 		logging.info('Deleted node #%s of type \'%s\'' %
 		             (node['id'],node['type']))
+
+		self.remove_references_to_node(node)
 		self.user['nodes'].remove(node)
+
+	def remove_references_to_node(self,node):
+		for _node_in_mesh in self.user['nodes']:
+			if _node_in_mesh == node:
+				continue
+
+			if node['id'] in _node_in_mesh['parents']:
+				_node_in_mesh['parents'].remove(node['id'])
+				logging.info('\tSynapse with parent #%s removed.' % _node_in_mesh['id'])
+
+			if node['id'] in _node_in_mesh['children']:
+				_node_in_mesh['children'].remove(node['id'])
+				logging.info('\tSynapse with child #%s removed.' % _node_in_mesh['id'])
 
 	def add_child_to_node(self,parent,child):
 		if not parent['id'] in child['parents']:
@@ -325,21 +339,6 @@ class SwanBot(LineReceiver):
 		logging.info('Event created: %s - %s' % (type,value))
 		
 		self.factory.broadcast_event(type,value,self.name)
-	
-	def create_script(self,module,args):
-		_script_id = len(self.scripts)+1
-		_script = {'script':module['module'].Script(args,self,_script_id),
-			'id':_script_id}
-		
-		self.scripts.append(_script)
-		logging.info('Created script with id #%s' % _script['id'])
-		
-		return _script['id']
-	
-	def run_script(self,id):
-		for script in self.scripts:
-			if script['id'] == id:
-				script['script'].parse()
 
 class SwanBotFactory(Factory):
 	protocol = SwanBot
@@ -383,19 +382,21 @@ class SwanBotFactory(Factory):
 				pass
 			
 			_file = open(os.path.join('data','core_users.json'),'w')
-			
+
 			if '--init' in sys.argv:
 				self.users = [{'name':'root',
 					'password':'871ce144069ea0816545f52f09cd135d1182262c3b235808fa5a3281',
 				    'api-key':'testkey',
 					'nodes':[]}]
-				
+
 				logging.info('Creating new user DB...')
-			
-			_file.write(json.dumps(self.users))
-			_file.close()
-			logging.info('Created words database.')
-			self.load_users_db(error=True)
+				_file.close()
+				logging.info('Created words database.')
+				self.load_users_db(error=True)
+			else:
+				logging.error('The user DB could not be loaded. Run swanbot.py --init')
+				_file.close()
+				sys.exit()
 	
 	def load_words_db(self,error=False):
 		self.words_db = {'words':[],'nodes':[]}
@@ -484,17 +485,6 @@ class SwanBotFactory(Factory):
 				module['module'].tick(_public_nodes)
 			except Exception, e:
 				print e
-	
-	def create_node(self,username,type,public):
-		for user in self.users:
-			if user['name'] == username:
-				_node = nodes.create_node()
-				_node['owner'] = username
-				_node['type'] = type
-				_node['public'] = public
-				
-				user['nodes'].append(_node)
-				logging.info('Created node with ID #%s' % _node['id'])
 	
 	def get_public_user_nodes(self):
 		_public_user_nodes = []

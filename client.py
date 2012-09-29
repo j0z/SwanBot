@@ -76,30 +76,9 @@ class Client:
 
 _client = Client('localhost','testkey')
 
-_client.create_node({'type':'twitter','filter':{'type':'tweet'}})
-_client.create_node({'type':'twitter','filter':{'type':'tweet'}})
 #_client.create_node({'type':'twitter','filter':{'type':'tweet'}})
 #_client.create_node({'type':'tweet','from':'lederp',
 #        'text':'Free your mind :)','read':False,'public':True})
 
-_twitter = _client.find_nodes({'type':'twitter'})
-#_client.get_nodes(_twitter)
-_not_deleted = _client.delete_nodes(_twitter)
-
-#Client('localhost').get({'param':'user_value','user':'root','value':'password',
-#                         'apikey':'testkey'})
-#Client('localhost').send({'param':'create_node','query':{'type':'twitter','public':True,
-#                         'filter':{'type':'tweet'}},
-#                         'apikey':'testkey'})
-#
-#
-#_results = Client('localhost').get({'param':'find_nodes','query':{'type':'tweet','public':True},
-#                         'apikey':'testkey'})['results']
-#
-#print len(_results)
-#
-#Client('localhost').send({'param':'delete_nodes','nodes':_results,
-#                          'apikey':'testkey'})
-#
-#Client('localhost').get({'param':'get_nodes','nodes':_results,
-#                          'apikey':'testkey'})
+_client.delete_nodes(_client.find_nodes({'type':'twitter'}))
+_client.delete_nodes(_client.find_nodes({'type':'tweet'}))
