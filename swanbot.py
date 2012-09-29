@@ -465,7 +465,7 @@ class SwanBotFactory(Factory):
 	def startFactory(self):
 		logging.info('SwanBot is up and running.')
 		
-		self.add_module('mod_coreutils')
+		self.add_module('mod_coreutils.py')
 		
 		self.module_thread = ModuleThread()
 		self.module_thread.start(self)
@@ -530,7 +530,9 @@ class SwanBotFactory(Factory):
 
 		_module = imp.load_source(name.replace('.py',''),
 			os.path.join('modules',_mod_name))
-		
+
+		logging.info('Module \'%s\' loaded.' % _mod_name)
+
 		self.modules.append({'name':_sanitized_name,'module':_module})
 		
 		return 1
