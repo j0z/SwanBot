@@ -181,101 +181,22 @@ class SwanBot(LineReceiver):
 		return payload['apikey']
 
 	def create_node_from_payload(self,payload):
-		_node = nodes.create_node()
-		_node['owner'] = self.user['name']
-
-		for key in payload:
-			_node[key] = payload[key]
-
-		if payload.has_key('parent') and payload['parent']:
-			_parent_nodes = self.find_nodes(payload['parent'])
-
-			for parent_node in _parent_nodes:
-				logging.info('Found parent!')
-				_retrieved_node = self.retrieve_node_via_id(parent_node)
-				self.add_child_to_node(_retrieved_node,_node)
-
-			del _node['parent']
-
-		self.user['nodes'].append(_node)
-		logging.info('Created node with ID #%s of type \'%s\'' %
-		             (_node['id'],_node['type']))
-
-		self.filter_nodes()
-
-		return _node
+		return self.factory.create_node_from_payload(self.user,payload)
 
 	def delete_nodes_from_payload(self,nodes):
-		"""Deletes nodes, where `nodes` is an array
-		of the node IDs to be deleted.
-
-		returns: array of node IDs that could not be deleted."""
-		_nodes_copy = nodes[:]
-
-		for node in nodes:
-			_node_to_delete = self.retrieve_node_via_id(node)
-			self.delete_node(_node_to_delete)
-			_nodes_copy.remove(node)
-
-		return {'results':_nodes_copy}
+		return self.factory.delete_nodes_from_payload(self.user,nodes)
 
 	def delete_node(self,node):
-		logging.info('Deleted node #%s of type \'%s\'' %
-		             (node['id'],node['type']))
-
-		self.remove_references_to_node(node)
-		self.user['nodes'].remove(node)
+		return self.factory.delete_node(self.user,node)
 
 	def remove_references_to_node(self,node):
-		for _node_in_mesh in self.user['nodes']:
-			if _node_in_mesh == node:
-				continue
-
-			if node['id'] in _node_in_mesh['parents']:
-				_node_in_mesh['parents'].remove(node['id'])
-				logging.info('\tSynapse with parent #%s removed.' % _node_in_mesh['id'])
-
-			if node['id'] in _node_in_mesh['children']:
-				_node_in_mesh['children'].remove(node['id'])
-				logging.info('\tSynapse with child #%s removed.' % _node_in_mesh['id'])
+		return self.factory.remove_references_to_node(self.user,node)
 
 	def add_child_to_node(self,parent,child):
-		if not parent['id'] in child['parents']:
-			child['parents'].append(parent['id'])
-
-		if not child['id'] in parent['children']:
-			parent['children'].append(child['id'])
-
-		return True
+		return self.factory.add_child_to_node(parent,child)
 
 	def filter_nodes(self):
-		for node1 in self.user['nodes']:
-			for node2 in self.user['nodes']:
-				if node1['id'] == node2['id'] or not node1['filter']:
-					continue
-
-				_nodes_connected = False
-				_found = True
-
-				for key in node1['filter']:
-					if not node2.has_key(key) or not node2[key] == node1['filter'][key]:
-						_found = False
-						break
-
-				if not _found:
-					continue
-
-				if not node1['id'] in node2['parents']:
-					node2['parents'].append(node1['id'])
-					_nodes_connected = True
-
-				if not node2['id'] in node1['children']:
-					node1['children'].append(node2['id'])
-					_nodes_connected = True
-
-				if _nodes_connected:
-					logging.info('Synapse: Node #%s -> Node #%s' %
-					             (node2['id'],node1['id']))
+		self.factory.filter_nodes(self.user)
 
 	def handle_find_nodes(self,query):
 		_found_nodes = self.find_nodes(query)
@@ -301,33 +222,10 @@ class SwanBot(LineReceiver):
 		return {'results':_returned_nodes}
 
 	def find_nodes(self,query):
-		_matching_nodes = []
-
-		for node in self.user['nodes']:
-			_found = True
-
-			for key in query:
-				if node.has_key(key) and node[key] == query[key]:
-					pass
-				else:
-					_found = False
-					break
-
-			if not _found:
-				continue
-
-			_matching_nodes.append(node['id'])
-
-		logging.info('Found %s matching nodes.' % len(_matching_nodes))
-
-		return _matching_nodes
+		return self.factory.find_nodes(self.user,query)
 
 	def retrieve_node_via_id(self,id):
-		for node in self.user['nodes']:
-			if node['id'] == id:
-				return node
-
-		return None
+		return self.factory.retrieve_node_via_id(self.user,id)
 
 	def update_user_node_mesh(self):
 		#TODO: Look over this
@@ -485,7 +383,133 @@ class SwanBotFactory(Factory):
 				module['module'].tick(_public_nodes)
 			except Exception, e:
 				print e
-	
+
+	def create_node_from_payload(self,user,payload):
+		_node = nodes.create_node()
+		_node['owner'] = user['name']
+
+		for key in payload:
+			_node[key] = payload[key]
+
+		if payload.has_key('parent') and payload['parent']:
+			_parent_nodes = self.find_nodes(payload['parent'])
+
+			for parent_node in _parent_nodes:
+				logging.info('Found parent!')
+				_retrieved_node = self.retrieve_node_via_id(user,parent_node)
+				self.add_child_to_node(_retrieved_node,_node)
+
+			del _node['parent']
+
+		user['nodes'].append(_node)
+		logging.info('Created node with ID #%s of type \'%s\'' %
+		             (_node['id'],_node['type']))
+
+		self.filter_nodes(user)
+
+		return _node
+
+	def delete_nodes_from_payload(self,user,nodes):
+		"""Deletes nodes, where `nodes` is an array
+		  of the node IDs to be deleted.
+
+		  returns: array of node IDs that could not be deleted."""
+		_nodes_copy = nodes[:]
+
+		for node in nodes:
+			_node_to_delete = self.retrieve_node_via_id(user,node)
+			self.delete_node(user,_node_to_delete)
+			_nodes_copy.remove(node)
+
+		return {'results':_nodes_copy}
+
+	def delete_node(self,user,node):
+		logging.info('Deleted node #%s of type \'%s\'' %
+		             (node['id'],node['type']))
+
+		self.remove_references_to_node(user,node)
+		user['nodes'].remove(node)
+
+	def remove_references_to_node(self,user,node):
+		for _node_in_mesh in user['nodes']:
+			if _node_in_mesh == node:
+				continue
+
+			if node['id'] in _node_in_mesh['parents']:
+				_node_in_mesh['parents'].remove(node['id'])
+				logging.info('\tSynapse with parent #%s removed.' % _node_in_mesh['id'])
+
+			if node['id'] in _node_in_mesh['children']:
+				_node_in_mesh['children'].remove(node['id'])
+				logging.info('\tSynapse with child #%s removed.' % _node_in_mesh['id'])
+
+	def add_child_to_node(self,parent,child):
+		if not parent['id'] in child['parents']:
+			child['parents'].append(parent['id'])
+
+		if not child['id'] in parent['children']:
+			parent['children'].append(child['id'])
+
+		return True
+
+	def filter_nodes(self,user):
+		for node1 in user['nodes']:
+			for node2 in user['nodes']:
+				if node1['id'] == node2['id'] or not node1['filter']:
+					continue
+
+				_nodes_connected = False
+				_found = True
+
+				for key in node1['filter']:
+					if not node2.has_key(key) or not node2[key] == node1['filter'][key]:
+						_found = False
+						break
+
+				if not _found:
+					continue
+
+				if not node1['id'] in node2['parents']:
+					node2['parents'].append(node1['id'])
+					_nodes_connected = True
+
+				if not node2['id'] in node1['children']:
+					node1['children'].append(node2['id'])
+					_nodes_connected = True
+
+				if _nodes_connected:
+					logging.info('Synapse: Node #%s -> Node #%s' %
+					             (node2['id'],node1['id']))
+
+	def find_nodes(self,user,query):
+		_matching_nodes = []
+
+		for node in user['nodes']:
+			_found = True
+
+			for key in query:
+				if node.has_key(key) and node[key] == query[key]:
+					pass
+				else:
+					_found = False
+					break
+
+			if not _found:
+				continue
+
+			_matching_nodes.append(node['id'])
+
+		logging.info('Found %s matching nodes.' % len(_matching_nodes))
+
+		return _matching_nodes
+
+	def retrieve_node_via_id(self,user,id):
+		for node in user['nodes']:
+			if node['id'] == id:
+				return node
+
+		return None
+
 	def get_public_user_nodes(self):
 		_public_user_nodes = []
 		
