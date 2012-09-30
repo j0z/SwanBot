@@ -33,6 +33,7 @@ ch.setLevel(logging.INFO)
 ch.setFormatter(console_formatter)
 logger.addHandler(ch)
 
+#noinspection PyMethodOverriding
 class ModuleThread(threading.Thread):
 	RUNNING = True
 	CALLBACK = None
@@ -250,6 +251,7 @@ class SwanBotFactory(Factory):
 		self.node_db = []
 		
 		self.load_users_db()
+		self.load_node_mesh()
 		self.load_words_db()
 		self.load_geoip_db()
 	
@@ -282,12 +284,13 @@ class SwanBotFactory(Factory):
 			_file = open(os.path.join('data','core_users.json'),'w')
 
 			if '--init' in sys.argv:
+				logging.info('Creating new user DB...')
 				self.users = [{'name':'root',
 					'password':'871ce144069ea0816545f52f09cd135d1182262c3b235808fa5a3281',
 				    'api-key':'testkey',
 					'nodes':[]}]
 
-				logging.info('Creating new user DB...')
+				_file.write(json.dumps(self.users))
 				_file.close()
 				logging.info('Created words database.')
 				self.load_users_db(error=True)
@@ -324,6 +327,9 @@ class SwanBotFactory(Factory):
 			_file.close()
 			logging.info('Created words database.')
 			self.load_words_db(error=True)
+
+	def load_node_mesh(self):
+		pass
 
 	def load_geoip_db(self):
 		try:
@@ -380,9 +386,9 @@ class SwanBotFactory(Factory):
 		
 		for module in self.modules:
 			try:
-				module['module'].tick(_public_nodes)
+				module['module'].tick(_public_nodes,self)
 			except Exception, e:
-				print e
+				logging.error(sys.exc_info())
 
 	def create_node_from_payload(self,user,payload):
 		_node = nodes.create_node()
@@ -524,6 +530,13 @@ class SwanBotFactory(Factory):
 		
 		return _public_user_nodes
 	
+	def get_user_from_name(self,name):
+		for user in self.users:
+			if user['name'] == name:
+				return user
+
+		return False
+
 	def get_user_value(self,name,value):
 		for user in self.users:
 			if user['name'] == name:

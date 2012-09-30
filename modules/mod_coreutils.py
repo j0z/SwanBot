@@ -4,10 +4,10 @@
 
 import feedparser
 import datetime
-import time
+import logging
 
 #Runs every second. Get access to all public nodes.
-def tick(public_nodes):
+def tick(public_nodes,callback):
 	_calendars = []
 
 	#Check for any calendar nodes
@@ -18,7 +18,16 @@ def tick(public_nodes):
 				                   'calendar':node['url']})
 
 	for calendar in _calendars:
-		pass
+		_user = callback.get_user_from_name(calendar['user'])
+		_events = get_todays_events_from_calendar(calendar['calendar'])
+
+		for event in _events:
+			if callback.find_nodes(_user,{'type':'calendar_event','title':event['title']}):
+				continue
+			else:
+				callback.create_node_from_payload(_user,{'type':'calendar_event','title':event['title'],
+				                                   'starts':event['starts'],'ends':event['ends']})
+				logging.info('Added new calendar item for user \'%s\'' % calendar['user'])
 
 #Parses incoming date/time strings from calendar entries.
 #TODO: Do this.
@@ -58,7 +67,7 @@ def parse_calendar_entry(entry):
 	else:
 		_entry['ends'] = None
 
-	if _start_time.count(':'):# and (_start_time.count('am') or _start_time.count('pm')):
+	if _start_time.count(':'):
 		_entry['starts'] = datetime.datetime.strptime(_start_time,'%a %b %d, %Y %I:%M%p')
 	elif _start_time.count('AM') or _start_time.count('PM'):
 		_entry['starts'] = datetime.datetime.strptime(_start_time,'%a %b %d, %Y %I%p')
@@ -72,23 +81,34 @@ def parse_calendar_entry(entry):
 
 	return _entry
 
+def calendar_entry_to_string(entry):
+	_start_time_string = str(entry['starts'])
+	_end_time_string = str(entry['ends'])
+
+	return {'title':entry['title'],'starts':_start_time_string,'ends':_end_time_string}
+
 #Parses a Google Calendar.
 def get_todays_events_from_calendar(url):
 	_feed = feedparser.parse(url)
 	_todays_date = datetime.datetime.today()
+	_entries = []
 
 	for entry in _feed.entries:
 		_parsed_entry = parse_calendar_entry(entry)
+		_string_entry = calendar_entry_to_string(_parsed_entry)
 
 		if _parsed_entry['starts'].year == _todays_date.year and\
 		   _parsed_entry['starts'].day == _todays_date.day and\
 		   _parsed_entry['starts'].month == _todays_date.month:
-			print _parsed_entry['title'],_parsed_entry['starts'],_parsed_entry['ends']
+			_entries.append(_string_entry)
+
+	return _entries
 
 def get_this_weeks_events_from_calendar(url):
 	_feed = feedparser.parse(url)
 	_todays_date = datetime.datetime.today()
 	_todays_date += datetime.timedelta(days=7)
+	_entries = []
 
 	for entry in _feed.entries:
 		_parsed_entry = parse_calendar_entry(entry)
@@ -96,10 +116,11 @@ def get_this_weeks_events_from_calendar(url):
 		if _parsed_entry['starts'].year == _todays_date.year and\
 		   0<_todays_date.day-_parsed_entry['starts'].day<=7 and\
 		   _parsed_entry['starts'].month >= _todays_date.month:
-			print 'derp'
+			_entries.append(_parsed_entry)
 
-url = 'https://www.google.com/calendar/feeds/jetstarforever%40gmail.com/private-0b5d9ebe10bade7630eda7b436678e8c/basic'
+	return _entries
 
-get_this_weeks_events_from_calendar(url)
+#url =
+#get_this_weeks_events_from_calendar(url)
 
 
