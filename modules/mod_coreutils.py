@@ -6,10 +6,21 @@ import feedparser
 import datetime
 import logging
 
+WAIT_TIME_MAX = 10
+WAIT_TIME = 0
+
 #Runs every second. Get access to all public nodes.
 def tick(public_nodes,callback):
+	global WAIT_TIME, WAIT_TIME_MAX
+
+	if WAIT_TIME:
+		WAIT_TIME-=1
+
+		return False
+	
+	WAIT_TIME = WAIT_TIME_MAX
+	
 	_calendars = []
-	print 'tick'
 
 	#Check for any calendar nodes
 	for user in public_nodes:
