@@ -82,5 +82,7 @@ _client = Client('localhost','testkey')
 _client.create_node({'type':'calendar','public':True,
     'url':'https://www.google.com/calendar/feeds/jetstarforever%40gmail.com/private-0b5d9ebe10bade7630eda7b436678e8c/basic'})
 
+_client.find_nodes({'type':'calendar'})
+_client.get_nodes([1])
 #_client.delete_nodes(_client.find_nodes({'type':'twitter'}))
 #_client.delete_nodes(_client.find_nodes({'type':'tweet'}))

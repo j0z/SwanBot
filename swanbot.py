@@ -505,7 +505,7 @@ class SwanBotFactory(Factory):
 
 			_matching_nodes.append(node['id'])
 
-		logging.info('Found %s matching nodes.' % len(_matching_nodes))
+		#logging.info('Found %s matching nodes.' % len(_matching_nodes))
 
 		return _matching_nodes
 
