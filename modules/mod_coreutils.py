@@ -11,6 +11,60 @@ WAIT_TIME = 0
 
 #Runs every second. Get access to all public nodes.
 def tick(public_nodes,callback):
+	#TODO: Might want to get this in a different module
+	watch_tick(public_nodes,callback)
+	#calendar_tick(public_nodes,callback)
+
+def watch_tick(public_nodes,callback):
+	_watches = []
+	
+	for user in public_nodes:
+		for node in user['nodes']:
+			if node['type'] == 'watch':
+				_watches.append({'user':user,
+				                   'node':node})
+
+	for watch_node in _watches:
+		_actions = []
+		
+		for node in watch_node['user']['nodes']:
+			_user = callback.get_user_from_name(watch_node['user']['name'])
+			_found = True
+			
+			for key in watch_node['node']['input']:
+				if not node.has_key(key) or not node[key]==watch_node['node']['input'][key]:
+					_found = False
+					break
+					
+			if _found:
+				_actions.append({'watch':watch_node,'action':node})
+				callback.delete_nodes_from_payload(_user,[node['id']])
+				#watch_node['user']['nodes'].remove(node)
+			else:
+				continue
+	
+		for action in _actions:
+			_user = callback.get_user_from_name(action['watch']['user']['name'])
+			
+			for node in action['watch']['user']['nodes']:
+				_output = action['watch']['node']['output']
+				_found = True
+				
+				for key in _output['text_from']:
+					if not node.has_key(key) or not node[key]==_output['text_from'][key]:
+						_found = False
+						break
+						
+				if _found:
+					_to_parser = _output.copy()
+					_to_parser['text_from'] = node
+					_ret = callback.handle_action_node(_to_parser)
+					
+					callback.create_node_from_payload(_user,_ret)
+				else:
+					continue
+
+def calendar_tick(public_nodes,callback):	
 	global WAIT_TIME, WAIT_TIME_MAX
 
 	if WAIT_TIME:

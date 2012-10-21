@@ -76,13 +76,13 @@ class Client:
 
 _client = Client('localhost','testkey')
 
-#_client.create_node({'type':'twitter','filter':{'type':'tweet'}})
-#_client.create_node({'type':'tweet','from':'lederp',
-#        'text':'Free your mind :)','read':False,'public':True})
-#_client.create_node({'type':'calendar','public':True,
-#    'url':'https://www.google.com/calendar/feeds/jetstarforever%40gmail.com/private-0b5d9ebe10bade7630eda7b436678e8c/basic'})
+#_client.create_node({'public':True,'type':'watch','input':{'type':'action',
+#	'action':'tablet-awake'},'output':
+#		{'type':'speech','text_from':{'type':'event'
+#			,'when':'today'}}})
 
-_client.find_nodes({'type':'calendar'})
-_client.get_nodes([1])
-#_client.delete_nodes(_client.find_nodes({'type':'twitter'}))
-#_client.delete_nodes(_client.find_nodes({'type':'tweet'}))
+_client.create_node({'type':'action','action':'tablet-awake',
+        'public':True})
+
+#_client.create_node({'type':'event','when':'today',
+#        'public':True})
