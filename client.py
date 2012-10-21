@@ -75,14 +75,16 @@ class Client:
 			return []
 
 #_client = Client('localhost','testkey')
-#
-##_client.create_node({'public':True,'type':'watch','input':{'type':'action',
-##	'action':'tablet-awake'},'output':
-##		{'type':'speech','text_from':{'type':'event'
-##			,'when':'today'}}})
-#
+##
+###_client.create_node({'public':True,'type':'watch','input':{'type':'action',
+###	'action':'tablet-awake'},'output':
+###		{'type':'speech','text_from':{'type':'event'
+###			,'when':'today'}}})
+##
 #_client.create_node({'type':'action','action':'tablet-awake',
 #        'public':True})
+#
+#_client.get_nodes(_client.find_nodes({'type':'speech'}))
 
 #_client.create_node({'type':'event','when':'today',
 #        'public':True})
