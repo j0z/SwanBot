@@ -74,15 +74,15 @@ class Client:
 		else:
 			return []
 
-_client = Client('localhost','testkey')
-
-#_client.create_node({'public':True,'type':'watch','input':{'type':'action',
-#	'action':'tablet-awake'},'output':
-#		{'type':'speech','text_from':{'type':'event'
-#			,'when':'today'}}})
-
-_client.create_node({'type':'action','action':'tablet-awake',
-        'public':True})
+#_client = Client('localhost','testkey')
+#
+##_client.create_node({'public':True,'type':'watch','input':{'type':'action',
+##	'action':'tablet-awake'},'output':
+##		{'type':'speech','text_from':{'type':'event'
+##			,'when':'today'}}})
+#
+#_client.create_node({'type':'action','action':'tablet-awake',
+#        'public':True})
 
 #_client.create_node({'type':'event','when':'today',
 #        'public':True})
