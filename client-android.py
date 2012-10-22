@@ -28,7 +28,11 @@ def check_for_movement(droid):
 	
 	if not ACCEL_LAST_X:
 		ACCEL_LAST_X = _accel.result[0]
+	
+	if not ACCEL_LAST_Y:
 		ACCEL_LAST_Y = _accel.result[1]
+	
+	if not ACCEL_LAST_Z:
 		ACCEL_LAST_Z = _accel.result[2]
 	
 	if _accel.result[2]:
