@@ -7,9 +7,11 @@ HOST = '192.168.1.2'
 
 def check_for_speech(droid):
 	_results = Client(HOST,'testkey').get({'param':'find_nodes',
-                        'query':{'type':'speech'}})['results']
+                        'query':{'type':'speech'}})
 
-	if not _results:
+	if _results.has_key('results'):
+		_results = _results['results']
+	else:
 		return False
 	
 	for node in Client(HOST,'testkey').get({'param':'get_nodes','nodes':_results})['results']:
