@@ -29,7 +29,7 @@ def check_for_movement(droid):
 	if not ACCEL_LAST_Z:
 		ACCEL_LAST_Z = _accel[2]
 	
-	print _accel
+	print _accel['results']
 	
 	print abs(_accel[2]-ACCEL_LAST_Z)
 	
