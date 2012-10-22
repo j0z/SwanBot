@@ -36,6 +36,7 @@ def check_for_movement(droid):
 		ACCEL_LAST_Z = _accel.result[2]
 	
 	if _accel.result[2]:
+		print _accel.result[2],ACCEL_LAST_Z
 		print abs(_accel.result[2]-ACCEL_LAST_Z)
 	
 	ACCEL_LAST_Z = _accel[2]
@@ -48,7 +49,7 @@ def main():
 	while 1:
 		check_for_speech(droid)
 		check_for_movement(droid)
-		time.sleep(5)
+		time.sleep(3)
 
 main()
 #_results = Client(HOST,'testkey').get({'param':'find_nodes',
