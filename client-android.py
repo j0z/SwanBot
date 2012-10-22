@@ -22,8 +22,12 @@ def check_for_speech(droid):
 		droid.ttsSpeak('%s' % (node['text']))
 
 def check_for_movement(droid):
-	global ACCEL_LAST_Z
+	global ACCEL_LAST_X,ACCEL_LAST_Y,ACCEL_LAST_Z
+	
 	_accel = droid.sensorsReadAccelerometer()
+	
+	if not ACCEL_LAST_X:
+		ACCEL_LAST_X,ACCEL_LAST_Y,ACCEL_LAST_Z = _accel
 	
 	print abs(_accel[2]-ACCEL_LAST_Z)
 	
