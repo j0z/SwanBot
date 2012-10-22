@@ -40,7 +40,7 @@ def check_for_movement(droid):
 		print _accel.result[2],ACCEL_LAST_Z
 		print abs(_accel.result[2]-ACCEL_LAST_Z)
 	
-	ACCEL_LAST_Z = _accel[2]
+	ACCEL_LAST_Z = _accel.result[2]
 
 def main():
 	global droid
