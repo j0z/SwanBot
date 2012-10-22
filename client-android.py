@@ -31,6 +31,7 @@ def main():
 		check_for_movement(droid)
 		time.sleep(5)
 
+main()
 #_results = Client(HOST,'testkey').get({'param':'find_nodes',
 #                        'query':{'type':'speech'}})['results']
 #
