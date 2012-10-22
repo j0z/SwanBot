@@ -27,7 +27,9 @@ def check_for_movement(droid):
 	_accel = droid.sensorsReadAccelerometer()
 	
 	if not ACCEL_LAST_X:
-		ACCEL_LAST_X,ACCEL_LAST_Y,ACCEL_LAST_Z = _accel.result
+		ACCEL_LAST_X = _accel.result[0]
+		ACCEL_LAST_Y = _accel.result[1]
+		ACCEL_LAST_Z = _accel.result[2]
 	
 	if _accel.result[2]:
 		print abs(_accel.result[2]-ACCEL_LAST_Z)
