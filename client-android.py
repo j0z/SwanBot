@@ -23,6 +23,7 @@ def check_for_speech(droid):
 
 def check_for_movement(droid):
 	global ACCEL_LAST_X,ACCEL_LAST_Y,ACCEL_LAST_Z
+	_return = False
 	
 	_accel = droid.sensorsReadAccelerometer()
 	
@@ -37,19 +38,24 @@ def check_for_movement(droid):
 		print 'Setting ACCEL Z'
 	
 	if _accel.result[2]:
-		print _accel.result[2],ACCEL_LAST_Z
-		print abs(_accel.result[2]-ACCEL_LAST_Z)
+		if abs(_accel.result[2]-ACCEL_LAST_Z)>=2:
+			_return = True
 	
 	ACCEL_LAST_Z = _accel.result[2]
+	
+	return _return
 
 def main():
-	global droid
+	global droid,host
 	
 	droid.startSensingTimed(1,500)
 	
 	while 1:
 		check_for_speech(droid)
-		check_for_movement(droid)
+		
+		if check_for_movement(droid):
+			Client(HOST,'testkey').create_node({'type':'action','action':'tablet-awake','public':True})
+		
 		time.sleep(3)
 
 main()
