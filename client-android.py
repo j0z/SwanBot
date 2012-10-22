@@ -4,6 +4,9 @@ import time
 
 droid = android.Android()
 HOST = '192.168.1.2'
+ACCEL_LAST_X = None
+ACCEL_LAST_Y = None
+ACCEL_LAST_Z = None
 
 def check_for_speech(droid):
 	_results = Client(HOST,'testkey').get({'param':'find_nodes',
@@ -19,9 +22,14 @@ def check_for_speech(droid):
 		droid.ttsSpeak('%s' % (node['text']))
 
 def check_for_movement(droid):
+	global ACCEL_LAST_Z
 	_accel = droid.sensorsReadAccelerometer()
 	
-	print _accel
+	print abs(_accel[2]-ACCEL_LAST_Z)
+	
+	ACCEL_LAST_Z = _accel[2]
+	
+	print _accel[3]
 
 def main():
 	global droid
