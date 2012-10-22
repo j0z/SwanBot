@@ -94,6 +94,7 @@ def calendar_tick(public_nodes,callback):
 				_node = {'title':event['title'],
 					  'starts':event['starts'],'ends':event['ends']}				
 				_node = calendar_entry_to_string(_node)
+				_node['public'] = True
 				_node['type'] = 'calendar_event'
 
 				callback.create_node_from_payload(_user,_node)
