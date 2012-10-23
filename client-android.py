@@ -35,13 +35,12 @@ def check_for_movement(droid):
 	
 	if not ACCEL_LAST_Z:
 		ACCEL_LAST_Z = _accel.result[2]
-		print 'Setting ACCEL Z'
 	
 	if _accel.result[2]:
 		if abs(_accel.result[2]-ACCEL_LAST_Z)>=2:
 			_return = True
 	
-	ACCEL_LAST_Z = _accel.result[2]
+	ACCEL_LAST_X,ACCEL_LAST_Y,ACCEL_LAST_Z = _accel.result
 	
 	return _return
 
