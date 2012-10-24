@@ -9,6 +9,8 @@ ACCEL_LAST_X = None
 ACCEL_LAST_Y = None
 ACCEL_LAST_Z = None
 SCREEN_ON = True
+PLUGGED_IN = False
+BATTERY_CHARGING = True
 
 def check_for_speech(droid):
 	_results = Client(HOST,'testkey').get({'param':'find_nodes',
@@ -27,7 +29,6 @@ def check_for_screen(droid):
 	return droid.checkScreenOn().result
 
 def check_for_movement(droid):
-	global ACCEL_LAST_X,ACCEL_LAST_Y,ACCEL_LAST_Z
 	_return = False
 	
 	_accel = droid.sensorsReadAccelerometer()
@@ -72,20 +73,24 @@ def reset_time_asleep():
 	
 	Client(HOST,'testkey').delete_nodes(_results['results'])
 
-def main():
-	global droid,host,SCREEN_ON
+def handle_battery(droid):
+	if droid.batteryGetPlugType().result in [1,2]:
+		PLUGGED_IN = True
+	else:
+		PLUGGED_IN = False
 	
-	droid.startSensingTimed(1,500)
+	if droid.batterGetStatus().result == 2:
+		if not BATTERY_CHARGING:
+			BATTERY_CHARGING = True
+	else:
+		if BATTERY_CHARGING:
+			BATTERY_CHARGING = False
+
+def main():
+	#droid.startSensingTimed(1,500)
 	
 	while 1:
 		check_for_speech(droid)
-		
-		#if check_for_movement(droid):
-		#	if _asleep_time>5:
-		#		Client(HOST,'testkey').create_node({'type':'action','action':'tablet-awake','public':True})
-		#		print 'MOVED!!!!!!!!!!!!!!!!'
-		
-		print get_time_asleep(droid)		
 		
 		if check_for_screen(droid):
 			if not SCREEN_ON:
@@ -97,6 +102,11 @@ def main():
 			if SCREEN_ON:
 				Client(HOST,'testkey').create_node({'type':'action','action':'tablet-asleep','public':True})
 				SCREEN_ON = False
+		
+		handle_battery(droid)
+		
+		droid.batteryStopMonitoring()
+		droid.batteryStartMonitoring()
 		
 		time.sleep(3)
 
