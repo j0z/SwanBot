@@ -50,7 +50,7 @@ def check_for_movement(droid):
 
 def get_time_asleep(droid):
 	_results = Client(HOST,'testkey').get({'param':'find_nodes',
-		'query':{'type':'tablet-asleep'}})
+		'query':{'type':'action','action':'tablet-asleep'}})
 	
 	if not _results.has_key('results'):
 		return -1
