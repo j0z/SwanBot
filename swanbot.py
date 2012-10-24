@@ -2,6 +2,7 @@
 
 import threading
 import logging
+import speech
 import nodes
 import time
 import json
@@ -383,7 +384,7 @@ class SwanBotFactory(Factory):
 		for module in self.modules:
 			try:
 				module['module'].tick(_public_nodes,self)
-			except Exception, e:
+			except Exception:
 				logging.error(sys.exc_info())
 
 	def create_node_from_payload(self,user,payload):
@@ -416,6 +417,11 @@ class SwanBotFactory(Factory):
 		  of the node IDs to be deleted.
 
 		  returns: array of node IDs that could not be deleted."""
+		
+		for _user in self.users:
+			if _user['name'] == user['name']:
+				user = _user
+		
 		_nodes_copy = nodes[:]
 
 		for node in nodes:
@@ -501,7 +507,7 @@ class SwanBotFactory(Factory):
 
 			_matching_nodes.append(node['id'])
 
-		logging.info('Found %s matching nodes.' % len(_matching_nodes))
+		#logging.info('Found %s matching nodes.' % len(_matching_nodes))
 
 		return _matching_nodes
 
@@ -579,6 +585,10 @@ class SwanBotFactory(Factory):
 				return 1
 		
 		return 0
+	
+	def handle_action_node(self,node):
+		if node['type'] == 'speech':
+			return speech.node_to_speech(node['text_from'])
 
 endpoint = TCP4ServerEndpoint(reactor, 9002)
 endpoint.listen(SwanBotFactory())

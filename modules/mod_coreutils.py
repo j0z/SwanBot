@@ -6,8 +6,74 @@ import feedparser
 import datetime
 import logging
 
+WAIT_TIME_MAX = 10
+WAIT_TIME = 0
+
 #Runs every second. Get access to all public nodes.
 def tick(public_nodes,callback):
+	#TODO: Might want to get this in a different module
+	watch_tick(public_nodes,callback)
+	#calendar_tick(public_nodes,callback)
+
+def watch_tick(public_nodes,callback):
+	_watches = []
+	
+	for user in public_nodes:
+		for node in user['nodes']:
+			if node['type'] == 'watch':
+				_watches.append({'user':user,
+				                   'node':node})
+
+	for watch_node in _watches:
+		_actions = []
+		
+		for node in watch_node['user']['nodes']:
+			_user = callback.get_user_from_name(watch_node['user']['name'])
+			_found = True
+			
+			for key in watch_node['node']['input']:
+				if not node.has_key(key) or not node[key]==watch_node['node']['input'][key]:
+					_found = False
+					break
+					
+			if _found:
+				_actions.append({'watch':watch_node,'action':node})
+				callback.delete_nodes_from_payload(_user,[node['id']])
+				#watch_node['user']['nodes'].remove(node)
+			else:
+				continue
+	
+		for action in _actions:
+			_user = callback.get_user_from_name(action['watch']['user']['name'])
+			
+			for node in action['watch']['user']['nodes']:
+				_output = action['watch']['node']['output']
+				_found = True
+				
+				for key in _output['text_from']:
+					if not node.has_key(key) or not node[key]==_output['text_from'][key]:
+						_found = False
+						break
+						
+				if _found:
+					_to_parser = _output.copy()
+					_to_parser['text_from'] = node
+					_ret = callback.handle_action_node(_to_parser)
+					
+					callback.create_node_from_payload(_user,_ret)
+				else:
+					continue
+
+def calendar_tick(public_nodes,callback):	
+	global WAIT_TIME, WAIT_TIME_MAX
+
+	if WAIT_TIME:
+		WAIT_TIME-=1
+
+		return False
+	
+	WAIT_TIME = WAIT_TIME_MAX
+	
 	_calendars = []
 
 	#Check for any calendar nodes
@@ -19,14 +85,19 @@ def tick(public_nodes,callback):
 
 	for calendar in _calendars:
 		_user = callback.get_user_from_name(calendar['user'])
-		_events = get_todays_events_from_calendar(calendar['calendar'])
+		_events = get_this_weeks_events_from_calendar(calendar['calendar'])
 
 		for event in _events:
 			if callback.find_nodes(_user,{'type':'calendar_event','title':event['title']}):
 				continue
 			else:
-				callback.create_node_from_payload(_user,{'type':'calendar_event','title':event['title'],
-				                                   'starts':event['starts'],'ends':event['ends']})
+				_node = {'title':event['title'],
+					  'starts':event['starts'],'ends':event['ends']}				
+				_node = calendar_entry_to_string(_node)
+				_node['public'] = True
+				_node['type'] = 'calendar_event'
+
+				callback.create_node_from_payload(_user,_node)
 				logging.info('Added new calendar item for user \'%s\'' % calendar['user'])
 
 #Parses incoming date/time strings from calendar entries.
@@ -107,20 +178,20 @@ def get_todays_events_from_calendar(url):
 def get_this_weeks_events_from_calendar(url):
 	_feed = feedparser.parse(url)
 	_todays_date = datetime.datetime.today()
-	_todays_date += datetime.timedelta(days=7)
+	#_todays_date += datetime.timedelta(days=7)
 	_entries = []
 
 	for entry in _feed.entries:
 		_parsed_entry = parse_calendar_entry(entry)
-
-		if _parsed_entry['starts'].year == _todays_date.year and\
-		   0<_todays_date.day-_parsed_entry['starts'].day<=7 and\
-		   _parsed_entry['starts'].month >= _todays_date.month:
+		_date_delta = _parsed_entry['starts']-_todays_date
+		
+		if 0<_date_delta.days<=7:
 			_entries.append(_parsed_entry)
 
 	return _entries
 
-#url =
-#get_this_weeks_events_from_calendar(url)
+#url = 'https://www.google.com/calendar/feeds/jetstarforever%40gmail.com/private-0b5d9ebe10bade7630eda7b436678e8c/basic'
+#for event in get_this_weeks_events_from_calendar(url):
+#	print event
 
 
