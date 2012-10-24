@@ -209,7 +209,6 @@ class SwanBot(LineReceiver):
 			return {'error':'No nodes were found.'}
 
 	def handle_get_nodes(self,nodes):
-		print nodes
 		_returned_nodes = []
 
 		_nodes_copy = nodes[:]
