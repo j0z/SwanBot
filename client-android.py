@@ -85,7 +85,7 @@ def main():
 		#		Client(HOST,'testkey').create_node({'type':'action','action':'tablet-awake','public':True})
 		#		print 'MOVED!!!!!!!!!!!!!!!!'
 		
-		print get_time_asleep()		
+		print get_time_asleep(droid)		
 		
 		if check_for_screen(droid):
 			if not SCREEN_ON:
