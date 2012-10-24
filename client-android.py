@@ -22,7 +22,7 @@ def check_for_speech(droid):
 		droid.ttsSpeak('%s' % (node['text']))
 
 def check_for_screen(droid):
-	return droid.checkScreenOn()
+	return droid.checkScreenOn().result
 
 def check_for_movement(droid):
 	global ACCEL_LAST_X,ACCEL_LAST_Y,ACCEL_LAST_Z
