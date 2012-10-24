@@ -4,7 +4,7 @@ import android
 import time
 
 droid = android.Android()
-HOST = '10.238.82.100'
+HOST = '10.238.82.236'
 ACCEL_LAST_X = None
 ACCEL_LAST_Y = None
 ACCEL_LAST_Z = None
