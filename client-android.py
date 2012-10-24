@@ -108,6 +108,8 @@ def main():
 		droid.batteryStopMonitoring()
 		droid.batteryStartMonitoring()
 		
+		print PLUGGED_IN,BATTERY_CHARGING
+		
 		time.sleep(3)
 
 main()
