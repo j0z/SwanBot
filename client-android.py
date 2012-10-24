@@ -58,8 +58,7 @@ def get_time_asleep(droid):
 	_results = _results['results']
 	
 	node = Client(HOST,'testkey').get({'param':'get_nodes','nodes':_results})['results'][0]
-	print repr(node['created'])
-	_fell_asleep_time = datetime.strptime(node['created'],'%m/%d/%Y %H:%M:%S')
+	_fell_asleep_time = datetime.strptime(str(node['created']),'%m/%d/%Y %H:%M:%S')
 	
 	return (datetime.now()-_fell_asleep_time).seconds
 
