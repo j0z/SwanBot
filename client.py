@@ -2,16 +2,18 @@ import socket
 import json
 
 class Client:
-	def __init__(self,host,apikey,port=9002):
+	def __init__(self,host,apikey,port=9002,debug=True):
 		self.host = host
 		self.port = port
 		self.apikey = apikey
+		self.debug = debug
 
 	def parse(self,data):
-		for line in ['%s: %s' % (key,data[key]) for key in data]:
-			print line
-
-		print '='*10
+		if self.debug:
+			for line in ['%s: %s' % (key,data[key]) for key in data]:
+				print line
+	
+			print '='*10
 
 		return data
 

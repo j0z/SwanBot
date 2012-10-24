@@ -75,6 +75,7 @@ def main():
 			if get_time_asleep(droid)>5:
 				Client(HOST,'testkey').create_node({'type':'action','action':'tablet-awake','public':True})
 				droid.wakeLockAcquireDim()
+				print 'MOVED!!!!!!!!!!!!!!!!'
 		
 		if check_for_screen(droid):
 			if not SCREEN_ON:
