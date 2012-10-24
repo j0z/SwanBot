@@ -8,7 +8,7 @@ HOST = '10.238.82.100'
 ACCEL_LAST_X = None
 ACCEL_LAST_Y = None
 ACCEL_LAST_Z = None
-SCREEN_ON = False
+SCREEN_ON = True
 
 def check_for_speech(droid):
 	_results = Client(HOST,'testkey').get({'param':'find_nodes',
@@ -63,6 +63,15 @@ def get_time_asleep(droid):
 	
 	return (datetime.now()-_fell_asleep_time).seconds
 
+def reset_time_asleep(droid):
+	_results = Client(HOST,'testkey').get({'param':'find_nodes',
+		'query':{'type':'action','action':'tablet-asleep'}})
+	
+	if not _results.has_key('results'):
+		return -1
+	
+	Client(HOST,'testkey').delete_nodes(_results['results'])
+
 def main():
 	global droid,host,SCREEN_ON
 	
@@ -76,9 +85,12 @@ def main():
 		#		Client(HOST,'testkey').create_node({'type':'action','action':'tablet-awake','public':True})
 		#		print 'MOVED!!!!!!!!!!!!!!!!'
 		
+		print get_time_asleep()		
+		
 		if check_for_screen(droid):
 			if not SCREEN_ON:
 				Client(HOST,'testkey').create_node({'type':'action','action':'tablet-awake','public':True})
+				reset_time_asleep()
 				SCREEN_ON = True
 				
 		else:
