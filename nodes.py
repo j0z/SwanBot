@@ -20,6 +20,6 @@ def create_node():
 	_node['id'] = NODE_ID
 	_node['parents'] = []
 	_node['children'] = []
-	_node['created'] = datetime.now().strftime('%c')
+	_node['created'] = datetime.now().strftime('%m/%d/%Y %H:%M:%S')
 
 	return _node

@@ -73,16 +73,12 @@ class Client:
 			return _results['results']
 		else:
 			return []
-
+#
 #_client = Client('localhost','testkey')
-
+#
 #_client.create_node({'public':True,'type':'watch','input':{'type':'action',
 #	'action':'tablet-awake'},'output':
 #		{'type':'speech','text_from':{'type':'calendar_event'}}})
-
-#_client.create_node({'type':'action','action':'tablet-awake','public':True})
 #
-#_client.get_nodes(_client.find_nodes({'type':'speech'}))
-
 #_client.create_node({'type':'calendar','public':True,
 #        'url':'https://www.google.com/calendar/feeds/jetstarforever%40gmail.com/private-0b5d9ebe10bade7630eda7b436678e8c/basic'})
