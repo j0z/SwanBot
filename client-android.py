@@ -8,6 +8,7 @@ HOST = '10.238.82.100'
 ACCEL_LAST_X = None
 ACCEL_LAST_Y = None
 ACCEL_LAST_Z = None
+SCREEN_ON = False
 
 def check_for_speech(droid):
 	_results = Client(HOST,'testkey').get({'param':'find_nodes',
@@ -63,20 +64,27 @@ def get_time_asleep(droid):
 	return (datetime.now()-_fell_asleep_time).seconds
 
 def main():
-	global droid,host
+	global droid,host,SCREEN_ON
 	
 	droid.startSensingTimed(1,500)
 	
 	while 1:
 		check_for_speech(droid)
 		
-		if check_for_movement(droid):
-			Client(HOST,'testkey').create_node({'type':'action','action':'tablet-awake','public':True})
+		if check_for_movement(droid) and not SCREEN_ON:
+			if get_time_asleep(droid)>5:
+				Client(HOST,'testkey').create_node({'type':'action','action':'tablet-awake','public':True})
+				droid.wakeLockAcquireDim()
 		
-		if not check_for_screen(droid):
-			Client(HOST,'testkey').create_node({'type':'action','action':'tablet-asleep','public':True})
-		
-		print get_time_asleep(droid)
+		if check_for_screen(droid):
+			if not SCREEN_ON:
+				Client(HOST,'testkey').create_node({'type':'action','action':'tablet-awake','public':True})
+				SCREEN_ON = True
+				
+		else:
+			if SCREEN_ON:
+				Client(HOST,'testkey').create_node({'type':'action','action':'tablet-asleep','public':True})
+				SCREEN_ON = False
 		
 		time.sleep(3)
 
