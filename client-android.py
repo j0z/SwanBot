@@ -58,6 +58,8 @@ def main():
 		if check_for_movement(droid):
 			Client(HOST,'testkey').create_node({'type':'action','action':'tablet-awake','public':True})
 		
+		print check_for_screen(droid)
+		
 		if not check_for_screen(droid):
 			Client(HOST,'testkey').create_node({'type':'action','action':'tablet-asleep','public':True})
 		
