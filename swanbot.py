@@ -251,7 +251,6 @@ class SwanBotFactory(Factory):
 		self.node_db = []
 		
 		self.load_users_db()
-		self.load_node_mesh()
 		self.load_words_db()
 		self.load_geoip_db()
 	
@@ -327,9 +326,6 @@ class SwanBotFactory(Factory):
 			_file.close()
 			logging.info('Created words database.')
 			self.load_words_db(error=True)
-
-	def load_node_mesh(self):
-		pass
 
 	def load_geoip_db(self):
 		try:
