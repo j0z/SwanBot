@@ -63,7 +63,7 @@ def get_time_asleep(droid):
 	
 	return (datetime.now()-_fell_asleep_time).seconds
 
-def reset_time_asleep(droid):
+def reset_time_asleep():
 	_results = Client(HOST,'testkey').get({'param':'find_nodes',
 		'query':{'type':'action','action':'tablet-asleep'}})
 	
