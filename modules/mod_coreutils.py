@@ -13,7 +13,7 @@ WAIT_TIME = 0
 def tick(public_nodes,callback):
 	#TODO: Might want to get this in a different module
 	watch_tick(public_nodes,callback)
-	#calendar_tick(public_nodes,callback)
+	calendar_tick(public_nodes,callback)
 
 def watch_tick(public_nodes,callback):
 	_watches = []

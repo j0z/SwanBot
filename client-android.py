@@ -3,7 +3,7 @@ import android
 import time
 
 droid = android.Android()
-HOST = '192.168.1.2'
+HOST = '10.238.82.100'
 ACCEL_LAST_X = None
 ACCEL_LAST_Y = None
 ACCEL_LAST_Z = None
@@ -20,6 +20,9 @@ def check_for_speech(droid):
 	for node in Client(HOST,'testkey').get({'param':'get_nodes','nodes':_results})['results']:
 		Client(HOST,'testkey').delete_nodes([node['id']])
 		droid.ttsSpeak('%s' % (node['text']))
+
+def check_for_screen(droid):
+	return droid.checkScreenOn()
 
 def check_for_movement(droid):
 	global ACCEL_LAST_X,ACCEL_LAST_Y,ACCEL_LAST_Z
@@ -55,12 +58,8 @@ def main():
 		if check_for_movement(droid):
 			Client(HOST,'testkey').create_node({'type':'action','action':'tablet-awake','public':True})
 		
+		check_for_screen(droid)
+		
 		time.sleep(3)
 
 main()
-#_results = Client(HOST,'testkey').get({'param':'find_nodes',
-#                        'query':{'type':'speech'}})['results']
-#
-#for node in Client(HOST,'testkey').get({'param':'get_nodes','nodes':_results})['results']:
-#	Client(HOST,'testkey').delete_nodes([node['id']])
-#	droid.ttsSpeak('%s' % (node['text']))
