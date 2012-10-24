@@ -2,7 +2,7 @@ import socket
 import json
 
 class Client:
-	def __init__(self,host,apikey,port=9002,debug=True):
+	def __init__(self,host,apikey,port=9002,debug=False):
 		self.host = host
 		self.port = port
 		self.apikey = apikey
