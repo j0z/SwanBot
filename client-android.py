@@ -71,8 +71,11 @@ def main():
 	while 1:
 		check_for_speech(droid)
 		
+		_asleep_time = get_time_asleep(droid)
+		print _asleep_time,SCREEN_ON
+		
 		if check_for_movement(droid) and not SCREEN_ON:
-			if get_time_asleep(droid)>5:
+			if _asleep_time>5:
 				Client(HOST,'testkey').create_node({'type':'action','action':'tablet-awake','public':True})
 				droid.wakeLockAcquireDim()
 				print 'MOVED!!!!!!!!!!!!!!!!'
