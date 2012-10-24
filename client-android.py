@@ -53,7 +53,7 @@ def get_time_asleep(droid):
 		'query':{'type':'tablet-asleep'}})
 	
 	if not _results.has_key('results'):
-		return 0
+		return -1
 	
 	node = Client(HOST,'testkey').get({'param':'get_nodes','nodes':_results})['results'][0]
 	_fell_asleep_time = datetime.strptime(node['time'],'%c')
