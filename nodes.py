@@ -1,5 +1,6 @@
 #Defines functions used to create and modify nodes on the
 #node mesh.
+from datetime import datetime
 
 NODE_ID = 0
 
@@ -19,5 +20,6 @@ def create_node():
 	_node['id'] = NODE_ID
 	_node['parents'] = []
 	_node['children'] = []
+	_node['created'] = datetime.now().strftime('%c')
 
 	return _node

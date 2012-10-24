@@ -1,3 +1,4 @@
+from datetime import datetime
 from client import Client
 import android
 import time
@@ -12,10 +13,10 @@ def check_for_speech(droid):
 	_results = Client(HOST,'testkey').get({'param':'find_nodes',
                         'query':{'type':'speech'}})
 
-	if _results.has_key('results'):
-		_results = _results['results']
-	else:
+	if not _results.has_key('results'):
 		return False
+	
+	_results = _results['results']
 	
 	for node in Client(HOST,'testkey').get({'param':'get_nodes','nodes':_results})['results']:
 		Client(HOST,'testkey').delete_nodes([node['id']])
@@ -47,6 +48,18 @@ def check_for_movement(droid):
 	
 	return _return
 
+def get_time_asleep(droid):
+	_results = Client(HOST,'testkey').get({'param':'find_nodes',
+		'query':{'type':'tablet-asleep'}})
+	
+	if not _results.has_key('results'):
+		return 0
+	
+	node = Client(HOST,'testkey').get({'param':'get_nodes','nodes':_results})['results'][0]
+	_fell_asleep_time = datetime.strptime(node['time'],'%c')
+	
+	return (datetime.now()-_fell_asleep_time).seconds
+
 def main():
 	global droid,host
 	
@@ -58,10 +71,10 @@ def main():
 		if check_for_movement(droid):
 			Client(HOST,'testkey').create_node({'type':'action','action':'tablet-awake','public':True})
 		
-		print check_for_screen(droid)
-		
 		if not check_for_screen(droid):
 			Client(HOST,'testkey').create_node({'type':'action','action':'tablet-asleep','public':True})
+		
+		print get_time_asleep(droid)
 		
 		time.sleep(3)
 
