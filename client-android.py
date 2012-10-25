@@ -24,6 +24,7 @@ def check_for_speech(droid):
 	for node in Client(HOST,'testkey').get({'param':'get_nodes','nodes':_results})['results']:
 		Client(HOST,'testkey').delete_nodes([node['id']])
 		droid.ttsSpeak('%s' % (node['text']))
+		print 'Saying: '+node['text']
 
 def check_for_screen(droid):
 	return droid.checkScreenOn().result
@@ -106,12 +107,12 @@ def main():
 				Client(HOST,'testkey').create_node({'type':'action','action':'tablet-asleep','public':True})
 				SCREEN_ON = False
 		
+		
+		
 		handle_battery(droid)
 		
 		droid.batteryStopMonitoring()
 		droid.batteryStartMonitoring()
-		
-		print PLUGGED_IN,BATTERY_CHARGING
 		
 		time.sleep(3)
 
