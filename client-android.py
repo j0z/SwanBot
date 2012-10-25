@@ -81,12 +81,12 @@ def handle_battery(droid):
 	else:
 		PLUGGED_IN = False
 	
-	if droid.batterGetStatus().result == 2:
-		if not BATTERY_CHARGING:
-			BATTERY_CHARGING = True
-	else:
-		if BATTERY_CHARGING:
-			BATTERY_CHARGING = False
+#	if droid.batterGetStatus().result == 2:
+#		if not BATTERY_CHARGING:
+#			BATTERY_CHARGING = True
+#	else:
+#		if BATTERY_CHARGING:
+#			BATTERY_CHARGING = False
 
 def main():
 	global SCREEN_ON, PLUGGED_IN, BATTERY_CHARGING
