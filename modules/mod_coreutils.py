@@ -190,8 +190,6 @@ def get_this_weeks_events_from_calendar(url):
 
 	return _entries
 
-url = 'https://www.google.com/calendar/feeds/jetstarforever%40gmail.com/private-0b5d9ebe10bade7630eda7b436678e8c/basic'
-for event in get_this_weeks_events_from_calendar(url):
-	print event
-
-
+#url = 'https://www.google.com/calendar/feeds/jetstarforever%40gmail.com/private-0b5d9ebe10bade7630eda7b436678e8c/basic'
+#for event in get_this_weeks_events_from_calendar(url):
+#	print event

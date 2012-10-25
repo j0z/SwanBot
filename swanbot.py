@@ -382,10 +382,10 @@ class SwanBotFactory(Factory):
 		_public_nodes = self.get_public_user_nodes()
 		
 		for module in self.modules:
-			try:
-				module['module'].tick(_public_nodes,self)
-			except Exception:
-				logging.error(sys.exc_info())
+			#try:
+			module['module'].tick(_public_nodes,self)
+			#except Exception:
+			#logging.error(sys.exc_info())
 
 	def create_node_from_payload(self,user,payload):
 		_node = nodes.create_node()
