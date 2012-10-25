@@ -4,7 +4,7 @@ import android
 import time
 
 droid = android.Android()
-HOST = '10.238.82.236'
+HOST = '10.238.82.100'
 ACCEL_LAST_X = None
 ACCEL_LAST_Y = None
 ACCEL_LAST_Z = None
@@ -29,6 +29,7 @@ def check_for_screen(droid):
 	return droid.checkScreenOn().result
 
 def check_for_movement(droid):
+	global ACCEL_LAST_X, ACCEL_LAST_Y, ACCEL_LAST_Z
 	_return = False
 	
 	_accel = droid.sensorsReadAccelerometer()
@@ -74,6 +75,7 @@ def reset_time_asleep():
 	Client(HOST,'testkey').delete_nodes(_results['results'])
 
 def handle_battery(droid):
+	global PLUGGED_IN, BATTERY_CHARGING
 	if droid.batteryGetPlugType().result in [1,2]:
 		PLUGGED_IN = True
 	else:
@@ -87,6 +89,7 @@ def handle_battery(droid):
 			BATTERY_CHARGING = False
 
 def main():
+	global SCREEN_ON, PLUGGED_IN, BATTERY_CHARGING
 	#droid.startSensingTimed(1,500)
 	
 	while 1:
