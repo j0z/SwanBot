@@ -107,8 +107,6 @@ def main():
 				Client(HOST,'testkey').create_node({'type':'action','action':'tablet-asleep','public':True})
 				SCREEN_ON = False
 		
-		
-		
 		handle_battery(droid)
 		
 		droid.batteryStopMonitoring()

@@ -177,7 +177,7 @@ def get_todays_events_from_calendar(url):
 
 def get_this_weeks_events_from_calendar(url):
 	_feed = feedparser.parse(url)
-	_todays_date = datetime.datetime.today()
+	_todays_date = datetime.datetime.now()
 	#_todays_date += datetime.timedelta(days=7)
 	_entries = []
 
@@ -185,13 +185,13 @@ def get_this_weeks_events_from_calendar(url):
 		_parsed_entry = parse_calendar_entry(entry)
 		_date_delta = _parsed_entry['starts']-_todays_date
 		
-		if 0<_date_delta.days<=7:
+		if -1<_date_delta.days<=7:
 			_entries.append(_parsed_entry)
 
 	return _entries
 
-#url = 'https://www.google.com/calendar/feeds/jetstarforever%40gmail.com/private-0b5d9ebe10bade7630eda7b436678e8c/basic'
-#for event in get_this_weeks_events_from_calendar(url):
-#	print event
+url = 'https://www.google.com/calendar/feeds/jetstarforever%40gmail.com/private-0b5d9ebe10bade7630eda7b436678e8c/basic'
+for event in get_this_weeks_events_from_calendar(url):
+	print event
 
 
