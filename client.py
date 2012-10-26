@@ -14,6 +14,9 @@ class Client:
 				print line
 	
 			print '='*10
+		
+		if data.has_key('error'):
+			print 'Error:',data['error']
 
 		return data
 
@@ -50,6 +53,8 @@ class Client:
 		return _returned_data
 
 	def create_node(self,query):
+		_a = json.dumps(query)
+		json.loads(_a)
 		return self.send({'param':'create_node','query':query})
 
 	def find_nodes(self,query):
@@ -76,7 +81,12 @@ class Client:
 		else:
 			return []
 
-#_client = Client('localhost','testkey')
+_client = Client('localhost','testkey')
+
+_client.create_node({'type':'test_node'})
+_client.create_node({'type':'test_node_2'})
+
+_client.create_node({'type':'fetch','fetch':[{'type':'test_node'},{'type':'test_node_2'}],'format':'Node 1: node[1].type, Node 2: node[2].type'})
 #
 #_client.create_node({'public':True,'type':'watch','input':{'type':'action',
 #	'action':'tablet-awake'},'output':

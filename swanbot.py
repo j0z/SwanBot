@@ -9,14 +9,15 @@ import json
 import sys
 import imp
 import os
+import re
 
 try:
 	from twisted.internet.endpoints import TCP4ServerEndpoint
 	from twisted.internet.protocol import Factory
 	from twisted.protocols.basic import LineReceiver
 	from twisted.internet import reactor
-except:
-	print 'Library not found: Twisted.'
+except Exception, e:
+	print 'Error importing Twisted:',e
 	sys.exit()
 
 try:
@@ -146,7 +147,11 @@ class SwanBot(LineReceiver):
 
 		if payload['param'] == 'create_node':
 			if payload.has_key('query'):
-				_send_string = self.create_node_from_payload(payload['query'])
+				if payload['query']['type'] == 'fetch':
+					_node = self.create_node_from_payload(payload['query'])
+					_send_string = self.handle_fetch_node(_node)
+				else:
+					_send_string = self.create_node_from_payload(payload['query'])
 			else:
 				_send_string = {'error':'No \'query\' key passed to create_node.'}
 
@@ -158,6 +163,33 @@ class SwanBot(LineReceiver):
 
 		self.send(json.dumps(_send_string))
 		return True
+
+	def handle_fetch_node(self,node):
+		_fetched_nodes = []
+		
+		for fetch_node in node['fetch']:
+			_find_nodes = self.handle_find_nodes(fetch_node)
+			
+			if _find_nodes.has_key('results') and _find_nodes['results']:
+				_fetched_node = self.handle_get_nodes([_find_nodes['results'][0]])
+				_fetched_nodes.append(_fetched_node['results'][0])
+			else:
+				_send_string = {'error':'Fetched node %s does not exist.'
+					% node['fetch'].index(fetch_node)}
+				_fetched_nodes = []
+				break
+		
+		if _fetched_nodes:
+			node['text'] = node['format']
+			
+			for match in re.findall('[[node\\[\\d\\]]*].[\\w]*',node['text']):
+				_node_id = int(match.partition('[')[2].partition(']')[0])-1
+				_key = match.partition('.')[2]
+				node['text'] = node['text'].replace(match,_fetched_nodes[_node_id][_key])
+			
+			_send_string = node
+		
+		return _send_string
 
 	def handle_missing_api_key(self):
 		logging.error('Incorrect API key from %s:%s' % (self.client_host,self.client_port))
@@ -382,10 +414,10 @@ class SwanBotFactory(Factory):
 		_public_nodes = self.get_public_user_nodes()
 		
 		for module in self.modules:
-			#try:
-			module['module'].tick(_public_nodes,self)
-			#except Exception:
-			#logging.error(sys.exc_info())
+			try:
+				module['module'].tick(_public_nodes,self)
+			except Exception:
+				logging.error(sys.exc_info())
 
 	def create_node_from_payload(self,user,payload):
 		_node = nodes.create_node()
