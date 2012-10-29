@@ -2,6 +2,7 @@
 
 import threading
 import logging
+import hashlib
 import speech
 import nodes
 import time
@@ -193,7 +194,7 @@ class SwanBot(LineReceiver):
 
 	def handle_missing_api_key(self):
 		logging.error('Incorrect API key from %s:%s' % (self.client_host,self.client_port))
-		self.send(json.dumps({'text':'No API key found in dictionary.'}))
+		self.send(json.dumps({'error':'No API key found in dictionary.'}))
 
 	def auth_user_via_api_key(self,api_key):
 		for user in self.factory.users:
@@ -204,7 +205,7 @@ class SwanBot(LineReceiver):
 				return True
 
 		logging.error('Incorrect API key from %s:%s' % (self.client_host,self.client_port))
-		self.send(json.dumps({'text':'No user with that API key exists.'}))
+		self.send(json.dumps({'error':'No user with that API key exists.'}))
 
 		return False
 
@@ -283,11 +284,8 @@ class SwanBotFactory(Factory):
 
 	def __init__(self):
 		self.users = []
-		self.words_db = {'words':[],'nodes':[]}
-		self.node_db = []
 		
 		self.load_users_db()
-		self.load_words_db()
 		self.load_geoip_db()
 	
 	def load_users_db(self,error=False):
@@ -320,10 +318,7 @@ class SwanBotFactory(Factory):
 
 			if '--init' in sys.argv:
 				logging.info('Creating new user DB...')
-				self.users = [{'name':'root',
-					'password':'871ce144069ea0816545f52f09cd135d1182262c3b235808fa5a3281',
-				    'api-key':'testkey',
-					'nodes':[]}]
+				self.add_user('root','testkey')
 
 				_file.write(json.dumps(self.users))
 				_file.close()
@@ -333,35 +328,6 @@ class SwanBotFactory(Factory):
 				logging.error('The user DB could not be loaded. Run swanbot.py --init')
 				_file.close()
 				sys.exit()
-	
-	def load_words_db(self,error=False):
-		self.words_db = {'words':[],'nodes':[]}
-		
-		try:
-			_file = open(os.path.join('data','words.json'),'r')
-			words_db = json.loads(_file.readline())
-			
-			for entry in self.words_db['words']:
-				for key in entry:
-					if isinstance(entry[key],unicode):
-						entry[key] = entry[key].encode("utf-8")
-			
-			_file.close()
-			self.node_db = words_db['nodes']
-			self.words_db = words_db['words']
-			logging.info('Loaded words db.')
-		except Exception, e:
-			if error:
-				logging.error('Could not create words.json!')
-				logging.error(e)
-				sys.exit(1)
-			
-			logging.error('Could not load words database from disk!')
-			_file = open(os.path.join('data','words.json'),'w')
-			_file.write(json.dumps(self.words_db))
-			_file.close()
-			logging.info('Created words database.')
-			self.load_words_db(error=True)
 
 	def load_geoip_db(self):
 		try:
@@ -393,11 +359,6 @@ class SwanBotFactory(Factory):
 		_file.write(json.dumps(self.users))
 		_file.close()
 	
-	def save_words_db(self):
-		_file = open(os.path.join('data','words.json'),'w')
-		_file.write(json.dumps({'words':self.words_db,'nodes':self.node_db},ensure_ascii=True))
-		_file.close()
-	
 	def startFactory(self):
 		logging.info('SwanBot is up and running.')
 		
@@ -409,7 +370,6 @@ class SwanBotFactory(Factory):
 	
 	def stopFactory(self):
 		self.save_users_db()
-		self.save_words_db()
 		
 		logging.info('SwanBot is shutting down.')
 		self.module_thread.stop()
@@ -601,6 +561,18 @@ class SwanBotFactory(Factory):
 				user[value] = to
 				
 				return user[value]
+	
+	def add_user(self,name,password):
+		for user in self.users:
+			if user['name'] == name:
+				logging.error('User \'%s\' already exists!' % name)
+				return False
+		
+		api_key = hashlib.sha224(password).hexdigest()
+		_user = {'name':name,
+			'api-key':api_key,
+			'nodes':[]}
+		self.users.append(_user)
 	
 	def add_module(self,name):
 		#Sanitize input to prevent duplicates

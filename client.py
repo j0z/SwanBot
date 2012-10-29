@@ -1,3 +1,4 @@
+import hashlib
 import socket
 import json
 
@@ -5,7 +6,7 @@ class Client:
 	def __init__(self,host,apikey,port=9002,debug=False):
 		self.host = host
 		self.port = port
-		self.apikey = apikey
+		self.apikey = hashlib.sha224(apikey).hexdigest()
 		self.debug = debug
 
 	def parse(self,data):
@@ -81,7 +82,7 @@ class Client:
 		else:
 			return []
 
-#_client = Client('localhost','testkey')
+_client = Client('localhost','testkey')
 #
 #_client.create_node({'type':'test_node'})
 #_client.create_node({'type':'test_node_2'})

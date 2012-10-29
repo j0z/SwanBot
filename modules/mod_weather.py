@@ -14,7 +14,7 @@ WAIT_TIME = 0
 
 def tick(users,callback):
 	for user in users:
-		_user = callback.get_user_from_name(nodes['name'])
+		_user = callback.get_user_from_name(user['name'])
 		
 		for node in user['nodes']:
 			if node['type'] == 'location':
