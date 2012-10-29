@@ -174,7 +174,7 @@ class SwanBot(LineReceiver):
 				_fetched_node = self.handle_get_nodes([_find_nodes['results'][0]])
 				_fetched_nodes.append(_fetched_node['results'][0])
 			else:
-				_send_string = {'error':'Fetched node %s does not exist.'
+				_node_string = {'error':'Fetched node %s does not exist.'
 					% node['fetch'].index(fetch_node)}
 				_fetched_nodes = []
 				break
@@ -187,9 +187,9 @@ class SwanBot(LineReceiver):
 				_key = match.partition('.')[2]
 				node['text'] = node['text'].replace(match,_fetched_nodes[_node_id][_key])
 			
-			_send_string = node
+			_node_string = node
 		
-		return _send_string
+		return _node_string
 
 	def handle_missing_api_key(self):
 		logging.error('Incorrect API key from %s:%s' % (self.client_host,self.client_port))
@@ -247,6 +247,9 @@ class SwanBot(LineReceiver):
 
 		for node in self.user['nodes']:
 			if node['id'] in _nodes_copy:
+				if node['type'] == 'fetch':
+					node = self.handle_fetch_node(node)
+				
 				_returned_nodes.append(node)
 				_nodes_copy.remove(node['id'])
 
