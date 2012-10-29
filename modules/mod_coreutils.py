@@ -1,6 +1,7 @@
 #This module provides a few core features,
 #like schedules. It's mostly just for example,
 #though.
+#By flags - jetstarforever@gmail.com
 
 import feedparser
 import datetime

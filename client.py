@@ -15,8 +15,8 @@ class Client:
 	
 			print '='*10
 		
-		if data.has_key('error'):
-			print 'Error:',data['error']
+			if data.has_key('error'):
+				print 'Error:',data['error']
 
 		return data
 

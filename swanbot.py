@@ -402,6 +402,7 @@ class SwanBotFactory(Factory):
 		logging.info('SwanBot is up and running.')
 		
 		self.add_module('mod_coreutils.py')
+		self.add_module('mod_weather.py')
 		
 		self.module_thread = ModuleThread()
 		self.module_thread.start(self)
@@ -414,6 +415,9 @@ class SwanBotFactory(Factory):
 		self.module_thread.stop()
 	
 	def tick_modules(self):
+		#TODO: Obviously need to refactor here, but I'll wait until
+		#the issue of public vs. private in relation to modules is
+		#resolved.
 		_public_nodes = self.get_all_user_nodes()
 		
 		for module in self.modules:
