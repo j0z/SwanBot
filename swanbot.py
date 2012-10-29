@@ -414,7 +414,7 @@ class SwanBotFactory(Factory):
 		self.module_thread.stop()
 	
 	def tick_modules(self):
-		_public_nodes = self.get_public_user_nodes()
+		_public_nodes = self.get_all_user_nodes()
 		
 		for module in self.modules:
 			try:
@@ -566,6 +566,14 @@ class SwanBotFactory(Factory):
 			_public_user_nodes.append({'name':user['name'],'nodes':_nodes})
 		
 		return _public_user_nodes
+	
+	def get_all_user_nodes(self):
+		_user_nodes = []
+		
+		for user in self.users:
+			_user_nodes.append({'name':user['name'],'nodes':user['nodes'][:]})
+		
+		return _user_nodes
 	
 	def get_user_from_name(self,name):
 		for user in self.users:

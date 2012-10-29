@@ -90,7 +90,7 @@ class Client:
 #	'fetch':[{'type':'test_node'},{'type':'test_node_2'}],
 #	'format':'Node 1: node[1].type, Node 2: node[2].type'})
 #
-##print _client.get_nodes(_client.find_nodes({'type':'fetch'}))[0]['text']
+
 #
 #_client.create_node({'public':True,'type':'watch','input':{'type':'action',
 #	'action':'tablet-awake'},'output':

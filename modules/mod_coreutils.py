@@ -39,7 +39,6 @@ def watch_tick(public_nodes,callback):
 			if _found:
 				_actions.append({'watch':watch_node,'action':node})
 				callback.delete_nodes_from_payload(_user,[node['id']])
-				#watch_node['user']['nodes'].remove(node)
 			else:
 				continue
 	
