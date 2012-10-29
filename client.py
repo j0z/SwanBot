@@ -81,18 +81,20 @@ class Client:
 		else:
 			return []
 
-_client = Client('localhost','testkey')
-
+#_client = Client('localhost','testkey')
+#
 #_client.create_node({'type':'test_node'})
 #_client.create_node({'type':'test_node_2'})
-
-#_client.create_node({'type':'fetch','fetch':[{'type':'test_node'},{'type':'test_node_2'}],'format':'Node 1: node[1].type, Node 2: node[2].type'})
-
-print _client.get_nodes(_client.find_nodes({'type':'fetch'}))[0]['text']
-
+#
+#_client.create_node({'type':'fetch','name':'test_fetch',
+#	'fetch':[{'type':'test_node'},{'type':'test_node_2'}],
+#	'format':'Node 1: node[1].type, Node 2: node[2].type'})
+#
+##print _client.get_nodes(_client.find_nodes({'type':'fetch'}))[0]['text']
+#
 #_client.create_node({'public':True,'type':'watch','input':{'type':'action',
 #	'action':'tablet-awake'},'output':
-#		{'type':'speech','text_from':{'type':'calendar_event'}}})
+#		{'type':'speech','text_from':{'type':'fetch','name':'test_fetch'}}})
 #
 #_client.create_node({'type':'calendar','public':True,
 #        'url':'https://www.google.com/calendar/feeds/jetstarforever%40gmail.com/private-0b5d9ebe10bade7630eda7b436678e8c/basic'})

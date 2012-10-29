@@ -23,5 +23,7 @@ def node_to_speech(node):
 		
 		_speech_node['text'] = '%s the %s, %s.' % \
 			(_day_name,_day,_title)
+	else:
+		_speech_node['text'] = node['text']
 	
 	return _speech_node
