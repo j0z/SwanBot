@@ -70,5 +70,32 @@ Using either one is fairly simple:
     'api-get:{'param': 'find_nodes','apikey': 'apikey','query': {'type': 'tweet'}}\r\n'
 	    Returns a list of nodes of type 'tweet'.
 	
-	'api-get:{'param': 'get_nodes','apikey': 'apikey','nodes': [3,5,9]}\r\n'
+    'api-get:{'param': 'get_nodes','apikey': 'apikey','nodes': [3,5,9]}\r\n'
 	    Returns nodes 3, 5, and 9 in a list.
+
+Sends
+-----
+`api-send` is able to modify any aspect of the node mesh,
+including adding, deleting, and modifying nodes. The
+commands are:
+
+`create-node`, which creates a new a node on the mesh
+matching the contents of a provided dictionary.
+
+`delete-nodes` takes a list of node IDs and removes them
+from the mesh.
+
+`modify-nodes` accepts a node ID and changes each key,value
+pair according to the attached dictionary.
+
+Examples:
+
+    #_client.create_node({'type':'test_node'})
+    'api-send:{'param': 'create_node','apikey': 'apikey','query': {'type': 'tweet','from': 'Someone!'}}\r\n'
+	    Returns a node with the contents of `query`.
+
+    'api-send:{'param': 'delete_nodes','apikey': 'apikey','nodes': [1,2,3]}\r\n'
+	    Accepts a list of node IDs to delete and returns a list of nodes that could not be found.
+
+    'api-send:{'param': 'modify_node','apikey': 'apikey','id': 3,'query':{'data':'New value'}}\r\n'
+	    Changes the node with the specified `id` according to the contents of `query`. Returns the node.

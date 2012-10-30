@@ -1,4 +1,3 @@
-import hashlib
 import socket
 import json
 
@@ -6,7 +5,7 @@ class Client:
 	def __init__(self,host,apikey,port=9002,debug=False):
 		self.host = host
 		self.port = port
-		self.apikey = hashlib.sha224(apikey).hexdigest()
+		self.apikey = apikey
 		self.debug = debug
 
 	def parse(self,data):
@@ -54,8 +53,9 @@ class Client:
 		return _returned_data
 
 	def create_node(self,query):
-		_a = json.dumps(query)
-		json.loads(_a)
+		_result = json.dumps(query)
+		json.loads(_result)
+		
 		return self.send({'param':'create_node','query':query})
 
 	def find_nodes(self,query):
@@ -63,28 +63,41 @@ class Client:
 
 		if _results.has_key('results'):
 			return _results['results']
-		else:
-			return []
+		
+		return []
 
 	def get_nodes(self,nodes):
 		_results = self.get({'param':'get_nodes','nodes':nodes})
 
 		if _results.has_key('results'):
 			return _results['results']
-		else:
-			return []
+		
+		return []
 
 	def delete_nodes(self,nodes):
 		_results = self.send({'param':'delete_nodes','nodes':nodes})
 
 		if _results.has_key('results'):
 			return _results['results']
-		else:
-			return []
+		
+		return []
+	
+	def modify_node(self,node_id,query):
+		_results = self.send({'param':'modify_node','id':node_id,
+						'query':query})
+		
+		if _results.has_key('results'):
+			return _results['results']
+		
+		return []
 
-_client = Client('localhost','testkey')
+API_KEY = '934a26c6ec10c1c44e1e140c6ffa25036166c0afd0efcfe638693e6a'
+_client = Client('localhost',API_KEY)
+print _client.get_nodes(_client.find_nodes({'type':'test_node'}))[0]['data']
+_client.modify_node(1,{'data':'derp2'})
+print _client.get_nodes(_client.find_nodes({'type':'test_node'}))[0]['data']
 #
-#_client.create_node({'type':'test_node'})
+#print _client.create_node({'type':'test_node'})
 #_client.create_node({'type':'test_node_2'})
 #
 #_client.create_node({'type':'fetch','name':'test_fetch',

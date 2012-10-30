@@ -161,7 +161,20 @@ class SwanBot(LineReceiver):
 				_send_string = self.delete_nodes_from_payload(payload['nodes'])
 			else:
 				_send_string = {'error':'No \'nodes\' key passed to delete_node.'}
-
+		
+		elif payload['param'] == 'modify_node':
+			if payload.has_key('id') and payload.has_key('query'):
+				_send_string = self.handle_modify_node(payload['id'],payload['query'])
+			
+			elif not payload.has_key('id') and not payload.has_key('query'):
+				_send_string = {'error':'Missing keys for \'modify_node\': id, query.'}
+			
+			elif not payload.has_key('id'):
+				_send_string = {'error':'Missing key for \'modify_node\': id.'}
+			
+			elif not payload.has_key('query'):
+				_send_string = {'error':'Missing keys for \'modify_node\': query.'}
+		
 		self.send(json.dumps(_send_string))
 		return True
 
@@ -191,6 +204,27 @@ class SwanBot(LineReceiver):
 			_node_string = node
 		
 		return _node_string
+	
+	def handle_modify_node(self,node_id,query):
+		_changed_node = None
+		
+		for node in self.user['nodes']:
+			if node['id'] == node_id:
+				_changed_node = node
+				break
+		
+		if not _changed_node:
+			return {'error':'Could not find node with ID \'%s\'.' % node_id}
+		
+		for key in query:
+			node[key] = query[key]
+		
+		#TODO: It's pointless to return the ID of the node, because the
+		#client should already be aware of what the ID is for this type
+		#of call to begin with. Somethng should be returned, and it would
+		#be out of place for only a string to be returned or something
+		#similar. We'll just return the entire node for now.
+		return node
 
 	def handle_missing_api_key(self):
 		logging.error('Incorrect API key from %s:%s' % (self.client_host,self.client_port))
