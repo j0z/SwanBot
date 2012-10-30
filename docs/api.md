@@ -16,8 +16,8 @@ in this document, there are certain aspects that are better
 explained in code. These will be pointed out when the
 situation arises.
 
-Prerequisites include a working knowledge of sockets, JSON,
-and SHA224.
+Prerequisites include a working knowledge of sockets and
+JSON.
 
 Connecting and Authenticating
 -----------------------------
