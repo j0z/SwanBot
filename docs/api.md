@@ -36,7 +36,7 @@ API key converted to SHA224. As long as this key is
 included in the packet, you are considered "authenticated."
 
 For the visual learners:
-    {'apikey':,'22c7d75bd36e271adc1ef873aee4f95db6bc54a9c2f9f4bcf0cd18a8'}
+    {'apikey': '22c7d75bd36e271adc1ef873aee4f95db6bc54a9c2f9f4bcf0cd18a8'}
 
 Gets and Sends
 --------------
