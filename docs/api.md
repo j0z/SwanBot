@@ -90,7 +90,6 @@ pair according to the attached dictionary.
 
 Examples:
 
-    #_client.create_node({'type':'test_node'})
     'api-send:{'param': 'create_node','apikey': 'apikey','query': {'type': 'tweet','from': 'Someone!'}}\r\n'
 	    Returns a node with the contents of `query`.
 
