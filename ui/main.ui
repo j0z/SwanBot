@@ -47,29 +47,36 @@
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QTreeWidget" name="list_nodelist">
-            <property name="alternatingRowColors">
-             <bool>true</bool>
-            </property>
-            <property name="indentation">
-             <number>0</number>
-            </property>
-            <column>
-             <property name="text">
-              <string>Type</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>ID</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Date</string>
-             </property>
-            </column>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QTreeWidget" name="list_nodelist">
+              <property name="alternatingRowColors">
+               <bool>true</bool>
+              </property>
+              <property name="indentation">
+               <number>0</number>
+              </property>
+              <column>
+               <property name="text">
+                <string>Type</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>ID</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Date Created</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTreeWidget" name="list_nodeinfo"/>
+            </item>
+           </layout>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">

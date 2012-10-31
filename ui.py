@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui\main.ui'
 #
-# Created: Tue Oct 30 19:46:46 2012
+# Created: Wed Oct 31 02:31:04 2012
 #      by: PyQt4 UI code generator 4.9
 #
 # WARNING! All changes made in this file will be lost!
@@ -44,11 +44,17 @@ class Ui_MainWindow(object):
         self.tab_4.setObjectName(_fromUtf8("tab_4"))
         self.verticalLayout = QtGui.QVBoxLayout(self.tab_4)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.list_nodelist = QtGui.QTreeWidget(self.tab_4)
         self.list_nodelist.setAlternatingRowColors(True)
         self.list_nodelist.setIndentation(0)
         self.list_nodelist.setObjectName(_fromUtf8("list_nodelist"))
-        self.verticalLayout.addWidget(self.list_nodelist)
+        self.horizontalLayout.addWidget(self.list_nodelist)
+        self.list_nodeinfo = QtGui.QTreeWidget(self.tab_4)
+        self.list_nodeinfo.setObjectName(_fromUtf8("list_nodeinfo"))
+        self.horizontalLayout.addWidget(self.list_nodeinfo)
+        self.verticalLayout.addLayout(self.horizontalLayout)
         self.horizontalLayout_4 = QtGui.QHBoxLayout()
         self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
         self.button_refreshnodes = QtGui.QPushButton(self.tab_4)
@@ -107,7 +113,7 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QtGui.QApplication.translate("MainWindow", "Log", None, QtGui.QApplication.UnicodeUTF8))
         self.list_nodelist.headerItem().setText(0, QtGui.QApplication.translate("MainWindow", "Type", None, QtGui.QApplication.UnicodeUTF8))
         self.list_nodelist.headerItem().setText(1, QtGui.QApplication.translate("MainWindow", "ID", None, QtGui.QApplication.UnicodeUTF8))
-        self.list_nodelist.headerItem().setText(2, QtGui.QApplication.translate("MainWindow", "Date", None, QtGui.QApplication.UnicodeUTF8))
+        self.list_nodelist.headerItem().setText(2, QtGui.QApplication.translate("MainWindow", "Date Created", None, QtGui.QApplication.UnicodeUTF8))
         self.button_refreshnodes.setText(QtGui.QApplication.translate("MainWindow", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
         self.button_addnode.setText(QtGui.QApplication.translate("MainWindow", "Add Node", None, QtGui.QApplication.UnicodeUTF8))
         self.button_commit.setText(QtGui.QApplication.translate("MainWindow", "Commit Changes", None, QtGui.QApplication.UnicodeUTF8))
