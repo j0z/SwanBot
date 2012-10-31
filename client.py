@@ -91,11 +91,11 @@ class Client:
 		
 		return []
 
-API_KEY = '934a26c6ec10c1c44e1e140c6ffa25036166c0afd0efcfe638693e6a'
-_client = Client('localhost',API_KEY)
-print _client.get_nodes(_client.find_nodes({'type':'test_node'}))[0]['data']
-_client.modify_node(1,{'data':'derp2'})
-print _client.get_nodes(_client.find_nodes({'type':'test_node'}))[0]['data']
+#API_KEY = '934a26c6ec10c1c44e1e140c6ffa25036166c0afd0efcfe638693e6a'
+#_client = Client('localhost',API_KEY)
+#print _client.get_nodes(_client.find_nodes({'type':'test_node'}))[0]['data']
+#_client.modify_node(1,{'data':'derp2'})
+#print _client.get_nodes(_client.find_nodes({'type':'test_node'}))[0]['data']
 #
 #print _client.create_node({'type':'test_node'})
 #_client.create_node({'type':'test_node_2'})
