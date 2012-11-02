@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Machine>CTHULHU-DESKTOP</Machine>
+    <WindowsUser>Josh</WindowsUser>
+    <SolutionConfiguration>Release|AnyCPU</SolutionConfiguration>
+    <PackageArchitecture>neutral</PackageArchitecture>
+  </PropertyGroup>
+  <ItemGroup>
+    <AppXManifest Include="D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\CygnusMetroTest\CygnusMetroTest\bin\Release\AppxManifest.xml">
+      <PackagePath>AppxManifest.xml</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppXManifest>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxPackagedFile Include="D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\CygnusMetroTest\CygnusMetroTest\bin\Release\CygnusMetroTest.exe">
+      <PackagePath>CygnusMetroTest.exe</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\CygnusMetroTest\CygnusMetroTest\bin\Release\CygnusMetroTest.pdb">
+      <PackagePath>CygnusMetroTest.pdb</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\bin\Release\Cygnus.dll">
+      <PackagePath>Cygnus.dll</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\bin\Release\Newtonsoft.Json.dll">
+      <PackagePath>Newtonsoft.Json.dll</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\bin\Release\Cygnus.pdb">
+      <PackagePath>Cygnus.pdb</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\bin\Release\Newtonsoft.Json.xml">
+      <PackagePath>Newtonsoft.Json.xml</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\CygnusMetroTest\CygnusMetroTest\Assets\Logo.png">
+      <PackagePath>Assets\Logo.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\CygnusMetroTest\CygnusMetroTest\Assets\SmallLogo.png">
+      <PackagePath>Assets\SmallLogo.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\CygnusMetroTest\CygnusMetroTest\Assets\SplashScreen.png">
+      <PackagePath>Assets\SplashScreen.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\CygnusMetroTest\CygnusMetroTest\Assets\StoreLogo.png">
+      <PackagePath>Assets\StoreLogo.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\CygnusMetroTest\CygnusMetroTest\bin\Release\App.xaml">
+      <PackagePath>App.xaml</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\CygnusMetroTest\CygnusMetroTest\bin\Release\Common\StandardStyles.xaml">
+      <PackagePath>Common\StandardStyles.xaml</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\CygnusMetroTest\CygnusMetroTest\bin\Release\MainPage.xaml">
+      <PackagePath>MainPage.xaml</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\CygnusMetroTest\CygnusMetroTest\bin\Release\resources.pri">
+      <PackagePath>resources.pri</PackagePath>
+    </AppxPackagedFile>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+</Project>

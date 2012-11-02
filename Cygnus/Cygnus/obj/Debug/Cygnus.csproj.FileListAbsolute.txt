@@ -1,0 +1,17 @@
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Debug\Cygnus.csprojResolveAssemblyReference.cache
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\bin\Debug\Cygnus.dll
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\bin\Debug\Cygnus.pdb
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\bin\Debug\Cygnus.pri
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\bin\Debug\Newtonsoft.Json.dll
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\bin\Debug\Newtonsoft.Json.xml
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Debug\Cygnus.dll
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Debug\Cygnus.pdb
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Debug\priconfig.xml.intermediate
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Debug\layout.resfiles.intermediate
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Debug\resources.resfiles.intermediate
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Debug\pri.resfiles.intermediate
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Debug\priconfig.xml
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Debug\layout.resfiles
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Debug\resources.resfiles
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Debug\pri.resfiles
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Debug\LanguageQualifiers.txt

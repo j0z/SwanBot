@@ -1,0 +1,33 @@
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Release\Cygnus.csprojResolveAssemblyReference.cache
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\bin\Release\Cygnus.dll
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\bin\Release\Cygnus.pdb
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\bin\Release\Cygnus.pri
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\bin\Release\Newtonsoft.Json.dll
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\bin\Release\Newtonsoft.Json.xml
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Release\Cygnus.dll
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Release\Cygnus.pdb
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Release\priconfig.xml.intermediate
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Release\layout.resfiles.intermediate
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Release\resources.resfiles.intermediate
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Release\pri.resfiles.intermediate
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Release\priconfig.xml
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Release\layout.resfiles
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Release\resources.resfiles
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Release\pri.resfiles
+D:\Users\Josh\documents\visual studio 2012\Projects\Cygnus\Cygnus\obj\Release\LanguageQualifiers.txt
+D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\bin\Release\Cygnus.dll
+D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\bin\Release\Cygnus.pdb
+D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\bin\Release\Cygnus.pri
+D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\bin\Release\Newtonsoft.Json.xml
+D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\obj\Release\Cygnus.csprojResolveAssemblyReference.cache
+D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\obj\Release\Cygnus.dll
+D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\obj\Release\Cygnus.pdb
+D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\obj\Release\priconfig.xml.intermediate
+D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\obj\Release\layout.resfiles.intermediate
+D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\obj\Release\resources.resfiles.intermediate
+D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\obj\Release\pri.resfiles.intermediate
+D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\obj\Release\priconfig.xml
+D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\obj\Release\layout.resfiles
+D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\obj\Release\resources.resfiles
+D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\obj\Release\pri.resfiles
+D:\Users\Josh\Documents\GitHub\SwanBot\Cygnus\Cygnus\obj\Release\LanguageQualifiers.txt

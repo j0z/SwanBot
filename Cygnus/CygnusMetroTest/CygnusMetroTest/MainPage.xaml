@@ -1,0 +1,23 @@
+﻿<Page
+    x:Class="CygnusMetroTest.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:CygnusMetroTest"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="{StaticResource ApplicationPageBackgroundThemeBrush}">
+        <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Cygnus" VerticalAlignment="Top" FontSize="72"/>
+        <TextBlock HorizontalAlignment="Left" Margin="183,77,0,0" TextWrapping="Wrap" Text="Test App" VerticalAlignment="Top" FontSize="16"/>
+        <TextBox x:Name="IPAddress_Box" HorizontalAlignment="Left" Margin="10,163,0,0" TextWrapping="Wrap" Text="IP Address" VerticalAlignment="Top" Width="234"/>
+        <TextBox x:Name="Port_Box" HorizontalAlignment="Left" Margin="261,163,0,0" TextWrapping="Wrap" Text="Port" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="249,166,0,0" TextWrapping="Wrap" Text=":" VerticalAlignment="Top" FontSize="24" FontWeight="Bold"/>
+        <TextBlock x:Name="ConnectionStatus_Text" HorizontalAlignment="Left" Margin="191,200,0,0" TextWrapping="Wrap" Text="Not Connected" VerticalAlignment="Top" FontSize="20"/>
+        <Button x:Name="Connect_Btn" Content="Connect" HorizontalAlignment="Left" Margin="330,163,0,0" VerticalAlignment="Top" Click="Connect_Btn_Click"/>
+        <TextBlock x:Name="findNode_Text" HorizontalAlignment="Left" Margin="572,83,0,0" TextWrapping="Wrap" Text="Response" VerticalAlignment="Top" Height="141" Width="266" FontSize="12"/>
+        <Button x:Name="GetNode_Btn" Content="Get Nodes!" HorizontalAlignment="Left" Margin="729,224,0,0" VerticalAlignment="Top" Click="GetNode_Btn_Click"/>
+        <TextBox x:Name="Node_Box" HorizontalAlignment="Left" Margin="572,230,0,0" TextWrapping="Wrap" Text="Node" VerticalAlignment="Top" Width="152"/>
+
+    </Grid>
+</Page>
